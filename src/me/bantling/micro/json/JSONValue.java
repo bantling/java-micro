@@ -1,5 +1,7 @@
 package me.bantling.micro.json;
 
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -29,11 +31,11 @@ public class JSONValue {
 	public static final JSONValue FALSE_VALUE = new JSONValue(Type.BOOLEAN, Boolean.FALSE);
 	public static final JSONValue NULL_VALUE = new JSONValue(Type.NULL, null);
 	
-	private static final JSONValueException NOT_A_STRING  = new JSONValueException("Not a STRING value");
-	private static final JSONValueException NOT_A_NUMBER  = new JSONValueException("Not a NUMBER value");
-	private static final JSONValueException NOT_A_BOOLEAN = new JSONValueException("Not a BOOLEAN value");
-	private static final JSONValueException NOT_AN_OBJECT = new JSONValueException("Not a STRING value");
-	private static final JSONValueException NOT_AN_ARRAY  = new JSONValueException("Not an ARRAY value");
+	static final JSONValueException NOT_A_STRING  = new JSONValueException("Not a STRING value");
+	static final JSONValueException NOT_A_NUMBER  = new JSONValueException("Not a NUMBER value");
+	static final JSONValueException NOT_A_BOOLEAN = new JSONValueException("Not a BOOLEAN value");
+	static final JSONValueException NOT_AN_OBJECT = new JSONValueException("Not a STRING value");
+	static final JSONValueException NOT_AN_ARRAY  = new JSONValueException("Not an ARRAY value");
 	
 	private final Type type;
 	private final Object instance;
@@ -48,28 +50,32 @@ public class JSONValue {
 		this.instance = instance;
 	}
 	
-	public static JSONValue ofString(final String value) {
+	public static JSONValue of(final String value) {
 		return new JSONValue(Type.STRING, value);
 	}
 	
-	public static JSONValue ofNumber(final JSONNumber value) {
+	public static JSONValue of(final JSONNumber value) {
 		return new JSONValue(Type.NUMBER, value);
 	}
 	
-	public static JSONValue ofBoolean(final boolean value) {
+	public static JSONValue of(final boolean value) {
 		return value ? TRUE_VALUE : FALSE_VALUE;
 	}
+    
+    public static JSONValue of(final Boolean value) {
+        return ((value != null) && value.booleanValue()) ? TRUE_VALUE : FALSE_VALUE;
+    }
 	
 	public static JSONValue ofNull() {
 		return NULL_VALUE;
 	}
 	
-	public static JSONValue ofObject(final Map<String, JSONValue> value) {
-		return new JSONValue(Type.OBJECT, value);
+	public static JSONValue of(final Map<String, JSONValue> value) {
+		return new JSONValue(Type.OBJECT, value != null ? value : new HashMap<>());
 	}
 	
-	public static JSONValue ofArray(final List<JSONValue> value) {
-		return new JSONValue(Type.ARRAY, value);
+	public static JSONValue of(final List<JSONValue> value) {
+		return new JSONValue(Type.ARRAY, value != null ? value : new LinkedList<>());
 	}
 	
 	// ==== Object
@@ -137,7 +143,7 @@ public class JSONValue {
 	
 	// Return the value as a number, or die if it is not a number
 	public JSONNumber asNumber() throws JSONValueException {
-		if (type != Type.STRING) {
+		if (type != Type.NUMBER) {
 			throw NOT_A_NUMBER;
 		}
 		
@@ -176,4 +182,13 @@ public class JSONValue {
 		return l;
 	}
 	
+	// ==== Accessors
+	
+	public Type getType() {
+	    return type;
+	}
+	
+	public Object getInstance() {
+	    return instance;
+	}
 }

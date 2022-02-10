@@ -2,6 +2,7 @@ package me.bantling.micro.json;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -12,6 +13,7 @@ import java.util.Optional;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 
+import me.bantling.micro.util.TestUnicode;
 import me.bantling.micro.util.Unicode;
 
 @SuppressWarnings("static-method")
@@ -22,14 +24,16 @@ public class TestLexer {
 			final String[] goodCases = {
 				" \n\"\"",
 				"\r\"a\"",
+                "\r\n\t\"a\"",
 				"\"aß東𐐀\"",
-				"\"\\\"\\\\\\//\\b\\f\\n\\r\\t\\u0041\\u00df\\u6771\\ud801\\udc00\\u0001\""
+				"\"\\\"\\\\\\//\\b\\f\\n\\r\\t\\u0041\\u00df\\u6771\\ud801\\udc00\\u0001\"",
 			};
 			final String[] goodResults = {
 				"",
 				"a",
+				"a",
 				"aß東𐐀",
-				"\"\\//\b\f\n\r\tAß東𐐀\u0001"
+				"\"\\//\b\f\n\r\tAß東𐐀\u0001",
 			};
 			
 			for (int i = 0; i < goodCases.length; i++) {
@@ -64,7 +68,7 @@ public class TestLexer {
 					Lexer.INCOMPLETE_UNICODE_ESCAPE.getMessage(),
 					Lexer.INCOMPLETE_UNICODE_ESCAPE.getMessage(),
 					String.format(Lexer.INVALID_UNICODE_ESCAPE_FMT, "ghij"),
-					String.format(Lexer.INVALID_BACKSLASH_ESCAPE_FMT, "z"),
+                    String.format(Lexer.INVALID_BACKSLASH_ESCAPE_FMT, "z"),
 			};
 			
 			for (int i = 0; i < badCases.length; i++) {
@@ -72,8 +76,7 @@ public class TestLexer {
 					new Lexer(new StringReader(badCases[i])).lex();
 					Assert.fail("Bad string cases must fail");
 				} catch (final RuntimeException e) {
-					assertTrue(e.getCause() instanceof IOException);
-					assertEquals(messages[i], e.getCause().getMessage());
+					assertEquals(messages[i], e.getMessage());
 				}
 			}
 		}
@@ -96,7 +99,7 @@ public class TestLexer {
 				"-12.34E-56",
 				"1e2",
 				"1E+2",
-				"1e-2",
+				"1e-2a",
 				"1a",
 				"-1a",
 			};
@@ -133,6 +136,7 @@ public class TestLexer {
 			final String[] badCases = {
 				"-",
 				"-a",
+                "-!",
 				"1.",
 				"1.a",
 				"1e",
@@ -144,6 +148,7 @@ public class TestLexer {
 			final String[] messages = {
 					Lexer.INCOMPLETE_NEGATIVE_NUMBER.getMessage(),
 					Lexer.MINUS_SIGN_REQUIRES_DIGIT.getMessage(),
+                    Lexer.MINUS_SIGN_REQUIRES_DIGIT.getMessage(),
 					Lexer.DECIMAL_POINT_REQUIRES_DIGIT.getMessage(),
 					Lexer.DECIMAL_POINT_REQUIRES_DIGIT.getMessage(),
 					Lexer.EXPONENT_REQUIRES_DIGIT.getMessage(),
@@ -157,8 +162,7 @@ public class TestLexer {
 					new Lexer(new StringReader(badCases[i])).lex();
 					Assert.fail("Bad number cases must fail");
 				} catch (final RuntimeException e) {
-					assertTrue(e.getCause() instanceof IOException);
-					assertEquals(messages[i], e.getCause().getMessage());
+					assertEquals(messages[i], e.getMessage());
 				}
 			}
 		}	
@@ -209,8 +213,7 @@ public class TestLexer {
 					new Lexer(new StringReader(badCases[i])).lex();
 					Assert.fail("Bad number cases must fail");
 				} catch (final RuntimeException e) {
-					assertTrue(e.getCause() instanceof IOException);
-					assertEquals(Lexer.BOOLEAN_SPELLED_TRUE_OR_FALSE, e.getCause());
+					assertEquals(Lexer.BOOLEAN_SPELLED_TRUE_OR_FALSE, e);
 				}
 			}
 		}	
@@ -241,8 +244,7 @@ public class TestLexer {
 					new Lexer(new StringReader(badCases[i])).lex();
 					Assert.fail("Bad number cases must fail");
 				} catch (final RuntimeException e) {
-					assertTrue(e.getCause() instanceof IOException);
-					assertEquals(Lexer.NULL_SPELLING, e.getCause());
+					assertEquals(Lexer.NULL_SPELLING, e);
 				}
 			}
 		}	
@@ -293,8 +295,6 @@ public class TestLexer {
 					new Lexer(new StringReader(badCases[i])).lex();
 					Assert.fail("Bad lex cases must fail");
 				} catch (final RuntimeException e) {
-					assertTrue(e.getCause() instanceof IOException);
-					
 					String escaped = Unicode.formatAsUnicodeEscapes(badCases[i].codePointAt(0));
 					assertEquals(
 						String.format(
@@ -302,7 +302,7 @@ public class TestLexer {
 							escaped,
 							"1:1"
 						),
-						e.getCause().getMessage()
+						e.getMessage()
 					);
 				}
 			}
@@ -378,5 +378,21 @@ public class TestLexer {
 			assertEquals(expected.length, i[0]);
 			assertEquals(Optional.empty(), l.lex());
 		}
+	}
+	
+	@Test
+	public void other() {
+	    {
+    	    // Invalid unicode
+    	    final Reader testCase = new StringReader("\ud801");
+            try {
+                new Lexer(testCase).lex();
+                fail("Must die");
+            } catch (final Throwable t) {
+                assertTrue(t instanceof RuntimeException);
+                assertTrue(t.getCause() instanceof IOException);
+                assertEquals(String.format(TestUnicode.HIGH_SURROGATE_EOF, "1:0"), t.getCause().getMessage());
+            }
+	    }
 	}
 }

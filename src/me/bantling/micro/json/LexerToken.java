@@ -72,7 +72,9 @@ public final class LexerToken {// The types of tokens to read
 	@Override
 	public boolean equals(final Object o) {
 		boolean equals = o == this;
-		if ((! equals) && (o instanceof LexerToken)) {
+		if (
+		        (! equals) && 
+		        (o instanceof LexerToken)) {
 			final LexerToken obj = (LexerToken)(o);
 			equals =
 				(type == obj.type) &&

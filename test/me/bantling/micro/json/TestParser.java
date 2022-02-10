@@ -6,12 +6,17 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.Reader;
 import java.io.StringReader;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
+
+import me.bantling.micro.util.Util;
 
 @SuppressWarnings("static-method")
 public class TestParser {
@@ -22,21 +27,22 @@ public class TestParser {
 				"\r{}\n",
 				" { } ",
 				"{\"a\":\"b\"}",
-				"{ \"a\": 1 \n, \"c\" :true\r, \"d\" : null}",
+				"{ \"a\": 1 \n, \"c\" :true\r,\"b\":false, \"d\" : null}",
 				"{\"e\": [\"f\"]}",
 			};
 			
 			final JSONValue[] goodResults = {
-				JSONValue.ofObject(Map.of()),
-				JSONValue.ofObject(Map.of()),
-				JSONValue.ofObject(Map.of("a", JSONValue.ofString("b"))),
-				JSONValue.ofObject(Map.of(
-					"a", JSONValue.ofNumber(new JSONNumber("1", true, "1", "", true, "")),
+				JSONValue.of(Map.of()),
+				JSONValue.of(Map.of()),
+				JSONValue.of(Map.of("a", JSONValue.of("b"))),
+				JSONValue.of(Map.of(
+					"a", JSONValue.of(new JSONNumber("1", true, "1", "", true, "")),
 					"c", JSONValue.TRUE_VALUE,
+                    "b", JSONValue.FALSE_VALUE,
 					"d", JSONValue.NULL_VALUE
 				)),
-				JSONValue.ofObject(Map.of(
-					"e", JSONValue.ofArray(List.of(JSONValue.ofString("f")))
+				JSONValue.of(Map.of(
+					"e", JSONValue.of(List.of(JSONValue.of("f")))
 				)),
 			};
 			
@@ -55,8 +61,8 @@ public class TestParser {
 	public void parseObjectLoop() throws Throwable {
 		// Data to use
 		final Reader source = new StringReader("{ \"a\": 1 , \"c\" :true, \"d\" : null}");
-		final JSONValue expected = JSONValue.ofObject(Map.of(
-			"a", JSONValue.ofNumber(new JSONNumber("1", true, "1", "", true, "")),
+		final JSONValue expected = JSONValue.of(Map.of(
+			"a", JSONValue.of(new JSONNumber("1", true, "1", "", true, "")),
 			"c", JSONValue.TRUE_VALUE,
 			"d", JSONValue.NULL_VALUE
 		));
@@ -112,23 +118,38 @@ public class TestParser {
 		{
 			final String[] goodCases = {
 				"[]",
+				"[1]",
 				"[ 1, \"a\" ]",
 				"[ 1, { \"a\": 2 }, 3 ]",
+				"[[\"a\",\"b\"]]"
 			};
 			
 			final JSONValue[][] goodResults = {
 				new JSONValue[0],
+                new JSONValue[] {
+                    JSONValue.of(new JSONNumber("1", true, "1", "", true, ""))
+                },
 				new JSONValue[] {
-					JSONValue.ofNumber(new JSONNumber("1", true, "1", "", true, "")),
-					JSONValue.ofString("a")
+					JSONValue.of(new JSONNumber("1", true, "1", "", true, "")),
+					JSONValue.of("a")
 				},
 				new JSONValue[] {
-					JSONValue.ofNumber(new JSONNumber("1", true, "1", "", true, "")),
-					JSONValue.ofObject(Map.of(
-						"a", JSONValue.ofNumber(new JSONNumber("2", true, "2", "", true, ""))
+					JSONValue.of(new JSONNumber("1", true, "1", "", true, "")),
+					JSONValue.of(Map.of(
+						"a", JSONValue.of(new JSONNumber("2", true, "2", "", true, ""))
 					)),
-					JSONValue.ofNumber(new JSONNumber("3", true, "3", "", true, ""))
+					JSONValue.of(new JSONNumber("3", true, "3", "", true, ""))
 				},
+				new JSONValue[] {
+			        JSONValue.of(
+		                Util.listOf(new LinkedList<JSONValue>()).
+		                    add(
+	                            JSONValue.of("a"),
+                                JSONValue.of("b")
+                            ).
+		                done()
+	                )
+				}
 			};
 			
 			for (int i = 0; i < goodCases.length; i++) {
@@ -138,13 +159,11 @@ public class TestParser {
 				final Parser p = new Parser(new StringReader(test));
 				if (allExpected.length == 0) {
 					assertTrue(p.parse().isEmpty());
-//					System.out.println("empty array");
 				} else {
 					for (final JSONValue expected : allExpected) {
 						final Optional<JSONValue> actual = p.parse();
 						assertTrue(actual.isPresent());
 						assertEquals(expected, actual.get());
-//						System.out.println(expected);
 					}
 				}
 			}
@@ -156,11 +175,11 @@ public class TestParser {
 		// Data to use
 		final Reader source = new StringReader("[ 1, { \"a\": 2 }, 3 ]");
 		final JSONValue[] expected = new JSONValue[] {
-			JSONValue.ofNumber(new JSONNumber("1", true, "1", "", true, "")),
-			JSONValue.ofObject(Map.of(
-				"a", JSONValue.ofNumber(new JSONNumber("2", true, "2", "", true, ""))
+			JSONValue.of(new JSONNumber("1", true, "1", "", true, "")),
+			JSONValue.of(Map.of(
+				"a", JSONValue.of(new JSONNumber("2", true, "2", "", true, ""))
 			)),
-			JSONValue.ofNumber(new JSONNumber("3", true, "3", "", true, ""))
+			JSONValue.of(new JSONNumber("3", true, "3", "", true, ""))
 		};
 		
 		// Loop using parse()
@@ -213,5 +232,34 @@ public class TestParser {
 			assertEquals(expected.length, i[0]);
 			assertEquals(Optional.empty(), p.parse());
 		}
+	}
+	
+	@Test
+	public void peek() throws Throwable {
+	    final Method peek = Parser.class.getDeclaredMethod("peek");
+	    peek.setAccessible(true);
+	    
+	    final Parser p = new Parser(new StringReader("1"));
+	    assertEquals(LexerToken.Type.NUMBER, peek.invoke(p));
+        assertEquals(LexerToken.Type.NUMBER, peek.invoke(p));
+	}
+	
+	@Test
+	public void expect() throws Throwable {
+	    final Method expect = Parser.class.getDeclaredMethod("expect", RuntimeException.class, LexerToken.Type[].class);
+	    expect.setAccessible(true);
+	    
+	    final Parser p = new Parser(new StringReader("1 2 3"));
+	    final RuntimeException error = new RuntimeException();
+	    try {
+	        expect.invoke(p, error, new LexerToken.Type[0]);
+	    } catch (final InvocationTargetException e) {
+	        assertTrue(error == e.getCause());
+	    }
+	    
+	    assertEquals(
+            new LexerToken("2", true, "2", "", true, ""),
+            expect.invoke(p, error, new LexerToken.Type[] {LexerToken.Type.NUMBER})
+        );
 	}
 }

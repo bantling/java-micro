@@ -1,6 +1,5 @@
 package me.bantling.micro.json;
 
-import java.io.IOException;
 import java.io.Reader;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -16,15 +15,15 @@ import java.util.stream.StreamSupport;
 // The parser ensures the tokens arrive in a correct order for a JSON document.
 // The result of the parse is a JSONValue that is either a document or an array.
 public class Parser implements Iterator<JSONValue>, Iterable<JSONValue> {
-	private static final IOException START_BRACE_OR_BRACKET    = new IOException("A JSON document must be begin with a curly brace or opening square bracket");
-	private static final IOException OBJECT_FIRST_KEY          = new IOException("A JSON object must a string key or closing brace after opening brace");
-	private static final IOException OBJECT_KEY_COLON          = new IOException("A JSON object key name must be followed by a colon");
-	private static final IOException OBJECT_KEY_COLON_VALUE    = new IOException("A JSON object key name and colon must be followed by a value");
-	private static final IOException OBJECT_VALUE_COMMA_BRACE  = new IOException("A JSON object value must be followed by a comma or closing brace");
-	private static final IOException OBJECT_COMMA_KEY          = new IOException("A JSON object cannot have a trailing comma after the last key value pair");
-	private static final IOException ARRAY_VALUE_OR_BRACKET    = new IOException("A JSON array opening square bracket must be followed by a value or closing square bracket");
-	private static final IOException ARRAY_COMMA_OR_BRACKET    = new IOException("A JSON array element must be followed by a comma or closing square bracket");
-	private static final IOException ARRAY_COMMA_VALUE         = new IOException("A JSON array cannot have a trailing comma after the last value");
+	private static final RuntimeException START_BRACE_OR_BRACKET    = new RuntimeException("A JSON document must be begin with a curly brace or opening square bracket");
+	private static final RuntimeException OBJECT_FIRST_KEY          = new RuntimeException("A JSON object must a string key or closing brace after opening brace");
+	private static final RuntimeException OBJECT_KEY_COLON          = new RuntimeException("A JSON object key name must be followed by a colon");
+	private static final RuntimeException OBJECT_KEY_COLON_VALUE    = new RuntimeException("A JSON object key name and colon must be followed by a value");
+	private static final RuntimeException OBJECT_VALUE_COMMA_BRACE  = new RuntimeException("A JSON object value must be followed by a comma or closing brace");
+	private static final RuntimeException OBJECT_COMMA_KEY          = new RuntimeException("A JSON object cannot have a trailing comma after the last key value pair");
+	private static final RuntimeException ARRAY_VALUE_OR_BRACKET    = new RuntimeException("A JSON array opening square bracket must be followed by a value or closing square bracket");
+	private static final RuntimeException ARRAY_COMMA_OR_BRACKET    = new RuntimeException("A JSON array element must be followed by a comma or closing square bracket");
+	private static final RuntimeException ARRAY_COMMA_VALUE         = new RuntimeException("A JSON array cannot have a trailing comma after the last value");
 	
 	private enum State {
 		START,
@@ -72,9 +71,9 @@ public class Parser implements Iterator<JSONValue>, Iterable<JSONValue> {
 	 * If peek is true, the returned token is retained for the next call to expect, without invoking the lexer.
 	 */
 	private LexerToken expect(
-		final IOException error,
+		final RuntimeException error,
 		final LexerToken.Type... expectedTypes
-	) throws IOException {
+	) {
 		// Return peeked token from last call, or lex the next one
 		final LexerToken result = token != null ? token : lexer.next();
 		// nullify retained token so previous peek is not infinite
@@ -93,8 +92,8 @@ public class Parser implements Iterator<JSONValue>, Iterable<JSONValue> {
 	
 	// parseAnyValue parses any value
 	private JSONValue parseAnyValue(
-		final IOException error
-	) throws IOException {
+		final RuntimeException error
+	) {
 		final LexerToken firstToken = expect(
 			error,
 			LexerToken.Type.OPEN_BRACE,
@@ -116,10 +115,10 @@ public class Parser implements Iterator<JSONValue>, Iterable<JSONValue> {
 				return parseArray();
 			
 			case STRING:
-				return JSONValue.ofString(firstToken.token);
+				return JSONValue.of(firstToken.token);
 				
 			case NUMBER:
-				return JSONValue.ofNumber(
+				return JSONValue.of(
 					new JSONNumber(
 						firstToken.token,
 						firstToken.positive,
@@ -132,7 +131,7 @@ public class Parser implements Iterator<JSONValue>, Iterable<JSONValue> {
 				
 			case TRUE:
 			case FALSE:
-				return JSONValue.ofBoolean(firstToken.type == LexerToken.Type.TRUE);
+				return JSONValue.of(firstToken.type == LexerToken.Type.TRUE);
 			
 			// Must be NULL
 			default:
@@ -141,7 +140,7 @@ public class Parser implements Iterator<JSONValue>, Iterable<JSONValue> {
 	}
 	
 	// Parse an object 
-	private JSONValue parseObject() throws IOException {
+	private JSONValue parseObject() {
 		// Consume brace we know exists
 		expect(null, LexerToken.Type.OPEN_BRACE);
 		
@@ -180,105 +179,94 @@ public class Parser implements Iterator<JSONValue>, Iterable<JSONValue> {
 			}
 		}
 		
-		return JSONValue.ofObject(objectMap);
+		return JSONValue.of(objectMap);
 	}
 	
-	private JSONValue parseArray() throws IOException {
+	private JSONValue parseArray() {
 		// Consume bracket, we don't need it
 		expect(null, LexerToken.Type.OPEN_BRACKET);
 		
 		// Create list for object
 		final List<JSONValue> arrayList = new LinkedList<>();
 		
-		// Check if closing bracket is next, if so, we're done - empty array
-		if (peek() == LexerToken.Type.CLOSE_BRACKET) {
-			// Consume bracket
-			clear();
-		} else {
-			// Get first value
-			arrayList.add(parseAnyValue(ARRAY_VALUE_OR_BRACKET));
-			
-			// Add any number of additional values preceded by commas
-			while (
-				expect(
-					ARRAY_COMMA_OR_BRACKET,
-					LexerToken.Type.COMMA,
-					LexerToken.Type.CLOSE_BRACKET
-				).type == LexerToken.Type.COMMA
-			) {
-				arrayList.add(parseAnyValue(ARRAY_COMMA_VALUE));
-			}
+		// Cannot be closing bracket next, as parse method already checks empty arrays
+		// Get first value
+		arrayList.add(parseAnyValue(ARRAY_VALUE_OR_BRACKET));
+		
+		// Add any number of additional values preceded by commas
+		while (
+			expect(
+				ARRAY_COMMA_OR_BRACKET,
+				LexerToken.Type.COMMA,
+				LexerToken.Type.CLOSE_BRACKET
+			).type == LexerToken.Type.COMMA
+		) {
+			arrayList.add(parseAnyValue(ARRAY_COMMA_VALUE));
 		}
 		
-		return JSONValue.ofArray(arrayList);
+		return JSONValue.of(arrayList);
 	}
 	
 	// Top level parse method that starts parsing, or resumes where it left off
 	public Optional<JSONValue> parse() {
-		try {
-			JSONValue result;
-			
-			switch (state) {
-				case START:
-					final LexerToken firstToken = expect(
-						START_BRACE_OR_BRACKET,
-						LexerToken.Type.OPEN_BRACE,
-						LexerToken.Type.OPEN_BRACKET
-					);
-					
-					switch (firstToken.type) {
-						case OPEN_BRACE:
-							unread(firstToken);
-							result = parseObject();
-							state = State.STOP;
-							break;
-						
-						// Must be OPEN_BRACKET
-						default:
-							// Check if closing bracket is next, if so, we're done - no values to return
-							if (peek() == LexerToken.Type.CLOSE_BRACKET) {
-								// Consume bracket
-								clear();
-								result = null;
-								state = State.STOP;
-							} else {
-								// Get first value
-								result = parseAnyValue(ARRAY_VALUE_OR_BRACKET);
-								state = State.ARRAY_NEXT_ELEMENT;
-							}
-							break;
-					}
-					break;
+		JSONValue result;
+		
+		switch (state) {
+			case START:
+				final LexerToken firstToken = expect(
+					START_BRACE_OR_BRACKET,
+					LexerToken.Type.OPEN_BRACE,
+					LexerToken.Type.OPEN_BRACKET
+				);
 				
-				case ARRAY_NEXT_ELEMENT: {
-					if (expect(
-						ARRAY_COMMA_OR_BRACKET,
-						LexerToken.Type.COMMA,
-						LexerToken.Type.CLOSE_BRACKET
-					).type == LexerToken.Type.CLOSE_BRACKET) {
-						// Check if closing bracket is next, if so, we're done - no values to return
-						result = null;
+				switch (firstToken.type) {
+					case OPEN_BRACE:
+						unread(firstToken);
+						result = parseObject();
 						state = State.STOP;
-					} else {
-						// Get next value
-						result = parseAnyValue(ARRAY_COMMA_VALUE);
-					}
-					break;
+						break;
+					
+					// Must be OPEN_BRACKET
+					default:
+						// Check if closing bracket is next, if so, we're done - no values to return
+						if (peek() == LexerToken.Type.CLOSE_BRACKET) {
+							// Consume bracket
+							clear();
+							result = null;
+							state = State.STOP;
+						} else {
+							// Get first value
+							result = parseAnyValue(ARRAY_VALUE_OR_BRACKET);
+							state = State.ARRAY_NEXT_ELEMENT;
+						}
+						break;
 				}
-				
-				// Must be STOP. Do nothing, result is already null, so actions below are correct.
-				default:
+				break;
+			
+			case ARRAY_NEXT_ELEMENT: {
+				if (expect(
+					ARRAY_COMMA_OR_BRACKET,
+					LexerToken.Type.COMMA,
+					LexerToken.Type.CLOSE_BRACKET
+				).type == LexerToken.Type.CLOSE_BRACKET) {
+					// Check if closing bracket is next, if so, we're done - no values to return
 					result = null;
+					state = State.STOP;
+				} else {
+					// Get next value
+					result = parseAnyValue(ARRAY_COMMA_VALUE);
+				}
+				break;
 			}
 			
-			// Save value in case iteration used
-			value = Optional.ofNullable(result);
-			return value;
-		} catch (final RuntimeException e) {
-			throw e;
-		} catch (final IOException e) {
-			throw new RuntimeException(e);
+			// Must be STOP. Do nothing, result is already null, so actions below are correct.
+			default:
+				result = null;
 		}
+		
+		// Save value in case iteration used
+		value = Optional.ofNullable(result);
+		return value;
 	}
 	
 	// ==== Iterator

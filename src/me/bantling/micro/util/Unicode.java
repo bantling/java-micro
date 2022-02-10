@@ -9,8 +9,15 @@ import me.bantling.micro.tryfn.Try;
 
 // Various useful methods to make Unicode easier in Java
 public final class Unicode {
+    Unicode() {
+        throw new RuntimeException();
+    }
+    
+    final static String HIGH_SURROGATE_EOF           = "Invalid Unicode at char %s, a high surrogate cannot be last character";
+    final static String HIGH_SURROGATE_LOW_SURROGATE = "Invalid Unicode at char %s, a high surrogate must be followed by a low surrogate";
+    
 	// NO_POSITION supplies an empty string suitable for nextCodePoint position parameter.
-	final Supplier<String> NO_POSITION = () -> "";
+	final static Supplier<String> NO_POSITION = () -> "";
 	
 	// Given a reader, which provides UTF-16 characters,
 	// Read one or two UTF-16 characters as needed into a UTF-32 int value.
@@ -20,7 +27,7 @@ public final class Unicode {
 		final Reader reader,
 		final Supplier<String> position
 	) {
-		return Try.getAsInt(() -> {
+		return Try.getInt(() -> {
 			int theChar = reader.read();
 			if (theChar < 0) {
 				return -1;
@@ -29,17 +36,17 @@ public final class Unicode {
 			if (Character.isHighSurrogate((char)(theChar))) {
 				int char2 = reader.read();
 				if (char2 < 0) {
-					throw new IOException("Invalid Unicode at char " + position.get() + ", a high surrogate cannot be last character");
+					throw new IOException(String.format(HIGH_SURROGATE_EOF, position.get()));
 				}
 				
 				if (! Character.isLowSurrogate((char)(char2))) {
-					throw new IOException("Invalid Unicode at char " + position.get() + ", a high surrogate must be followed by a low surrogate");
+					throw new IOException(String.format(HIGH_SURROGATE_LOW_SURROGATE, position.get()));
 				}
 				
 				// isHighSurrogate(theChar) and isLowSurrogate(char2) implies isValidCodePoint(theChar, char2)
 				theChar = Character.toCodePoint((char)(theChar), (char)(char2));
 			}
-			
+
 			return theChar;
 		});
 	}
