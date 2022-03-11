@@ -27,21 +27,23 @@ import me.bantling.micro.util.Unicode;
  * See Parser for iterating legal tokens only in a legal order.
  */
 public final class Lexer implements Iterator<LexerToken>, Iterable<LexerToken> {
-	static final RuntimeException INCOMPLETE_STRING            = new RuntimeException("Unexpected EOF: incomplete string");
-	static final RuntimeException NO_ASCII_CONTROL             = new RuntimeException("Strings cannot contain ASCII control characters");
-	static final RuntimeException INCOMPLETE_BACKSLASH_ESCAPE  = new RuntimeException("Unexpected EOF: incomplete backslash escape");
-	static final RuntimeException INCOMPLETE_UNICODE_ESCAPE    = new RuntimeException("Unexpected EOF: incomplete unicode escape");
-	static final String           INVALID_UNICODE_ESCAPE_FMT   = "Invalid unicode escape: \\u%s";
-	static final String           INVALID_BACKSLASH_ESCAPE_FMT = "Invalid backslash escape: \\%s";
+	static final RuntimeException INCOMPLETE_STRING               = new RuntimeException("Unexpected EOF: incomplete string");
+	static final RuntimeException NO_ASCII_CONTROL                = new RuntimeException("Strings cannot contain ASCII control characters");
+	static final RuntimeException INCOMPLETE_BACKSLASH_ESCAPE     = new RuntimeException("Unexpected EOF: incomplete backslash escape");
+	static final RuntimeException INCOMPLETE_UNICODE_ESCAPE       = new RuntimeException("Unexpected EOF: incomplete unicode escape");
+	static final String           INVALID_UNICODE_ESCAPE_FMT      = "Invalid unicode escape: \\u%s";
+    static final String           INVALID_HIGH_SURROGATE_ONLY_FMT = "Invalid unicode escape: \\u%s is a valid UTF-16 high surrogate, but it must be followed by another \\u escape this is a valid UTF-16 low surrogate";
+    static final String           INVALID_SURROGATE_ESCAPE_FMT    = "Invalid unicode escape: \\u%s is a valid UTF-16 high surrogate, but \\u%s is not a valid UTF-16 low surrogate";
+	static final String           INVALID_BACKSLASH_ESCAPE_FMT    = "Invalid backslash escape: \\%s";
 	
-	static final RuntimeException INCOMPLETE_NEGATIVE_NUMBER   = new RuntimeException("Unexpected EOF reading a negative number");
-	static final RuntimeException MINUS_SIGN_REQUIRES_DIGIT    = new RuntimeException("The minus sign for a number must be followed by a digit");
-	static final RuntimeException DECIMAL_POINT_REQUIRES_DIGIT = new RuntimeException("The decimal point in a number must be followed by a digit");
-	static final RuntimeException EXPONENT_REQUIRES_DIGIT      = new RuntimeException("The exponent character in a number must be followed by an optional sign and one or more digits");
+	static final RuntimeException INCOMPLETE_NEGATIVE_NUMBER      = new RuntimeException("Unexpected EOF reading a negative number");
+	static final RuntimeException MINUS_SIGN_REQUIRES_DIGIT       = new RuntimeException("The minus sign for a number must be followed by a digit");
+	static final RuntimeException DECIMAL_POINT_REQUIRES_DIGIT    = new RuntimeException("The decimal point in a number must be followed by a digit");
+	static final RuntimeException EXPONENT_REQUIRES_DIGIT         = new RuntimeException("The exponent character in a number must be followed by an optional sign and one or more digits");
 
-	static final RuntimeException BOOLEAN_SPELLED_TRUE_OR_FALSE = new RuntimeException("A boolean value must be spelled true or false in lower case");
-	static final RuntimeException NULL_SPELLING                 = new RuntimeException("A null value must be spelled null in lower case");
-	static final String           INVALID_CHARACTER_FMT         = "Invalid JSON input: character %s at position %s";
+	static final RuntimeException BOOLEAN_SPELLED_TRUE_OR_FALSE   = new RuntimeException("A boolean value must be spelled true or false in lower case");
+	static final RuntimeException NULL_SPELLING                   = new RuntimeException("A null value must be spelled null in lower case");
+	static final String           INVALID_CHARACTER_FMT           = "Invalid JSON input: character %s at position %s";
 	
 	// Underlying Reader
 	private final PushbackReader reader;
@@ -153,20 +155,61 @@ public final class Lexer implements Iterator<LexerToken>, Iterable<LexerToken> {
 						
 					case 'u': {
 						// u must be followed by 4 hex digits
-						final StringBuilder u = new StringBuilder();
+					    // This escape may be a high surrogate
+						final StringBuilder high = new StringBuilder();
 						for (int i = 1; i <= 4; i++) {
 							theChar = nextCodePoint();
 							if (theChar < 0) {
 								throw INCOMPLETE_UNICODE_ESCAPE;
 							}
-							u.appendCodePoint(theChar);
+							high.appendCodePoint(theChar);
 						}
 						
+						char highChar;
 						try {
-							sb.append((char)(Integer.parseUnsignedInt(u.toString(), 16)));
+						    highChar = (char)(Integer.parseUnsignedInt(high.toString(), 16));
 						} catch (@SuppressWarnings("unused") final NumberFormatException e) {
-							throw new RuntimeException(String.format(INVALID_UNICODE_ESCAPE_FMT, u.toString()));
+							throw new RuntimeException(String.format(INVALID_UNICODE_ESCAPE_FMT, high.toString()));
 						}
+						
+						sb.append(highChar);
+						
+						// A high surrogate escape must be followed by a low surrogate escape
+						if (Character.isHighSurrogate(highChar)) {
+						    // Expect another \\uXXXX sequence
+						    theChar = nextCodePoint();
+						    if (theChar != '\\') {
+	                            throw new RuntimeException(String.format(INVALID_HIGH_SURROGATE_ONLY_FMT, high.toString()));
+						    }
+
+                            theChar = nextCodePoint();
+                            if (theChar != 'u') {
+                                throw new RuntimeException(String.format(INVALID_HIGH_SURROGATE_ONLY_FMT, high.toString()));
+                            }
+						    
+                            final StringBuilder low = new StringBuilder();
+	                        for (int i = 1; i <= 4; i++) {
+	                            theChar = nextCodePoint();
+	                            if (theChar < 0) {
+	                                throw INCOMPLETE_UNICODE_ESCAPE;
+	                            }
+	                            low.appendCodePoint(theChar);
+	                        }
+	                        
+	                        char lowChar;
+	                        try {
+	                            lowChar = (char)(Integer.parseUnsignedInt(low.toString(), 16));
+	                        } catch (@SuppressWarnings("unused") final NumberFormatException e) {
+	                            throw new RuntimeException(String.format(INVALID_UNICODE_ESCAPE_FMT, low.toString()));
+	                        }
+	                        
+	                        if (!Character.isLowSurrogate(lowChar)) {
+                                throw new RuntimeException(String.format(INVALID_SURROGATE_ESCAPE_FMT, high.toString(), low.toString()));
+	                        }
+	                        
+	                        sb.append(lowChar);
+						}
+						
 						break;
 					}
 						

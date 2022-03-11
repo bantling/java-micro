@@ -1,4 +1,4 @@
-package me.bantling.micro.tryfn;
+package me.bantling.micro.function;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -14,6 +14,16 @@ import java.util.function.LongBinaryOperator;
 import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Test;
+
+import me.bantling.micro.function.BooleanBinaryOperator;
+import me.bantling.micro.function.Try;
+import me.bantling.micro.function.TryBooleanSupplier;
+import me.bantling.micro.function.TryConsumer;
+import me.bantling.micro.function.TryDoubleSupplier;
+import me.bantling.micro.function.TryIntSupplier;
+import me.bantling.micro.function.TryLongSupplier;
+import me.bantling.micro.function.TrySideEffect;
+import me.bantling.micro.function.TrySupplier;
 
 @SuppressWarnings("static-method")
 public class TestTry {

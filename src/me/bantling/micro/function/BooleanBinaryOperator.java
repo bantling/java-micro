@@ -1,4 +1,4 @@
-package me.bantling.micro.tryfn;
+package me.bantling.micro.function;
 
 @FunctionalInterface
 public interface BooleanBinaryOperator {

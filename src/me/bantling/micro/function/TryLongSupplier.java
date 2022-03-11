@@ -1,4 +1,4 @@
-package me.bantling.micro.tryfn;
+package me.bantling.micro.function;
 
 // A LongSupplier that can throw any exception
 @FunctionalInterface

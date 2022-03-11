@@ -5,7 +5,7 @@ import java.io.PushbackReader;
 import java.io.Reader;
 import java.util.function.Supplier;
 
-import me.bantling.micro.tryfn.Try;
+import me.bantling.micro.function.Try;
 
 // Various useful methods to make Unicode easier in Java
 public final class Unicode {

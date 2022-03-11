@@ -16,7 +16,7 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 
-import me.bantling.micro.util.Util;
+import me.bantling.micro.util.Collections;
 
 @SuppressWarnings("static-method")
 public class TestParser {
@@ -142,7 +142,7 @@ public class TestParser {
 				},
 				new JSONValue[] {
 			        JSONValue.of(
-		                Util.listOf(new LinkedList<JSONValue>()).
+		                Collections.listOf(new LinkedList<JSONValue>()).
 		                    add(
 	                            JSONValue.of("a"),
                                 JSONValue.of("b")

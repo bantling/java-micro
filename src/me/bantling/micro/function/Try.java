@@ -1,4 +1,4 @@
-package me.bantling.micro.tryfn;
+package me.bantling.micro.function;
 
 import java.util.Objects;
 import java.util.function.BinaryOperator;
