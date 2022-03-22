@@ -31,11 +31,11 @@ public class JSONValue {
 	public static final JSONValue FALSE_VALUE = new JSONValue(Type.BOOLEAN, Boolean.FALSE);
 	public static final JSONValue NULL_VALUE = new JSONValue(Type.NULL, null);
 	
-	static final JSONValueException NOT_A_STRING  = new JSONValueException("Not a STRING value");
-	static final JSONValueException NOT_A_NUMBER  = new JSONValueException("Not a NUMBER value");
-	static final JSONValueException NOT_A_BOOLEAN = new JSONValueException("Not a BOOLEAN value");
-	static final JSONValueException NOT_AN_OBJECT = new JSONValueException("Not a STRING value");
-	static final JSONValueException NOT_AN_ARRAY  = new JSONValueException("Not an ARRAY value");
+	static final String NOT_A_STRING  = "Not a STRING value";
+	static final String NOT_A_NUMBER  = "Not a NUMBER value";
+	static final String NOT_A_BOOLEAN = "Not a BOOLEAN value";
+	static final String NOT_AN_OBJECT = "Not a STRING value";
+	static final String NOT_AN_ARRAY  = "Not an ARRAY value";
 	
 	private final Type type;
 	private final Object instance;
@@ -135,7 +135,7 @@ public class JSONValue {
 	// Return the value as a string, or die if it is not a String
 	public String asString() throws JSONValueException {
 		if (type != Type.STRING) {
-			throw NOT_A_STRING;
+			throw new JSONValueException(NOT_A_STRING);
 		}
 		
 		return (String)(instance);
@@ -144,7 +144,7 @@ public class JSONValue {
 	// Return the value as a number, or die if it is not a number
 	public JSONNumber asNumber() throws JSONValueException {
 		if (type != Type.NUMBER) {
-			throw NOT_A_NUMBER;
+			throw new JSONValueException(NOT_A_NUMBER);
 		}
 		
 		return (JSONNumber)(instance);
@@ -153,7 +153,7 @@ public class JSONValue {
 	// Return the value as a boolean, or die if it is not a boolean
 	public boolean asBoolean() throws JSONValueException {
 		if (type != Type.BOOLEAN) {
-			throw NOT_A_BOOLEAN;
+			throw new JSONValueException(NOT_A_BOOLEAN);
 		}
 		
 		return ((Boolean)(instance)).booleanValue();
@@ -162,7 +162,7 @@ public class JSONValue {
 	// Return the value as an object, or die if it is not an object
 	public Map<String, JSONValue> asObject() throws JSONValueException {
 		if (type != Type.OBJECT) {
-			throw NOT_AN_OBJECT;
+			throw new JSONValueException(NOT_AN_OBJECT);
 		}
 		
 		@SuppressWarnings("unchecked")
@@ -174,7 +174,7 @@ public class JSONValue {
 	// Uses list instead of array, as lists are generally more convenient.
 	public List<JSONValue> asArray() throws JSONValueException {
 		if (type != Type.ARRAY) {
-			throw NOT_AN_ARRAY;
+			throw new JSONValueException(NOT_AN_ARRAY);
 		}
 		
 		@SuppressWarnings("unchecked")

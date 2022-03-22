@@ -60,13 +60,13 @@ public class TestLexer {
 			};
 			
 			final String[] messages = {
-					Lexer.INCOMPLETE_STRING.getMessage(),
-					Lexer.NO_ASCII_CONTROL.getMessage(),
-					Lexer.INCOMPLETE_BACKSLASH_ESCAPE.getMessage(),
-					Lexer.INCOMPLETE_UNICODE_ESCAPE.getMessage(),
-					Lexer.INCOMPLETE_UNICODE_ESCAPE.getMessage(),
-					Lexer.INCOMPLETE_UNICODE_ESCAPE.getMessage(),
-					Lexer.INCOMPLETE_UNICODE_ESCAPE.getMessage(),
+					Lexer.INCOMPLETE_STRING,
+					Lexer.NO_ASCII_CONTROL,
+					Lexer.INCOMPLETE_BACKSLASH_ESCAPE,
+					Lexer.INCOMPLETE_UNICODE_ESCAPE,
+					Lexer.INCOMPLETE_UNICODE_ESCAPE,
+					Lexer.INCOMPLETE_UNICODE_ESCAPE,
+					Lexer.INCOMPLETE_UNICODE_ESCAPE,
 					String.format(Lexer.INVALID_UNICODE_ESCAPE_FMT, "ghij"),
                     String.format(Lexer.INVALID_BACKSLASH_ESCAPE_FMT, "z"),
 			};
@@ -146,15 +146,15 @@ public class TestLexer {
 			};
 			
 			final String[] messages = {
-					Lexer.INCOMPLETE_NEGATIVE_NUMBER.getMessage(),
-					Lexer.MINUS_SIGN_REQUIRES_DIGIT.getMessage(),
-                    Lexer.MINUS_SIGN_REQUIRES_DIGIT.getMessage(),
-					Lexer.DECIMAL_POINT_REQUIRES_DIGIT.getMessage(),
-					Lexer.DECIMAL_POINT_REQUIRES_DIGIT.getMessage(),
-					Lexer.EXPONENT_REQUIRES_DIGIT.getMessage(),
-					Lexer.EXPONENT_REQUIRES_DIGIT.getMessage(),
-					Lexer.EXPONENT_REQUIRES_DIGIT.getMessage(),
-					Lexer.EXPONENT_REQUIRES_DIGIT.getMessage(),
+					Lexer.INCOMPLETE_NEGATIVE_NUMBER,
+					Lexer.MINUS_SIGN_REQUIRES_DIGIT,
+                    Lexer.MINUS_SIGN_REQUIRES_DIGIT,
+					Lexer.DECIMAL_POINT_REQUIRES_DIGIT,
+					Lexer.DECIMAL_POINT_REQUIRES_DIGIT,
+					Lexer.EXPONENT_REQUIRES_DIGIT,
+					Lexer.EXPONENT_REQUIRES_DIGIT,
+					Lexer.EXPONENT_REQUIRES_DIGIT,
+					Lexer.EXPONENT_REQUIRES_DIGIT,
 			};
 			
 			for (int i = 0; i < badCases.length; i++) {
@@ -213,7 +213,7 @@ public class TestLexer {
 					new Lexer(new StringReader(badCases[i])).lex();
 					Assert.fail("Bad number cases must fail");
 				} catch (final RuntimeException e) {
-					assertEquals(Lexer.BOOLEAN_SPELLED_TRUE_OR_FALSE, e);
+					assertEquals(Lexer.BOOLEAN_SPELLED_TRUE_OR_FALSE, e.getMessage());
 				}
 			}
 		}	
@@ -244,7 +244,7 @@ public class TestLexer {
 					new Lexer(new StringReader(badCases[i])).lex();
 					Assert.fail("Bad number cases must fail");
 				} catch (final RuntimeException e) {
-					assertEquals(Lexer.NULL_SPELLING, e);
+					assertEquals(Lexer.NULL_SPELLING, e.getMessage());
 				}
 			}
 		}	

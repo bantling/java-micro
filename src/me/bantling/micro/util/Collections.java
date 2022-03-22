@@ -1,449 +1,211 @@
 package me.bantling.micro.util;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 public final class Collections {
     private Collections() {
         throw new RuntimeException();
     }
-
+    
     /**
-     * Build a list of hard-coded items of any length, in batches of 1 to 10 items.
+     * Create a {@link ArrayList} of the items given.
      * 
-     * @param <E> the type of element to build a list of
+     * @param <E> the type of elements to add to the list
+     * @param firstElement the first element to add
+     * @param moreElements additional elements to add, if any
+     * @return a list of all the elements
      */
-    public static class ListBuilder<E> {
-        private final List<E> list;
-        
-        ListBuilder(
-            final List<E> list
-        ) {
-            this.list = list;
+    @SafeVarargs
+    public static <E> List<E> listOf(
+        final E firstElement,
+        final E... moreElements
+    ) {
+        final List<E> list = new ArrayList<>(1 + moreElements.length);
+        list.add(firstElement);
+        for (final E nextElement : moreElements) {
+            list.add(nextElement);
         }
         
-        public ListBuilder<E> add(
-            final E e
-        ) {
-            list.add(e);
-            return this;
-        }
+        return list;
+    }
+    
+    /**
+     * Create an unmodifiable list of the items given.
+     * 
+     * @param <E> the type of elements to add to the list
+     * @param firstElement the first element to add
+     * @param moreElements additional elements to add, if any
+     * @return an unmodifiable list of all the elements
+     */
+    @SafeVarargs
+    public static <E> List<E> unmodifiableListOf(
+        final E firstElement,
+        final E... moreElements
+    ) {
+        return java.util.Collections.unmodifiableList(listOf(firstElement, moreElements));
+    }
+    
+    /**
+     * The error message format for adding duplicate set values
+     */
+    static final String DUPLICATE_VALUE_MSG = "Duplicate element: %s";
         
-        public ListBuilder<E> add(
-            final E e1,
-            final E e2
-        ) {
-            list.add(e1);
-            list.add(e2);
-            return this;
-        }
-        
-        public ListBuilder<E> add(
-            final E e1,
-            final E e2,
-            final E e3
-        ) {
-            list.add(e1);
-            list.add(e2);
-            list.add(e3);
-            return this;
-        }
-        
-        public ListBuilder<E> add(
-            final E e1,
-            final E e2,
-            final E e3,
-            final E e4
-        ) {
-            list.add(e1);
-            list.add(e2);
-            list.add(e3);
-            list.add(e4);
-            return this;
-        }
-        
-        public ListBuilder<E> add(
-            final E e1,
-            final E e2,
-            final E e3,
-            final E e4,
-            final E e5
-        ) {
-            list.add(e1);
-            list.add(e2);
-            list.add(e3);
-            list.add(e4);
-            list.add(e5);
-            return this;
-        }
-        
-        public ListBuilder<E> add(
-            final E e1,
-            final E e2,
-            final E e3,
-            final E e4,
-            final E e5,
-            final E e6
-        ) {
-            list.add(e1);
-            list.add(e2);
-            list.add(e3);
-            list.add(e4);
-            list.add(e5);
-            list.add(e6);
-            return this;
-        }
-        
-        public ListBuilder<E> add(
-            final E e1,
-            final E e2,
-            final E e3,
-            final E e4,
-            final E e5,
-            final E e6,
-            final E e7
-        ) {
-            list.add(e1);
-            list.add(e2);
-            list.add(e3);
-            list.add(e4);
-            list.add(e5);
-            list.add(e6);
-            list.add(e7);
-            return this;
-        }
-        
-        public ListBuilder<E> add(
-            final E e1,
-            final E e2,
-            final E e3,
-            final E e4,
-            final E e5,
-            final E e6,
-            final E e7,
-            final E e8
-        ) {
-            list.add(e1);
-            list.add(e2);
-            list.add(e3);
-            list.add(e4);
-            list.add(e5);
-            list.add(e6);
-            list.add(e7);
-            list.add(e8);
-            return this;
-        }
-        
-        public ListBuilder<E> add(
-            final E e1,
-            final E e2,
-            final E e3,
-            final E e4,
-            final E e5,
-            final E e6,
-            final E e7,
-            final E e8,
-            final E e9
-        ) {
-            list.add(e1);
-            list.add(e2);
-            list.add(e3);
-            list.add(e4);
-            list.add(e5);
-            list.add(e6);
-            list.add(e7);
-            list.add(e8);
-            list.add(e9);
-            return this;
-        }
-        
-        public ListBuilder<E> add(
-            final E e1,
-            final E e2,
-            final E e3,
-            final E e4,
-            final E e5,
-            final E e6,
-            final E e7,
-            final E e8,
-            final E e9,
-            final E e10
-        ) {
-            list.add(e1);
-            list.add(e2);
-            list.add(e3);
-            list.add(e4);
-            list.add(e5);
-            list.add(e6);
-            list.add(e7);
-            list.add(e8);
-            list.add(e9);
-            list.add(e10);
-            return this;
-        }
-        
-        /**
-         * Add all the elements of a collection to this list.
-         * 
-         * @param c the collection of elements to add 
-         * @return this builder
-         */
-        public ListBuilder<E> add(
-            final Collection<E> c
-        ) {
-            list.addAll(c);
-            return this;
-        }
-        
-        public List<E> done() {
-            return list;
-        }
-        
-        public List<E> toUnmodifiableList() {
-            return java.util.Collections.unmodifiableList(list);
+    /**
+     * Add one item to the set, throwing an {@link IllegalArgumentException} if it is a duplicate
+     * 
+     * @param <E> the type of element to add
+     * @param set the set to add the element to
+     * @param e the element to add
+     */
+    static <E> void addOne(final Set<E> set, final E e) {
+        if (! set.add(e)) {
+            throw new IllegalArgumentException(String.format(DUPLICATE_VALUE_MSG, e));
         }
     }
     
     /**
-     * Build a list of items of type T into the given list.
-     * Duplicates values can be added.
+     * Add all the elements to the set, throwing an {@link IllegalArgumentException} if any item is a duplicate
      * 
-     * @param <E> the type of element to add to the list
-     * @param list the list to add elements to
-     * @return a builder for the given list
+     * @param <E> the type of elements to add
+     * @param set the set to add the elements to
+     * @param firstElement the first element to add
+     * @param moreElements additional elements to add
+     * @return the given set, with all the elements added
      */
-    public static <E> ListBuilder<E> listOf(final List<E> list) {
-        return new ListBuilder<>(list);
-    }
-
-    /**
-     * Build a set of hard-coded items of any length, in batches of 1 to 10 items.
-     * Duplicate values result in an error, as they are considered a mistake in the coding.
-     * 
-     * @param <E> the type of element to build a set of
-     * @throws {@link IllegalArgumentException} if duplicate values are added 
-     */
-    public static class SetBuilder<E> {
-        /**
-         * The error message format for adding duplicate set values
-         */
-        static final String DUPLICATE_VALUE_MSG = "Duplicate element: %s";
-        
-        private final Set<E> set;
-        
-        SetBuilder(
-            final Set<E> list
-        ) {
-            this.set = list;
+    static <E> Set<E> addElements(
+        final Set<E> set,
+        final E firstElement,
+        final E[] moreElements
+    ) {
+        addOne(set, firstElement);
+        for (final E element : moreElements) {
+            addOne(set, element);
         }
         
-        /**
-         * Add one item to the set, and throw an {@link IllegalArgumentException} if it is a duplicate
-         * 
-         * @param e the element to add
-         */
-        void addOne(final E e) {
-            if (! set.add(e)) {
-                throw new IllegalArgumentException(String.format(DUPLICATE_VALUE_MSG, e));
-            }
-        }
-        
-        public SetBuilder<E> add(
-            final E e
-        ) {
-            addOne(e);
-            return this;
-        }
-        
-        public SetBuilder<E> add(
-            final E e1,
-            final E e2
-        ) {
-            addOne(e1);
-            addOne(e2);
-            return this;
-        }
-        
-        public SetBuilder<E> add(
-            final E e1,
-            final E e2,
-            final E e3
-        ) {
-            addOne(e1);
-            addOne(e2);
-            addOne(e3);
-            return this;
-        }
-        
-        public SetBuilder<E> add(
-            final E e1,
-            final E e2,
-            final E e3,
-            final E e4
-        ) {
-            addOne(e1);
-            addOne(e2);
-            addOne(e3);
-            addOne(e4);
-            return this;
-        }
-        
-        public SetBuilder<E> add(
-            final E e1,
-            final E e2,
-            final E e3,
-            final E e4,
-            final E e5
-        ) {
-            addOne(e1);
-            addOne(e2);
-            addOne(e3);
-            addOne(e4);
-            addOne(e5);
-            return this;
-        }
-        
-        public SetBuilder<E> add(
-            final E e1,
-            final E e2,
-            final E e3,
-            final E e4,
-            final E e5,
-            final E e6
-        ) {
-            addOne(e1);
-            addOne(e2);
-            addOne(e3);
-            addOne(e4);
-            addOne(e5);
-            addOne(e6);
-            return this;
-        }
-        
-        public SetBuilder<E> add(
-            final E e1,
-            final E e2,
-            final E e3,
-            final E e4,
-            final E e5,
-            final E e6,
-            final E e7
-        ) {
-            addOne(e1);
-            addOne(e2);
-            addOne(e3);
-            addOne(e4);
-            addOne(e5);
-            addOne(e6);
-            addOne(e7);
-            return this;
-        }
-        
-        public SetBuilder<E> add(
-            final E e1,
-            final E e2,
-            final E e3,
-            final E e4,
-            final E e5,
-            final E e6,
-            final E e7,
-            final E e8
-        ) {
-            addOne(e1);
-            addOne(e2);
-            addOne(e3);
-            addOne(e4);
-            addOne(e5);
-            addOne(e6);
-            addOne(e7);
-            addOne(e8);
-            return this;
-        }
-        
-        public SetBuilder<E> add(
-            final E e1,
-            final E e2,
-            final E e3,
-            final E e4,
-            final E e5,
-            final E e6,
-            final E e7,
-            final E e8,
-            final E e9
-        ) {
-            addOne(e1);
-            addOne(e2);
-            addOne(e3);
-            addOne(e4);
-            addOne(e5);
-            addOne(e6);
-            addOne(e7);
-            addOne(e8);
-            addOne(e9);
-            return this;
-        }
-        
-        public SetBuilder<E> add(
-            final E e1,
-            final E e2,
-            final E e3,
-            final E e4,
-            final E e5,
-            final E e6,
-            final E e7,
-            final E e8,
-            final E e9,
-            final E e10
-        ) {
-            addOne(e1);
-            addOne(e2);
-            addOne(e3);
-            addOne(e4);
-            addOne(e5);
-            addOne(e6);
-            addOne(e7);
-            addOne(e8);
-            addOne(e9);
-            addOne(e10);
-            return this;
-        }
-        
-        /**
-         * Add all the elemnents of another collection to this set.
-         * 
-         * @param c collection of elements to add 
-         * @return this builder
-         */
-        public SetBuilder<E> add(
-            final Collection<E> c
-        ) {
-            for (final E e : c) {
-                addOne(e);
-            }
-            return this;
-        }
-        
-        public Set<E> done() {
-            return set;
-        }
-        
-        public Set<E> toUnmodifiableSet() {
-            return java.util.Collections.unmodifiableSet(set);
-        }
+        return set;
     }
     
     /**
-     * Build a set of items of type T into the given set
+     * Create a {@link HashSet} of the items given.
      * 
-     * @param <E> the type of element to build a set of
-     * @param set the set to add elements into
-     * @return a builder for the given set
+     * @param <E> the type of elements to add
+     * @param firstElement the first element to add
+     * @param moreElements additional elements to add
+     * @return a set of all the elements
+     * @throws IllegalArgumentException if a duplicate value is provided
      */
-    public static <E> SetBuilder<E> setOf(final Set<E> set) {
-        return new SetBuilder<>(set);
+    @SafeVarargs
+    public static <E> Set<E> setOf(
+        final E firstElement,
+        final E... moreElements
+    ) {
+        return addElements(
+            new HashSet<>(),
+            firstElement,
+            moreElements
+        );
+    }
+    
+    /**
+     * Create an unmodifiable set of the items given.
+     * 
+     * @param <E> the type of elements to add
+     * @param firstElement the first element to add
+     * @param moreElements additional elements to add
+     * @return an unmodifiable set of all the elements
+     * @throws IllegalArgumentException if a duplicate value is provided
+     */
+    @SafeVarargs
+    public static <E> Set<E> unmodifiableSetOf(
+        final E firstElement,
+        final E... moreElements
+    ) {
+        return java.util.Collections.unmodifiableSet(setOf(firstElement, moreElements));
+    }
+    
+    /**
+     * Create a {@link LinkedHashSet} of the items given.
+     * 
+     * @param <E> the type of elements to add
+     * @param firstElement the first element to add
+     * @param moreElements additional elements to add
+     * @return a set of all the elements that iterate in the order given
+     * @throws IllegalArgumentException if a duplicate value is provided
+     */
+    @SafeVarargs
+    public static <E> Set<E> orderedSetOf(
+        final E firstElement,
+        final E... moreElements
+    ) {
+        return addElements(
+            new LinkedHashSet<>(),
+            firstElement,
+            moreElements
+        );
+    }
+    
+    /**
+     * Create an unmodifiable {@link LinkedHashSet} of items.
+     * 
+     * @param <E> the type of elements to add
+     * @param firstElement the first element to add
+     * @param moreElements additional elements to add
+     * @return an unmodifiable set of all the elements that iterate in the order given
+     * @throws IllegalArgumentException if a duplicate value is provided
+     */
+    @SafeVarargs
+    public static <E> Set<E> unmodifiableOrderedSetOf(
+        final E firstElement,
+        final E... moreElements
+    ) {
+        return java.util.Collections.unmodifiableSet(orderedSetOf(firstElement, moreElements));
+    }
+    
+    /**
+     * Create a {@link TreeSet} of the items given.
+     * 
+     * @param <E> the type of elements to add
+     * @param firstElement the first element to add
+     * @param moreElements additional elements to add
+     * @return a set of all the elements that iterate in the order given
+     * @throws IllegalArgumentException if a duplicate value is provided
+     */
+    @SafeVarargs
+    public static <E> Set<E> sortedSetOf(
+        final E firstElement,
+        final E... moreElements
+    ) {
+        return addElements(
+            new TreeSet<>(),
+            firstElement,
+            moreElements
+        );
+    }
+    
+    /**
+     * Create an unmodifiable {@link TreeSet} of items.
+     * 
+     * @param <E> the type of elements to add
+     * @param firstElement the first element to add
+     * @param moreElements additional elements to add
+     * @return an unmodifiable set of all the elements that iterate in the order given
+     * @throws IllegalArgumentException if a duplicate value is provided
+     */
+    @SafeVarargs
+    public static <E> Set<E> unmodifiableSortedSetOf(
+        final E firstElement,
+        final E... moreElements
+    ) {
+        return java.util.Collections.unmodifiableSet(sortedSetOf(firstElement, moreElements));
     }
 
     /**
@@ -660,6 +422,17 @@ public final class Collections {
     }
     
     /**
+     * Build a map of K, V pairs into a {@list HashMap}.
+     * 
+     * @param <K> the key type
+     * @param <V> the value type
+     * @return a builder for the given map
+     */
+    public static <K, V> MapBuilder<K, V> map() {
+        return new MapBuilder<>(new HashMap<>());
+    }
+    
+    /**
      * Build a map of K, V pairs into the given map
      * 
      * @param <K> the key type
@@ -667,7 +440,7 @@ public final class Collections {
      * @param map the map to build
      * @return a builder for the given map
      */
-    public static <K, V> MapBuilder<K, V> mapOf(final Map<K, V> map) {
+    public static <K, V> MapBuilder<K, V> map(final Map<K, V> map) {
         return new MapBuilder<>(map);
     }
     

@@ -30,7 +30,7 @@ enum VariablePathType {
      */
     UUID;
     
-    private static final Map<String, VariablePathType> STRING_TO_PATH_TYPE = Collections.mapOf(
+    private static final Map<String, VariablePathType> STRING_TO_PATH_TYPE = Collections.map(
         new HashMap<String, VariablePathType>()
     ).
         add("{str}",     STRING).

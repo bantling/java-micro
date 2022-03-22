@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -23,7 +24,10 @@ public class ServerBuilder {
     static final Pattern QUERY_PARAMS_PART = Pattern.compile("([A-Za-z0-9]+):([A-Za-z]+)([+])?");
     
     // URL cannot be empty
-    static final IllegalArgumentException URL_CANNOT_BE_EMPTY = new IllegalArgumentException("The url cannot be empty");
+    static final String URL_CANNOT_BE_EMPTY = "The url cannot be empty";
+    
+    // Query params cannot have multiple ?
+    static final String QUERY_PARAMS_ONE_QUESTION_MARK = "The query parameters cannot have multiple ?";
     
     // Illegal query parameters
     static final String ILLEGAL_QUERY_MSG =
@@ -48,7 +52,7 @@ public class ServerBuilder {
      */
     static List<PathPart> parseURL(final String url) {
         if (Objects.requireNonNull(url, "url").isEmpty()) {
-            throw URL_CANNOT_BE_EMPTY;
+            throw new IllegalArgumentException(URL_CANNOT_BE_EMPTY);
         }
         
         final List<PathPart> pathParts = new LinkedList<>();
@@ -60,28 +64,39 @@ public class ServerBuilder {
         final String[] parts =
             (coalescedSlashes.charAt(0) == '/' ? coalescedSlashes.substring(1) : coalescedSlashes).
             split("/");
-        
-        PathPart lastPart = null;
-        for (String part : parts) {
+
+        String lastPart = parts[0];
+        PathPart lastPathPart = new PathPart();
+        for (int i = 0; i < parts.length; i++) {
+            lastPart = parts[i];
+            
             // Is it a variable path part?
-            final Matcher m = VARIABLE_PATH_PART.matcher(part);
-            final String fixedPart;
-            final VariablePathType varPart;
-            if (!m.find(0)) {
-                fixedPart = part;
-                varPart = null;
+            final Matcher m = VARIABLE_PATH_PART.matcher(lastPart);
+            if (!m.find()) {
+                // If not, must be fixed
+                lastPathPart.fixedPart = lastPart;
             } else {
-                fixedPart = null;
-                varPart = VariablePathType.from(m.group(1));
+                // If so, get variable type
+                lastPathPart.variablePart.pathParam = Optional.of(VariableParamType.from(m.group(1)));
             }
             
-            lastPart = new PathPart();
+            // Add path part to list
+            pathParts.add(lastPathPart);
+
+            // Create a new last path part if at least one more part exists
+            if (i < parts.length - 1) {
+                lastPathPart = new PathPart();
+            }
         }
         
         // Is there a single question mark in the URL after one or more path parts?
-        final String[] querySplit = (part != null ? part : "").split("[?]");
+        final String[] querySplit = (lastPart != null ? lastPart : "").split("[?]");
+        if (querySplit.length > 2) {
+            throw new IllegalArgumentException(QUERY_PARAMS_ONE_QUESTION_MARK);
+        }
         if (querySplit.length == 2) {
             // One ?, so a string before and a string after
+            // Split further ampersand between name:type pairs
             final String[] params = querySplit[1].split("&");
             for (final String param : params) {
                 final Matcher m = QUERY_PARAMS_PART.matcher(param);
@@ -92,6 +107,10 @@ public class ServerBuilder {
                 final String paramName = m.group(1);
                 final VariableParamType paramType = VariableParamType.from(m.group(2));
                 final boolean required = m.group(3) != null;
+                lastPathPart.variablePart.queryParams.put(
+                    paramName,
+                    new QueryParam(paramName, paramType, required)
+                );
             }
         }
         

@@ -9,7 +9,6 @@ import java.io.StringReader;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -142,12 +141,10 @@ public class TestParser {
 				},
 				new JSONValue[] {
 			        JSONValue.of(
-		                Collections.listOf(new LinkedList<JSONValue>()).
-		                    add(
-	                            JSONValue.of("a"),
-                                JSONValue.of("b")
-                            ).
-		                done()
+		                Collections.listOf(
+                            JSONValue.of("a"),
+                            JSONValue.of("b")
+                        )
 	                )
 				}
 			};
@@ -246,15 +243,15 @@ public class TestParser {
 	
 	@Test
 	public void expect() throws Throwable {
-	    final Method expect = Parser.class.getDeclaredMethod("expect", RuntimeException.class, LexerToken.Type[].class);
+	    final Method expect = Parser.class.getDeclaredMethod("expect", String.class, LexerToken.Type[].class);
 	    expect.setAccessible(true);
 	    
 	    final Parser p = new Parser(new StringReader("1 2 3"));
-	    final RuntimeException error = new RuntimeException();
+	    final String error = "fooey";
 	    try {
 	        expect.invoke(p, error, new LexerToken.Type[0]);
 	    } catch (final InvocationTargetException e) {
-	        assertTrue(error == e.getCause());
+	        assertTrue(error == e.getCause().getMessage());
 	    }
 	    
 	    assertEquals(

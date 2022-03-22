@@ -36,25 +36,25 @@ public class TestJSONValue {
             str.asNumber();
             fail("Must die");
         } catch (final Throwable t) {
-            assertEquals(JSONValue.NOT_A_NUMBER, t);
+            assertEquals(JSONValue.NOT_A_NUMBER, t.getMessage());
         }
         try {
             str.asBoolean();
             fail("Must die");
         } catch (final Throwable t) {
-            assertEquals(JSONValue.NOT_A_BOOLEAN, t);
+            assertEquals(JSONValue.NOT_A_BOOLEAN, t.getMessage());
         }
         try {
             str.asObject();
             fail("Must die");
         } catch (final Throwable t) {
-            assertEquals(JSONValue.NOT_AN_OBJECT, t);
+            assertEquals(JSONValue.NOT_AN_OBJECT, t.getMessage());
         }
         try {
             str.asArray();
             fail("Must die");
         } catch (final Throwable t) {
-            assertEquals(JSONValue.NOT_AN_ARRAY, t);
+            assertEquals(JSONValue.NOT_AN_ARRAY, t.getMessage());
         }
         
         assertEquals(JSONValue.Type.STRING, str.getType());
@@ -83,25 +83,25 @@ public class TestJSONValue {
             number.asString();
             fail("Must die");
         } catch (final Throwable t) {
-            assertEquals(JSONValue.NOT_A_STRING, t);
+            assertEquals(JSONValue.NOT_A_STRING, t.getMessage());
         }
         try {
             number.asBoolean();
             fail("Must die");
         } catch (final Throwable t) {
-            assertEquals(JSONValue.NOT_A_BOOLEAN, t);
+            assertEquals(JSONValue.NOT_A_BOOLEAN, t.getMessage());
         }
         try {
             number.asObject();
             fail("Must die");
         } catch (final Throwable t) {
-            assertEquals(JSONValue.NOT_AN_OBJECT, t);
+            assertEquals(JSONValue.NOT_AN_OBJECT, t.getMessage());
         }
         try {
             number.asArray();
             fail("Must die");
         } catch (final Throwable t) {
-            assertEquals(JSONValue.NOT_AN_ARRAY, t);
+            assertEquals(JSONValue.NOT_AN_ARRAY, t.getMessage());
         }
         
         assertEquals(JSONValue.Type.NUMBER, number.getType());
@@ -129,25 +129,25 @@ public class TestJSONValue {
             bool.asString();
             fail("Must die");
         } catch (final Throwable t) {
-            assertEquals(JSONValue.NOT_A_STRING, t);
+            assertEquals(JSONValue.NOT_A_STRING, t.getMessage());
         }
         try {
             bool.asNumber();
             fail("Must die");
         } catch (final Throwable t) {
-            assertEquals(JSONValue.NOT_A_NUMBER, t);
+            assertEquals(JSONValue.NOT_A_NUMBER, t.getMessage());
         }
         try {
             bool.asObject();
             fail("Must die");
         } catch (final Throwable t) {
-            assertEquals(JSONValue.NOT_AN_OBJECT, t);
+            assertEquals(JSONValue.NOT_AN_OBJECT, t.getMessage());
         }
         try {
             bool.asArray();
             fail("Must die");
         } catch (final Throwable t) {
-            assertEquals(JSONValue.NOT_AN_ARRAY, t);
+            assertEquals(JSONValue.NOT_AN_ARRAY, t.getMessage());
         }
         
         assertEquals(JSONValue.Type.BOOLEAN, bool.getType());
@@ -177,31 +177,31 @@ public class TestJSONValue {
             nul.asString();
             fail("Must die");
         } catch (final Throwable t) {
-            assertEquals(JSONValue.NOT_A_STRING, t);
+            assertEquals(JSONValue.NOT_A_STRING, t.getMessage());
         }
         try {
             nul.asNumber();
             fail("Must die");
         } catch (final Throwable t) {
-            assertEquals(JSONValue.NOT_A_NUMBER, t);
+            assertEquals(JSONValue.NOT_A_NUMBER, t.getMessage());
         }
         try {
             nul.asBoolean();
             fail("Must die");
         } catch (final Throwable t) {
-            assertEquals(JSONValue.NOT_A_BOOLEAN, t);
+            assertEquals(JSONValue.NOT_A_BOOLEAN, t.getMessage());
         }
         try {
             nul.asObject();
             fail("Must die");
         } catch (final Throwable t) {
-            assertEquals(JSONValue.NOT_AN_OBJECT, t);
+            assertEquals(JSONValue.NOT_AN_OBJECT, t.getMessage());
         }
         try {
             nul.asArray();
             fail("Must die");
         } catch (final Throwable t) {
-            assertEquals(JSONValue.NOT_AN_ARRAY, t);
+            assertEquals(JSONValue.NOT_AN_ARRAY, t.getMessage());
         }
         
         assertEquals(JSONValue.Type.NULL, nul.getType());
@@ -229,25 +229,25 @@ public class TestJSONValue {
             object.asString();
             fail("Must die");
         } catch (final Throwable t) {
-            assertEquals(JSONValue.NOT_A_STRING, t);
+            assertEquals(JSONValue.NOT_A_STRING, t.getMessage());
         }
         try {
             object.asNumber();
             fail("Must die");
         } catch (final Throwable t) {
-            assertEquals(JSONValue.NOT_A_NUMBER, t);
+            assertEquals(JSONValue.NOT_A_NUMBER, t.getMessage());
         }
         try {
             object.asBoolean();
             fail("Must die");
         } catch (final Throwable t) {
-            assertEquals(JSONValue.NOT_A_BOOLEAN, t);
+            assertEquals(JSONValue.NOT_A_BOOLEAN, t.getMessage());
         }
         try {
             object.asArray();
             fail("Must die");
         } catch (final Throwable t) {
-            assertEquals(JSONValue.NOT_AN_ARRAY, t);
+            assertEquals(JSONValue.NOT_AN_ARRAY, t.getMessage());
         }
         
         assertEquals(JSONValue.Type.OBJECT, object.getType());
@@ -278,25 +278,25 @@ public class TestJSONValue {
             array.asString();
             fail("Must die");
         } catch (final Throwable t) {
-            assertEquals(JSONValue.NOT_A_STRING, t);
+            assertEquals(JSONValue.NOT_A_STRING, t.getMessage());
         }
         try {
             array.asNumber();
             fail("Must die");
         } catch (final Throwable t) {
-            assertEquals(JSONValue.NOT_A_NUMBER, t);
+            assertEquals(JSONValue.NOT_A_NUMBER, t.getMessage());
         }
         try {
             array.asBoolean();
             fail("Must die");
         } catch (final Throwable t) {
-            assertEquals(JSONValue.NOT_A_BOOLEAN, t);
+            assertEquals(JSONValue.NOT_A_BOOLEAN, t.getMessage());
         }
         try {
             array.asObject();
             fail("Must die");
         } catch (final Throwable t) {
-            assertEquals(JSONValue.NOT_AN_OBJECT, t);
+            assertEquals(JSONValue.NOT_AN_OBJECT, t.getMessage());
         }
         
         assertEquals(JSONValue.Type.ARRAY, array.getType());

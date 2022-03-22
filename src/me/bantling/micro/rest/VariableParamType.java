@@ -45,7 +45,7 @@ enum VariableParamType {
      */
     UUID;
     
-    private static final Map<String, VariableParamType> STRING_TO_PARAM_TYPE = Collections.mapOf(
+    private static final Map<String, VariableParamType> STRING_TO_PARAM_TYPE = Collections.map(
         new HashMap<String, VariableParamType>()
     ).
         add("{bool}",    BOOLEAN).

@@ -1,7 +1,9 @@
 package me.bantling.micro.rest;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 /**
@@ -9,10 +11,23 @@ import java.util.function.Consumer;
  * and contains an optional handler and possible more path parts.
  */
 final class PathPart {
+    
+    // ==== Fields
+    
     String fixedPart;
     VariablePart variablePart;
-    Consumer<Object[]> handler;
+    Optional<Consumer<Object[]>> handler;
     Map<PathPart, PathPart> nextParts;
+    
+    // ==== Construct
+    
+    PathPart() {
+        this.variablePart = new VariablePart();
+        this.handler = Optional.empty();
+        this.nextParts = new HashMap<>();
+    }
+    
+    // ==== Object
 
     @Override
     public int hashCode() {

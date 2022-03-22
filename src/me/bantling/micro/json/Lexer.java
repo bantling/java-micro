@@ -27,23 +27,23 @@ import me.bantling.micro.util.Unicode;
  * See Parser for iterating legal tokens only in a legal order.
  */
 public final class Lexer implements Iterator<LexerToken>, Iterable<LexerToken> {
-	static final RuntimeException INCOMPLETE_STRING               = new RuntimeException("Unexpected EOF: incomplete string");
-	static final RuntimeException NO_ASCII_CONTROL                = new RuntimeException("Strings cannot contain ASCII control characters");
-	static final RuntimeException INCOMPLETE_BACKSLASH_ESCAPE     = new RuntimeException("Unexpected EOF: incomplete backslash escape");
-	static final RuntimeException INCOMPLETE_UNICODE_ESCAPE       = new RuntimeException("Unexpected EOF: incomplete unicode escape");
-	static final String           INVALID_UNICODE_ESCAPE_FMT      = "Invalid unicode escape: \\u%s";
-    static final String           INVALID_HIGH_SURROGATE_ONLY_FMT = "Invalid unicode escape: \\u%s is a valid UTF-16 high surrogate, but it must be followed by another \\u escape this is a valid UTF-16 low surrogate";
-    static final String           INVALID_SURROGATE_ESCAPE_FMT    = "Invalid unicode escape: \\u%s is a valid UTF-16 high surrogate, but \\u%s is not a valid UTF-16 low surrogate";
-	static final String           INVALID_BACKSLASH_ESCAPE_FMT    = "Invalid backslash escape: \\%s";
+	static final String INCOMPLETE_STRING               = "Unexpected EOF: incomplete string";
+	static final String NO_ASCII_CONTROL                = "Strings cannot contain ASCII control characters";
+	static final String INCOMPLETE_BACKSLASH_ESCAPE     = "Unexpected EOF: incomplete backslash escape";
+	static final String INCOMPLETE_UNICODE_ESCAPE       = "Unexpected EOF: incomplete unicode escape";
+	static final String INVALID_UNICODE_ESCAPE_FMT      = "Invalid unicode escape: \\u%s";
+    static final String INVALID_HIGH_SURROGATE_ONLY_FMT = "Invalid unicode escape: \\u%s is a valid UTF-16 high surrogate, but it must be followed by another \\u escape this is a valid UTF-16 low surrogate";
+    static final String INVALID_SURROGATE_ESCAPE_FMT    = "Invalid unicode escape: \\u%s is a valid UTF-16 high surrogate, but \\u%s is not a valid UTF-16 low surrogate";
+	static final String INVALID_BACKSLASH_ESCAPE_FMT    = "Invalid backslash escape: \\%s";
 	
-	static final RuntimeException INCOMPLETE_NEGATIVE_NUMBER      = new RuntimeException("Unexpected EOF reading a negative number");
-	static final RuntimeException MINUS_SIGN_REQUIRES_DIGIT       = new RuntimeException("The minus sign for a number must be followed by a digit");
-	static final RuntimeException DECIMAL_POINT_REQUIRES_DIGIT    = new RuntimeException("The decimal point in a number must be followed by a digit");
-	static final RuntimeException EXPONENT_REQUIRES_DIGIT         = new RuntimeException("The exponent character in a number must be followed by an optional sign and one or more digits");
+	static final String INCOMPLETE_NEGATIVE_NUMBER      = "Unexpected EOF reading a negative number";
+	static final String MINUS_SIGN_REQUIRES_DIGIT       = "The minus sign for a number must be followed by a digit";
+	static final String DECIMAL_POINT_REQUIRES_DIGIT    = "The decimal point in a number must be followed by a digit";
+	static final String EXPONENT_REQUIRES_DIGIT         = "The exponent character in a number must be followed by an optional sign and one or more digits";
 
-	static final RuntimeException BOOLEAN_SPELLED_TRUE_OR_FALSE   = new RuntimeException("A boolean value must be spelled true or false in lower case");
-	static final RuntimeException NULL_SPELLING                   = new RuntimeException("A null value must be spelled null in lower case");
-	static final String           INVALID_CHARACTER_FMT           = "Invalid JSON input: character %s at position %s";
+	static final String BOOLEAN_SPELLED_TRUE_OR_FALSE   = "A boolean value must be spelled true or false in lower case";
+	static final String NULL_SPELLING                   = "A null value must be spelled null in lower case";
+	static final String INVALID_CHARACTER_FMT           = "Invalid JSON input: character %s at position %s";
 	
 	// Underlying Reader
 	private final PushbackReader reader;
@@ -105,11 +105,11 @@ public final class Lexer implements Iterator<LexerToken>, Iterable<LexerToken> {
 		// Initial " already swallowed, collect all before next "
 		for (int theChar = nextCodePoint(); theChar != '"'; theChar = nextCodePoint()) {
 			if (theChar < 0) {
-				throw INCOMPLETE_STRING;
+				throw new RuntimeException(INCOMPLETE_STRING);
 			}
 			
 			if (theChar < ' ') {
-				throw NO_ASCII_CONTROL;
+				throw new RuntimeException(NO_ASCII_CONTROL);
 			}
 			
 			// Can't have backslash by itself, or control chars
@@ -117,7 +117,7 @@ public final class Lexer implements Iterator<LexerToken>, Iterable<LexerToken> {
 				// Need next char has to be ", \, /, b, f, n, r, t, u
 				theChar = nextCodePoint();
 				if (theChar < 0) {
-					throw INCOMPLETE_BACKSLASH_ESCAPE;
+					throw new RuntimeException(INCOMPLETE_BACKSLASH_ESCAPE);
 				}
 				
 				switch (theChar) {
@@ -160,7 +160,7 @@ public final class Lexer implements Iterator<LexerToken>, Iterable<LexerToken> {
 						for (int i = 1; i <= 4; i++) {
 							theChar = nextCodePoint();
 							if (theChar < 0) {
-								throw INCOMPLETE_UNICODE_ESCAPE;
+								throw new RuntimeException(INCOMPLETE_UNICODE_ESCAPE);
 							}
 							high.appendCodePoint(theChar);
 						}
@@ -191,7 +191,7 @@ public final class Lexer implements Iterator<LexerToken>, Iterable<LexerToken> {
 	                        for (int i = 1; i <= 4; i++) {
 	                            theChar = nextCodePoint();
 	                            if (theChar < 0) {
-	                                throw INCOMPLETE_UNICODE_ESCAPE;
+	                                throw new RuntimeException(INCOMPLETE_UNICODE_ESCAPE);
 	                            }
 	                            low.appendCodePoint(theChar);
 	                        }
@@ -245,11 +245,11 @@ public final class Lexer implements Iterator<LexerToken>, Iterable<LexerToken> {
 			
 			theChar = nextCodePoint();
 			if (theChar < 0) {
-				throw INCOMPLETE_NEGATIVE_NUMBER;
+				throw new RuntimeException(INCOMPLETE_NEGATIVE_NUMBER);
 			}
 			
 			if ((theChar < '0') || (theChar > '9')) {
-				throw MINUS_SIGN_REQUIRES_DIGIT;
+				throw new RuntimeException(MINUS_SIGN_REQUIRES_DIGIT);
 			}
 			sb.append((char)(theChar));
 			integer.append((char)(theChar));
@@ -279,7 +279,7 @@ public final class Lexer implements Iterator<LexerToken>, Iterable<LexerToken> {
 				// At least one digit is required
 				theChar = nextCodePoint();
 				if ((theChar < '0') || (theChar > '9')) {
-					throw DECIMAL_POINT_REQUIRES_DIGIT;
+					throw new RuntimeException(DECIMAL_POINT_REQUIRES_DIGIT);
 				}
 				sb.append((char)(theChar));
 				fractional.append((char)(theChar));
@@ -312,7 +312,7 @@ public final class Lexer implements Iterator<LexerToken>, Iterable<LexerToken> {
 				
 				// At least one digit is required after optional sign
 				if ((theChar < '0') || (theChar > '9')) {
-					throw EXPONENT_REQUIRES_DIGIT;
+					throw new RuntimeException(EXPONENT_REQUIRES_DIGIT);
 				}
 				sb.append((char)(theChar));
 				exponent.append((char)(theChar));
@@ -365,7 +365,7 @@ public final class Lexer implements Iterator<LexerToken>, Iterable<LexerToken> {
 		}
 		
 		if (result == null) {
-			throw BOOLEAN_SPELLED_TRUE_OR_FALSE;
+			throw new RuntimeException(BOOLEAN_SPELLED_TRUE_OR_FALSE);
 		}
 		
 		return result;
@@ -383,7 +383,7 @@ public final class Lexer implements Iterator<LexerToken>, Iterable<LexerToken> {
 		}
 		
 		if (result == null) {
-			throw NULL_SPELLING;
+			throw new RuntimeException(NULL_SPELLING);
 		}
 		
 		return result;

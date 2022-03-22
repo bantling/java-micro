@@ -10,7 +10,7 @@ public class PrimitiveMappings {
     /**
      * Map primitives types to their wrapper types
      */
-    public static final Map<Class<?>, Class<?>> PRIMITIVE_TO_WRAPPER = Collections.mapOf(
+    public static final Map<Class<?>, Class<?>> PRIMITIVE_TO_WRAPPER = Collections.map(
         new HashMap<Class<?>, Class<?>>()
     ).add(
         void.class,    Void.class,
@@ -27,7 +27,7 @@ public class PrimitiveMappings {
     /**
      * Map wrappers types to their primitive types
      */
-    public static final Map<Class<?>, Class<?>> WRAPPER_TO_PRIMITIVE = Collections.mapOf(
+    public static final Map<Class<?>, Class<?>> WRAPPER_TO_PRIMITIVE = Collections.map(
         new HashMap<Class<?>, Class<?>>()
     ).
     add(
@@ -86,7 +86,7 @@ public class PrimitiveMappings {
     /**
      * Map primitives types to their zero values
      */
-    public static final Map<Class<?>, Object> PRIMITIVE_TO_ZERO_VALUE = Collections.mapOf(
+    public static final Map<Class<?>, Object> PRIMITIVE_TO_ZERO_VALUE = Collections.map(
         new HashMap<Class<?>, Object>()
     ).
     add(
@@ -105,7 +105,7 @@ public class PrimitiveMappings {
     /**
      * Map primitives wrapper types to their zero values, and String to ""
      */
-    public static final Map<Class<?>, Object> WRAPPER_TO_ZERO_VALUE = Collections.mapOf(
+    public static final Map<Class<?>, Object> WRAPPER_TO_ZERO_VALUE = Collections.map(
         new HashMap<Class<?>, Object>()
     ).
     add(
@@ -125,7 +125,7 @@ public class PrimitiveMappings {
     /**
      * Map primitives and their wrapper types to their zero values, and String to ""
      */
-    public static final Map<Class<?>, Object> PRIMITIVE_AND_WRAPPER_TO_ZERO_VALUE = Collections.mapOf(
+    public static final Map<Class<?>, Object> PRIMITIVE_AND_WRAPPER_TO_ZERO_VALUE = Collections.map(
         new HashMap<Class<?>, Object>()
     ).
     addAll(PRIMITIVE_TO_ZERO_VALUE).

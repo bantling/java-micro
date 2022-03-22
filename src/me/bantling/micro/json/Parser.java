@@ -15,15 +15,15 @@ import java.util.stream.StreamSupport;
 // The parser ensures the tokens arrive in a correct order for a JSON document.
 // The result of the parse is a JSONValue that is either a document or an array.
 public class Parser implements Iterator<JSONValue>, Iterable<JSONValue> {
-	private static final RuntimeException START_BRACE_OR_BRACKET    = new RuntimeException("A JSON document must be begin with a curly brace or opening square bracket");
-	private static final RuntimeException OBJECT_FIRST_KEY          = new RuntimeException("A JSON object must a string key or closing brace after opening brace");
-	private static final RuntimeException OBJECT_KEY_COLON          = new RuntimeException("A JSON object key name must be followed by a colon");
-	private static final RuntimeException OBJECT_KEY_COLON_VALUE    = new RuntimeException("A JSON object key name and colon must be followed by a value");
-	private static final RuntimeException OBJECT_VALUE_COMMA_BRACE  = new RuntimeException("A JSON object value must be followed by a comma or closing brace");
-	private static final RuntimeException OBJECT_COMMA_KEY          = new RuntimeException("A JSON object cannot have a trailing comma after the last key value pair");
-	private static final RuntimeException ARRAY_VALUE_OR_BRACKET    = new RuntimeException("A JSON array opening square bracket must be followed by a value or closing square bracket");
-	private static final RuntimeException ARRAY_COMMA_OR_BRACKET    = new RuntimeException("A JSON array element must be followed by a comma or closing square bracket");
-	private static final RuntimeException ARRAY_COMMA_VALUE         = new RuntimeException("A JSON array cannot have a trailing comma after the last value");
+	private static final String START_BRACE_OR_BRACKET    = "A JSON document must be begin with a curly brace or opening square bracket";
+	private static final String OBJECT_FIRST_KEY          = "A JSON object must a string key or closing brace after opening brace";
+	private static final String OBJECT_KEY_COLON          = "A JSON object key name must be followed by a colon";
+	private static final String OBJECT_KEY_COLON_VALUE    = "A JSON object key name and colon must be followed by a value";
+	private static final String OBJECT_VALUE_COMMA_BRACE  = "A JSON object value must be followed by a comma or closing brace";
+	private static final String OBJECT_COMMA_KEY          = "A JSON object cannot have a trailing comma after the last key value pair";
+	private static final String ARRAY_VALUE_OR_BRACKET    = "A JSON array opening square bracket must be followed by a value or closing square bracket";
+	private static final String ARRAY_COMMA_OR_BRACKET    = "A JSON array element must be followed by a comma or closing square bracket";
+	private static final String ARRAY_COMMA_VALUE         = "A JSON array cannot have a trailing comma after the last value";
 	
 	private enum State {
 		START,
@@ -71,7 +71,7 @@ public class Parser implements Iterator<JSONValue>, Iterable<JSONValue> {
 	 * If peek is true, the returned token is retained for the next call to expect, without invoking the lexer.
 	 */
 	private LexerToken expect(
-		final RuntimeException error,
+		final String error,
 		final LexerToken.Type... expectedTypes
 	) {
 		// Return peeked token from last call, or lex the next one
@@ -87,12 +87,12 @@ public class Parser implements Iterator<JSONValue>, Iterable<JSONValue> {
 		}
 		
 		// Die if no expected token type is found
-		throw error;
+		throw new RuntimeException(error);
 	}
 	
 	// parseAnyValue parses any value
 	private JSONValue parseAnyValue(
-		final RuntimeException error
+		final String error
 	) {
 		final LexerToken firstToken = expect(
 			error,
