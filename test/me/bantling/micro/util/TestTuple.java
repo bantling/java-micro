@@ -4,10 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Objects;
 
 import org.junit.jupiter.api.Test;
@@ -33,140 +30,21 @@ import me.bantling.micro.util.Tuple.UpToThreeOf;
 import me.bantling.micro.util.Tuple.UpToTwo;
 import me.bantling.micro.util.Tuple.UpToTwoOf;
 
-@SuppressWarnings({ "static-method", "boxing" })
+@SuppressWarnings({ "static-method", "boxing", "static-access"})
 public class TestTuple {
-    @Test
-    public void tuple() {
-        try {
-            final Constructor<?> cons = Tuple.class.getDeclaredConstructor();
-            cons.setAccessible(true);
-            cons.newInstance();
-            fail("Should not be able to construct");
-        } catch (final Throwable t) {
-            assertTrue(t instanceof InvocationTargetException);
-            assertTrue(t.getCause() instanceof RuntimeException);
-            assertNull(t.getCause().getMessage());
-        }
-    }
-    
-//    @Test
-//    public void base() {
-//        // Equals method
-//        
-//        {
-//            final Base<Integer, Integer, Integer, Integer, Integer, Integer> base1a =
-//                new Base<>(0, null, null, null, null, null, null);
-//            final Base<Integer, Integer, Integer, Integer, Integer, Integer> base1b =
-//                    new Base<>(0, null, null, null, null, null, null);
-//            final Base<Integer, Integer, Integer, Integer, Integer, Integer> base2 =
-//                    new Base<>(1, null, null, null, null, null, null);
-//            
-//            // ==
-//            assertEquals(base1a, base1a);
-//            // != && instance && count == 0
-//            assertEquals(base1a, base1b);
-//            // != && !instance
-//            assertNotEquals(base1a, "");
-//             != && instance && count != 0
-//            assertNotEquals(base1a, base2);
-//        }
-//        
-//        {
-//            // != && instance && count == 1 && t == t
-//            assertEquals(
-//                new Base<>(1, "", null, null, null, null, null),
-//                new Base<>(1, "", null, null, null, null, null)
-//            );
-//
-//            // != && instance && count == 1 && t != t
-//            assertNotEquals(
-//                new Base<>(1, "",   null, null, null, null, null),
-//                new Base<>(1, null, null, null, null, null, null)
-//            );
-//        }
-//        
-//        {
-//            // != && instance && count == 2 && u == u
-//            assertEquals(
-//                new Base<>(2, "", "", null, null, null, null),
-//                new Base<>(2, "", "", null, null, null, null)
-//            );
-//
-//            // != && instance && count == 2 && u != u
-//            assertNotEquals(
-//                new Base<>(2, "", "",   null, null, null, null),
-//                new Base<>(2, "", null, null, null, null, null)
-//            );
-//        }
-//        
-//        {
-//            // != && instance && count == 3 && v === v
-//            assertEquals(
-//                new Base<>(3, "", "", "", null, null, null),
-//                new Base<>(3, "", "", "", null, null, null)
-//            );
-//
-//            // != && instance && count == 3 && v != v
-//            assertNotEquals(
-//                new Base<>(3, "", "", "",   null, null, null),
-//                new Base<>(3, "", "", null, null, null, null)
-//            );
-//        }
-//        
-//        {
-//            // != && instance && count == 4 && w === w
-//            assertEquals(
-//                new Base<>(4, "", "", "", "", null, null),
-//                new Base<>(4, "", "", "", "", null, null)
-//            );
-//
-//            // != && instance && count == 4 && w != w
-//            assertNotEquals(
-//                new Base<>(4, "", "", "", "",   null, null),
-//                new Base<>(4, "", "", "", null, null, null)
-//            );
-//        }
-//        
-//        {
-//            // != && instance && count == 5 && x == x
-//            assertEquals(
-//                new Base<>(5, "", "", "", "", "", null),
-//                new Base<>(5, "", "", "", "", "", null)
-//            );
-//
-//            // != && instance && count == 5 && x != x
-//            assertNotEquals(
-//                new Base<>(5, "", "", "", "", "",   null),
-//                new Base<>(5, "", "", "", "", null, null)
-//            );
-//        }
-//        
-//        {
-//            // != && instance && count == 6 && y == y
-//            assertEquals(
-//                new Base<>(6, "", "", "", "", "", ""),
-//                new Base<>(6, "", "", "", "", "", "")
-//            );
-//
-//            // != && instance && count == 6 && y != y
-//            assertNotEquals(
-//                new Base<>(6, "", "", "", "", "", ""  ),
-//                new Base<>(6, "", "", "", "", "", null)
-//            );
-//        }
-//    }
     
     @Test
     public void two() {
-        final Two<String, Integer> t = Tuple.of("abc", 1);
+        final Tuple tpl = new Tuple();
+        final Two<String, Integer> t = tpl.of("abc", 1);
 
         assertTrue(Two.class == t.getClass());
         assertEquals(Objects.hash("abc", 1), t.hashCode());
         
         assertEquals(t, t);
-        assertEquals(t, Tuple.of("abc", 1));
-        assertNotEquals(t, Tuple.of(1, "abc"));
-        assertNotEquals(t, Tuple.of("abc", 2));
+        assertEquals(t, tpl.of("abc", 1));
+        assertNotEquals(t, tpl.of(1, "abc"));
+        assertNotEquals(t, tpl.of("abc", 2));
         assertNotEquals(t, "");
         
         assertEquals("(abc,1)", t.toString());
@@ -179,14 +57,15 @@ public class TestTuple {
         assertNull(t.x);
         assertNull(t.y);
 
-        final Two<Integer, Integer> tt = Tuple.ofNullable(null, 1);
+        final Two<Integer, Integer> tt = tpl.ofNullable(null, 1);
         assertTrue(Two.class == tt.getClass());
         assertEquals("(null,1)", tt.toString());
     }
     
     @Test
     public void twoOf() {
-        final TwoOf<Integer> t = Tuple.ofSame(1, 2);
+        final Tuple.Same same = new Tuple.Same();
+        final TwoOf<Integer> t = same.of(1, 2);
         
         assertEquals(Objects.hash(1, 2), t.hashCode());
         
@@ -206,20 +85,22 @@ public class TestTuple {
         assertNull(t.x);
         assertNull(t.y);
 
-        final TwoOf<Integer> tt = Tuple.ofSameNullable(null, 1);
+        final TwoOf<Integer> tt = same.ofNullable(null, 1);
         assertEquals("(null,1)", tt.toString());
     }
     
     @Test
     public void upToTwo() {
+        final Tuple.UpTo upto = new Tuple.UpTo();
+        
         {
-            final UpToTwo<String, Integer> t = Tuple.upToTwo();
+            final UpToTwo<String, Integer> t = upto.two();
             
             assertEquals(1, t.hashCode());
             
             assertEquals(t, t);
-            assertEquals(t, Tuple.upToTwo());
-            assertNotEquals(t, Tuple.upToTwo(1));
+            assertEquals(t, upto.two());
+            assertNotEquals(t, upto.two(1));
             assertNotEquals(t, "");
             
             assertEquals("()", t.toString());
@@ -234,13 +115,13 @@ public class TestTuple {
         }
         
         {
-            final UpToTwo<String, Integer> t = Tuple.upToTwo("abc");
+            final UpToTwo<String, Integer> t = upto.two("abc");
             
             assertEquals(Objects.hash("abc"), t.hashCode());
             
             assertEquals(t, t);
-            assertEquals(t, Tuple.upToTwo("abc"));
-            assertNotEquals(t, Tuple.upToTwo(1));
+            assertEquals(t, upto.two("abc"));
+            assertNotEquals(t, upto.two(1));
             assertNotEquals(t, "");
             
             assertEquals("(abc)", t.toString());
@@ -253,13 +134,13 @@ public class TestTuple {
             assertNull(t.x);
             assertNull(t.y);
 
-            final UpToTwo<Integer, Integer> tt = Tuple.upToTwoNullable(null);
+            final UpToTwo<Integer, Integer> tt = upto.twoNullable(null);
             assertTrue(UpToTwo.class == tt.getClass());
             assertEquals("(null)", tt.toString());
         }
         
         {
-            final UpToTwo<String, Integer> t = Tuple.upToTwo("abc", 1);
+            final UpToTwo<String, Integer> t = upto.two("abc", 1);
             
             assertEquals(Objects.hash("abc", 1), t.hashCode());
             
@@ -279,7 +160,7 @@ public class TestTuple {
             assertNull(t.x);
             assertNull(t.y);
 
-            final UpToTwo<Integer, Integer> tt = Tuple.upToTwoNullable(null, 1);
+            final UpToTwo<Integer, Integer> tt = upto.twoNullable(null, 1);
             assertTrue(UpToTwo.class == tt.getClass());
             assertEquals("(null,1)", tt.toString());
         }
@@ -287,14 +168,16 @@ public class TestTuple {
     
     @Test
     public void upToTwoOf() {
+        final Tuple.UpTo upto = new Tuple.UpTo();
+        final Tuple.UpToSame uptoSame = new Tuple.UpToSame();
         {
-            final UpToTwoOf<Integer> t = Tuple.upToTwoOf();
+            final UpToTwoOf<Integer> t = uptoSame.two();
             
             assertEquals(1, t.hashCode());
             
             assertEquals(t, t);
-            assertEquals(t, Tuple.upToTwo());
-            assertNotEquals(t, Tuple.upToTwo(1));
+            assertEquals(t, upto.two());
+            assertNotEquals(t, upto.two(1));
             
             assertEquals("()", t.toString());
             
@@ -308,13 +191,13 @@ public class TestTuple {
         }
         
         {
-            final UpToTwoOf<Integer> t = Tuple.upToTwoOf(1);
+            final UpToTwoOf<Integer> t = uptoSame.two(1);
             
             assertEquals(Objects.hash(1), t.hashCode());
             
             assertEquals(t, t);
-            assertEquals(t, Tuple.upToTwo(1));
-            assertNotEquals(t, Tuple.upToTwo(2));
+            assertEquals(t, upto.two(1));
+            assertNotEquals(t, upto.two(2));
             
             assertEquals("(1)", t.toString());
 
@@ -326,12 +209,12 @@ public class TestTuple {
             assertNull(t.x);
             assertNull(t.y);
 
-            final UpToTwoOf<Integer> tt = Tuple.upToTwoOfNullable(null);
+            final UpToTwoOf<Integer> tt = uptoSame.twoNullable(null);
             assertEquals("(null)", tt.toString());
         }
         
         {
-            final UpToTwoOf<Integer> t = Tuple.upToTwoOf(1, 2);
+            final UpToTwoOf<Integer> t = uptoSame.two(1, 2);
             
             assertEquals(Objects.hash(1, 2), t.hashCode());
             
@@ -350,7 +233,7 @@ public class TestTuple {
             assertNull(t.x);
             assertNull(t.y);
 
-            final UpToTwoOf<Integer> tt = Tuple.upToTwoOfNullable(null, 1);
+            final UpToTwoOf<Integer> tt = uptoSame.twoNullable(null, 1);
             assertEquals("(null,1)", tt.toString());
         }
     }
@@ -383,7 +266,8 @@ public class TestTuple {
     
     @Test
     public void threeOf() {
-        final ThreeOf<Integer> t = Tuple.ofSame(1, 2, 3);
+        final Tuple.Same same = new Tuple.Same();
+        final ThreeOf<Integer> t = same.of(1, 2, 3);
         
         assertEquals(Objects.hash(1, 2, 3), t.hashCode());
         
@@ -402,20 +286,21 @@ public class TestTuple {
         assertNull(t.x);
         assertNull(t.y);
         
-        final ThreeOf<Integer> tt = Tuple.ofSameNullable(null, 1, 2);
+        final ThreeOf<Integer> tt = same.ofNullable(null, 1, 2);
         assertEquals("(null,1,2)", tt.toString());
     }
     
     @Test
     public void upToThree() {
+        final Tuple.UpTo upto = new Tuple.UpTo();
         {
-            final UpToThree<String, Integer, String> t = Tuple.upToThree();
+            final UpToThree<String, Integer, String> t = upto.three();
             
             assertEquals(1, t.hashCode());
             
             assertEquals(t, t);
-            assertEquals(t, Tuple.upToTwo());
-            assertNotEquals(t, Tuple.upToTwo("abc"));
+            assertEquals(t, upto.two());
+            assertNotEquals(t, upto.two("abc"));
             
             assertEquals("()", t.toString());
 
@@ -429,12 +314,12 @@ public class TestTuple {
         }
         
         {
-            final UpToThree<String, Integer, String> t = Tuple.upToThree("abc");
+            final UpToThree<String, Integer, String> t = upto.three("abc");
             assertEquals(Objects.hash("abc"), t.hashCode());
             
             assertEquals(t, t);
-            assertEquals(t, Tuple.upToTwo("abc"));
-            assertNotEquals(t, Tuple.upToTwo(1));
+            assertEquals(t, upto.two("abc"));
+            assertNotEquals(t, upto.two(1));
             
             assertEquals("(abc)", t.toString());
 
@@ -446,13 +331,13 @@ public class TestTuple {
             assertNull(t.x);
             assertNull(t.y);
             
-            final UpToThree<Integer, Integer, Integer> tt = Tuple.upToThreeNullable(null);
+            final UpToThree<Integer, Integer, Integer> tt = upto.threeNullable(null);
             assertTrue(UpToThree.class == tt.getClass());
             assertEquals("(null)", tt.toString());
         }
         
         {
-            final UpToThree<String, Integer, String> t = Tuple.upToThree("abc", 1);
+            final UpToThree<String, Integer, String> t = upto.three("abc", 1);
             
             assertEquals(Objects.hash("abc", 1), t.hashCode());
             
@@ -471,13 +356,13 @@ public class TestTuple {
             assertNull(t.x);
             assertNull(t.y);
             
-            final UpToThree<Integer, Integer, Integer> tt = Tuple.upToThreeNullable(null, 1);
+            final UpToThree<Integer, Integer, Integer> tt = upto.threeNullable(null, 1);
             assertTrue(UpToThree.class == tt.getClass());
             assertEquals("(null,1)", tt.toString());
         }
         
         {
-            final UpToThree<String, Integer, String> t = Tuple.upToThree("abc", 1, "def");
+            final UpToThree<String, Integer, String> t = upto.three("abc", 1, "def");
             
             assertEquals(Objects.hash("abc", 1, "def"), t.hashCode());
             
@@ -496,7 +381,7 @@ public class TestTuple {
             assertNull(t.x);
             assertNull(t.y);
             
-            final UpToThree<Integer, Integer, Integer> tt = Tuple.upToThreeNullable(null, 1, 2);
+            final UpToThree<Integer, Integer, Integer> tt = upto.threeNullable(null, 1, 2);
             assertTrue(UpToThree.class == tt.getClass());
             assertEquals("(null,1,2)", tt.toString());
         }
@@ -504,14 +389,16 @@ public class TestTuple {
     
     @Test
     public void upToThreeOf() {
+        final Tuple.UpTo upto = new Tuple.UpTo();
+        final Tuple.UpToSame uptoSame = new Tuple.UpToSame();
         {
-            final UpToThreeOf<Integer> t = Tuple.upToThreeOf();
+            final UpToThreeOf<Integer> t = uptoSame.three();
             
             assertEquals(1, t.hashCode());
             
             assertEquals(t, t);
-            assertEquals(t, Tuple.upToTwo());
-            assertNotEquals(t, Tuple.upToTwo(1));
+            assertEquals(t, upto.two());
+            assertNotEquals(t, upto.two(1));
             
             assertEquals("()", t.toString());
             
@@ -525,13 +412,13 @@ public class TestTuple {
         }
         
         {
-            final UpToThreeOf<Integer> t = Tuple.upToThreeOf(1);
+            final UpToThreeOf<Integer> t = uptoSame.three(1);
             
             assertEquals(Objects.hash(1), t.hashCode());
             
             assertEquals(t, t);
-            assertEquals(t, Tuple.upToTwo(1));
-            assertNotEquals(t, Tuple.upToTwo(2));
+            assertEquals(t, upto.two(1));
+            assertNotEquals(t, upto.two(2));
             
             assertEquals("(1)", t.toString());
 
@@ -543,12 +430,12 @@ public class TestTuple {
             assertNull(t.x);
             assertNull(t.y);
             
-            final UpToThreeOf<Integer> tt = Tuple.upToThreeOfNullable(null);
+            final UpToThreeOf<Integer> tt = uptoSame.threeNullable(null);
             assertEquals("(null)", tt.toString());
         }
         
         {
-            final UpToThreeOf<Integer> t = Tuple.upToThreeOf(1, 2);
+            final UpToThreeOf<Integer> t = uptoSame.three(1, 2);
             
             assertEquals(Objects.hash(1, 2), t.hashCode());
             
@@ -567,11 +454,11 @@ public class TestTuple {
             assertNull(t.x);
             assertNull(t.y);
             
-            assertEquals("(null,1)", Tuple.upToThreeOfNullable(null, 1).toString());
+            assertEquals("(null,1)", uptoSame.threeNullable(null, 1).toString());
         }
         
         {
-            final UpToThreeOf<Integer> t = Tuple.upToThreeOf(1, 2, 3);
+            final UpToThreeOf<Integer> t = uptoSame.three(1, 2, 3);
             
             assertEquals(Objects.hash(1, 2, 3), t.hashCode());
             
@@ -590,7 +477,7 @@ public class TestTuple {
             assertNull(t.x);
             assertNull(t.y);
             
-            assertEquals("(null,1,2)", Tuple.upToThreeOfNullable(null, 1, 2).toString());
+            assertEquals("(null,1,2)", uptoSame.threeNullable(null, 1, 2).toString());
         }
     }
     
@@ -622,7 +509,8 @@ public class TestTuple {
     
     @Test
     public void fourOf() {
-        final FourOf<Integer> t = Tuple.ofSame(1, 2, 3, 4);
+        final Tuple.Same same = new Tuple.Same();
+        final FourOf<Integer> t = same.of(1, 2, 3, 4);
         
         assertEquals(Objects.hash(1, 2, 3, 4), t.hashCode());
         
@@ -641,19 +529,20 @@ public class TestTuple {
         assertNull(t.x);
         assertNull(t.y);
         
-        assertEquals("(null,1,2,3)", Tuple.ofSameNullable(null,1,2,3).toString());
+        assertEquals("(null,1,2,3)", same.ofNullable(null,1,2,3).toString());
     }
     
     @Test
     public void upToFour() {
+        final Tuple.UpTo upto = new Tuple.UpTo();
         {
-            final UpToFour<String, Integer, String, Integer> t = Tuple.upToFour();
+            final UpToFour<String, Integer, String, Integer> t = upto.four();
             
             assertEquals(1, t.hashCode());
             
             assertEquals(t, t);
-            assertEquals(t, Tuple.upToTwo());
-            assertNotEquals(t, Tuple.upToTwo("abc"));
+            assertEquals(t, upto.two());
+            assertNotEquals(t, upto.two("abc"));
             
             assertEquals("()", t.toString());
 
@@ -667,13 +556,13 @@ public class TestTuple {
         }
         
         {
-            final UpToFour<String, Integer, String, Integer> t = Tuple.upToFour("abc");
+            final UpToFour<String, Integer, String, Integer> t = upto.four("abc");
             
             assertEquals(Objects.hash("abc"), t.hashCode());
             
             assertEquals(t, t);
-            assertEquals(t, Tuple.upToTwo("abc"));
-            assertNotEquals(t, Tuple.upToTwo(1));
+            assertEquals(t, upto.two("abc"));
+            assertNotEquals(t, upto.two(1));
             
             assertEquals("(abc)", t.toString());
 
@@ -685,13 +574,13 @@ public class TestTuple {
             assertNull(t.x);
             assertNull(t.y);
 
-            final UpToFour<Integer, Integer, Integer, Integer> tt = Tuple.upToFourNullable(null);
+            final UpToFour<Integer, Integer, Integer, Integer> tt = upto.fourNullable(null);
             assertTrue(UpToFour.class == tt.getClass());
             assertEquals("(null)", tt.toString());
         }
         
         {
-            final UpToFour<String, Integer, String, Integer> t = Tuple.upToFour("abc", 1);
+            final UpToFour<String, Integer, String, Integer> t = upto.four("abc", 1);
             
             assertEquals(Objects.hash("abc", 1), t.hashCode());
             
@@ -710,13 +599,13 @@ public class TestTuple {
             assertNull(t.x);
             assertNull(t.y);
 
-            final UpToFour<Integer, Integer, Integer, Integer> tt = Tuple.upToFourNullable(null, 1);
+            final UpToFour<Integer, Integer, Integer, Integer> tt = upto.fourNullable(null, 1);
             assertTrue(UpToFour.class == tt.getClass());
             assertEquals("(null,1)", tt.toString());
         }
         
         {
-            final UpToFour<String, Integer, String, Integer> t = Tuple.upToFour("abc", 1, "def");
+            final UpToFour<String, Integer, String, Integer> t = upto.four("abc", 1, "def");
             
             assertEquals(Objects.hash("abc", 1, "def"), t.hashCode());
             
@@ -735,13 +624,13 @@ public class TestTuple {
             assertNull(t.x);
             assertNull(t.y);
 
-            final UpToFour<Integer, Integer, Integer, Integer> tt = Tuple.upToFourNullable(null, 1, 2);
+            final UpToFour<Integer, Integer, Integer, Integer> tt = upto.fourNullable(null, 1, 2);
             assertTrue(UpToFour.class == tt.getClass());
             assertEquals("(null,1,2)", tt.toString());
         }
         
         {
-            final UpToFour<String, Integer, String, Integer> t = Tuple.upToFour("abc", 1, "def", 2);
+            final UpToFour<String, Integer, String, Integer> t = upto.four("abc", 1, "def", 2);
             
             assertEquals(Objects.hash("abc", 1, "def", 2), t.hashCode());
             
@@ -760,7 +649,7 @@ public class TestTuple {
             assertNull(t.x);
             assertNull(t.y);
 
-            final UpToFour<Integer, Integer, Integer, Integer> tt = Tuple.upToFourNullable(null, 1, 2, 3);
+            final UpToFour<Integer, Integer, Integer, Integer> tt = upto.fourNullable(null, 1, 2, 3);
             assertTrue(UpToFour.class == tt.getClass());
             assertEquals("(null,1,2,3)", tt.toString());
         }
@@ -768,14 +657,16 @@ public class TestTuple {
     
     @Test
     public void upToFourOf() {
+        final Tuple.UpTo upto = new Tuple.UpTo();
+        final Tuple.UpToSame uptoSame = new Tuple.UpToSame();
         {
-            final UpToFourOf<Integer> t = Tuple.upToFourOf();
+            final UpToFourOf<Integer> t = uptoSame.four();
             
             assertEquals(1, t.hashCode());
             
             assertEquals(t, t);
-            assertEquals(t, Tuple.upToTwo());
-            assertNotEquals(t, Tuple.upToTwo(1));
+            assertEquals(t, upto.two());
+            assertNotEquals(t, upto.two(1));
             
             assertEquals("()", t.toString());
 
@@ -789,13 +680,13 @@ public class TestTuple {
         }
         
         {
-            final UpToFourOf<Integer> t = Tuple.upToFourOf(1);
+            final UpToFourOf<Integer> t = uptoSame.four(1);
             
             assertEquals(Objects.hash(1), t.hashCode());
             
             assertEquals(t, t);
-            assertEquals(t, Tuple.upToTwo(1));
-            assertNotEquals(t, Tuple.upToTwo(2));
+            assertEquals(t, upto.two(1));
+            assertNotEquals(t, upto.two(2));
             
             assertEquals("(1)", t.toString());
 
@@ -807,11 +698,11 @@ public class TestTuple {
             assertNull(t.x);
             assertNull(t.y);
             
-            assertEquals("(null)", Tuple.upToFourOfNullable(null).toString());
+            assertEquals("(null)", uptoSame.fourNullable(null).toString());
         }
         
         {
-            final UpToFourOf<Integer> t = Tuple.upToFourOf(1, 2);
+            final UpToFourOf<Integer> t = uptoSame.four(1, 2);
             
             assertEquals(Objects.hash(1, 2), t.hashCode());
             
@@ -830,11 +721,11 @@ public class TestTuple {
             assertNull(t.x);
             assertNull(t.y);
             
-            assertEquals("(null,1)", Tuple.upToFourOfNullable(null, 1).toString());
+            assertEquals("(null,1)", uptoSame.fourNullable(null, 1).toString());
         }
         
         {
-            final UpToFourOf<Integer> t = Tuple.upToFourOf(1, 2, 3);
+            final UpToFourOf<Integer> t = uptoSame.four(1, 2, 3);
             
             assertEquals(Objects.hash(1, 2, 3), t.hashCode());
             
@@ -853,11 +744,11 @@ public class TestTuple {
             assertNull(t.x);
             assertNull(t.y);
             
-            assertEquals("(null,1,2)", Tuple.upToFourOfNullable(null, 1, 2).toString());
+            assertEquals("(null,1,2)", uptoSame.fourNullable(null, 1, 2).toString());
         }
         
         {
-            final UpToFourOf<Integer> t = Tuple.upToFourOf(1, 2, 3, 4);
+            final UpToFourOf<Integer> t = uptoSame.four(1, 2, 3, 4);
             
             assertEquals(Objects.hash(1, 2, 3, 4), t.hashCode());
             
@@ -876,7 +767,7 @@ public class TestTuple {
             assertNull(t.x);
             assertNull(t.y);
             
-            assertEquals("(null,1,2,3)", Tuple.upToFourOfNullable(null, 1, 2, 3).toString());
+            assertEquals("(null,1,2,3)", uptoSame.fourNullable(null, 1, 2, 3).toString());
         }
     }
     
@@ -908,7 +799,8 @@ public class TestTuple {
     
     @Test
     public void fiveOf() {
-        final FiveOf<Integer> t = Tuple.ofSame(1, 2, 3, 4, 5);
+        final Tuple.Same same = new Tuple.Same();
+        final FiveOf<Integer> t = same.of(1, 2, 3, 4, 5);
         
         assertEquals(Objects.hash(1, 2, 3, 4, 5), t.hashCode());
         
@@ -927,19 +819,20 @@ public class TestTuple {
         assertEquals(5, t.get5());
         assertNull(t.y);
         
-        assertEquals("(null,1,2,3,4)", Tuple.ofSameNullable(null, 1, 2, 3, 4).toString());
+        assertEquals("(null,1,2,3,4)", same.ofNullable(null, 1, 2, 3, 4).toString());
     }
     
     @Test
     public void upToFive() {
+        final Tuple.UpTo upto = new Tuple.UpTo();
         {
-            final UpToFive<String, Integer, String, Integer, String> t = Tuple.upToFive();
+            final UpToFive<String, Integer, String, Integer, String> t = upto.five();
             
             assertEquals(1, t.hashCode());
             
             assertEquals(t, t);
-            assertEquals(t, Tuple.upToTwo());
-            assertNotEquals(t, Tuple.upToTwo("abc"));
+            assertEquals(t, upto.two());
+            assertNotEquals(t, upto.two("abc"));
             
             assertEquals("()", t.toString());
 
@@ -955,13 +848,13 @@ public class TestTuple {
         }
         
         {
-            final UpToFive<String, Integer, String, Integer, String> t = Tuple.upToFive("abc");
+            final UpToFive<String, Integer, String, Integer, String> t = upto.five("abc");
             
             assertEquals(Objects.hash("abc"), t.hashCode());
             
             assertEquals(t, t);
-            assertEquals(t, Tuple.upToTwo("abc"));
-            assertNotEquals(t, Tuple.upToTwo(1));
+            assertEquals(t, upto.two("abc"));
+            assertNotEquals(t, upto.two(1));
             
             assertEquals("(abc)", t.toString());
 
@@ -973,13 +866,13 @@ public class TestTuple {
             assertNull(t.x);
             assertNull(t.y);
 
-            final UpToFive<Integer, Integer, Integer, Integer, Integer> tt = Tuple.upToFiveNullable(null);
+            final UpToFive<Integer, Integer, Integer, Integer, Integer> tt = upto.fiveNullable(null);
             assertTrue(UpToFive.class == tt.getClass());
             assertEquals("(null)", tt.toString());
         }
         
         {
-            final UpToFive<String, Integer, String, Integer, String> t = Tuple.upToFive("abc", 1);
+            final UpToFive<String, Integer, String, Integer, String> t = upto.five("abc", 1);
             
             assertEquals(Objects.hash("abc", 1), t.hashCode());
             
@@ -998,13 +891,13 @@ public class TestTuple {
             assertNull(t.x);
             assertNull(t.y);
 
-            final UpToFive<Integer, Integer, Integer, Integer, Integer> tt = Tuple.upToFiveNullable(null, 1);
+            final UpToFive<Integer, Integer, Integer, Integer, Integer> tt = upto.fiveNullable(null, 1);
             assertTrue(UpToFive.class == tt.getClass());
             assertEquals("(null,1)", tt.toString());
         }
         
         {
-            final UpToFive<String, Integer, String, Integer, String> t = Tuple.upToFive("abc", 1, "def");
+            final UpToFive<String, Integer, String, Integer, String> t = upto.five("abc", 1, "def");
             
             assertEquals(Objects.hash("abc", 1, "def"), t.hashCode());
             
@@ -1023,13 +916,13 @@ public class TestTuple {
             assertNull(t.x);
             assertNull(t.y);
 
-            final UpToFive<Integer, Integer, Integer, Integer, Integer> tt = Tuple.upToFiveNullable(null, 1, 2);
+            final UpToFive<Integer, Integer, Integer, Integer, Integer> tt = upto.fiveNullable(null, 1, 2);
             assertTrue(UpToFive.class == tt.getClass());
             assertEquals("(null,1,2)", tt.toString());
         }
         
         {
-            final UpToFive<String, Integer, String, Integer, String> t = Tuple.upToFive("abc", 1, "def", 2);
+            final UpToFive<String, Integer, String, Integer, String> t = upto.five("abc", 1, "def", 2);
             
             assertEquals(Objects.hash("abc", 1, "def", 2), t.hashCode());
             
@@ -1048,13 +941,13 @@ public class TestTuple {
             assertNull(t.x);
             assertNull(t.y);
 
-            final UpToFive<Integer, Integer, Integer, Integer, Integer> tt = Tuple.upToFiveNullable(null, 1, 2, 3);
+            final UpToFive<Integer, Integer, Integer, Integer, Integer> tt = upto.fiveNullable(null, 1, 2, 3);
             assertTrue(UpToFive.class == tt.getClass());
             assertEquals("(null,1,2,3)", tt.toString());
         }
         
         {
-            final UpToFive<String, Integer, String, Integer, String> t = Tuple.upToFive("abc", 1, "def", 2, "ghi");
+            final UpToFive<String, Integer, String, Integer, String> t = upto.five("abc", 1, "def", 2, "ghi");
             
             assertEquals(Objects.hash("abc", 1, "def", 2, "ghi"), t.hashCode());
             
@@ -1073,7 +966,7 @@ public class TestTuple {
             assertEquals("ghi", t.get5());
             assertNull(t.y);
 
-            final UpToFive<Integer, Integer, Integer, Integer, Integer> tt = Tuple.upToFiveNullable(null, 1, 2, 3, 4);
+            final UpToFive<Integer, Integer, Integer, Integer, Integer> tt = upto.fiveNullable(null, 1, 2, 3, 4);
             assertTrue(UpToFive.class == tt.getClass());
             assertEquals("(null,1,2,3,4)", tt.toString());
         }
@@ -1081,14 +974,16 @@ public class TestTuple {
     
     @Test
     public void upToFiveOf() {
+        final Tuple.UpTo upto = new Tuple.UpTo();
+        final Tuple.UpToSame uptoSame = new Tuple.UpToSame();
         {
-            final UpToFiveOf<Integer> t = Tuple.upToFiveOf();
+            final UpToFiveOf<Integer> t = uptoSame.five();
             
             assertEquals(1, t.hashCode());
             
             assertEquals(t, t);
-            assertEquals(t, Tuple.upToTwo());
-            assertNotEquals(t, Tuple.upToTwo(1));
+            assertEquals(t, upto.two());
+            assertNotEquals(t, upto.two(1));
             
             assertEquals("()", t.toString());
 
@@ -1102,13 +997,13 @@ public class TestTuple {
         }
         
         {
-            final UpToFiveOf<Integer> t = Tuple.upToFiveOf(1);
+            final UpToFiveOf<Integer> t = uptoSame.five(1);
             
             assertEquals(Objects.hash(1), t.hashCode());
             
             assertEquals(t, t);
-            assertEquals(t, Tuple.upToTwo(1));
-            assertNotEquals(t, Tuple.upToTwo(2));
+            assertEquals(t, upto.two(1));
+            assertNotEquals(t, upto.two(2));
             
             assertEquals("(1)", t.toString());
 
@@ -1120,11 +1015,11 @@ public class TestTuple {
             assertNull(t.x);
             assertNull(t.y);
             
-            assertEquals("(null)", Tuple.upToFiveOfNullable(null).toString());
+            assertEquals("(null)", uptoSame.fiveNullable(null).toString());
         }
         
         {
-            final UpToFiveOf<Integer> t = Tuple.upToFiveOf(1, 2);
+            final UpToFiveOf<Integer> t = uptoSame.five(1, 2);
             
             assertEquals(Objects.hash(1, 2), t.hashCode());
             
@@ -1143,11 +1038,11 @@ public class TestTuple {
             assertNull(t.x);
             assertNull(t.y);
             
-            assertEquals("(null,1)", Tuple.upToFiveOfNullable(null, 1).toString());
+            assertEquals("(null,1)", uptoSame.fiveNullable(null, 1).toString());
         }
         
         {
-            final UpToFiveOf<Integer> t = Tuple.upToFiveOf(1, 2, 3);
+            final UpToFiveOf<Integer> t = uptoSame.five(1, 2, 3);
             
             assertEquals(Objects.hash(1, 2, 3), t.hashCode());
             
@@ -1166,11 +1061,11 @@ public class TestTuple {
             assertNull(t.x);
             assertNull(t.y);
             
-            assertEquals("(null,1,2)", Tuple.upToFiveOfNullable(null, 1, 2).toString());
+            assertEquals("(null,1,2)", uptoSame.fiveNullable(null, 1, 2).toString());
         }
         
         {
-            final UpToFiveOf<Integer> t = Tuple.upToFiveOf(1, 2, 3, 4);
+            final UpToFiveOf<Integer> t = uptoSame.five(1, 2, 3, 4);
             
             assertEquals(Objects.hash(1, 2, 3, 4), t.hashCode());
             
@@ -1189,11 +1084,11 @@ public class TestTuple {
             assertNull(t.x);
             assertNull(t.y);
             
-            assertEquals("(null,1,2,3)", Tuple.upToFiveOfNullable(null, 1, 2, 3).toString());
+            assertEquals("(null,1,2,3)", uptoSame.fiveNullable(null, 1, 2, 3).toString());
         }
         
         {
-            final UpToFiveOf<Integer> t = Tuple.upToFiveOf(1, 2, 3, 4, 5);
+            final UpToFiveOf<Integer> t = uptoSame.five(1, 2, 3, 4, 5);
             
             assertEquals(Objects.hash(1, 2, 3, 4, 5), t.hashCode());
             
@@ -1212,7 +1107,7 @@ public class TestTuple {
             assertEquals(5, t.get5());
             assertNull(t.y);
             
-            assertEquals("(null,1,2,3,4)", Tuple.upToFiveOfNullable(null, 1, 2, 3, 4).toString());
+            assertEquals("(null,1,2,3,4)", uptoSame.fiveNullable(null, 1, 2, 3, 4).toString());
         }
     }
     
@@ -1244,7 +1139,8 @@ public class TestTuple {
     
     @Test
     public void sixOf() {
-        final SixOf<Integer> t = Tuple.ofSame(1, 2, 3, 4, 5, 6);
+        final Tuple.Same same = new Tuple.Same();
+        final SixOf<Integer> t = same.of(1, 2, 3, 4, 5, 6);
         
         assertEquals(Objects.hash(1, 2, 3, 4, 5, 6), t.hashCode());
         
@@ -1263,19 +1159,20 @@ public class TestTuple {
         assertEquals(5, t.get5());
         assertEquals(6, t.get6());
         
-        assertEquals("(null,1,2,3,4,5)", Tuple.ofSameNullable(null, 1, 2, 3, 4, 5).toString());
+        assertEquals("(null,1,2,3,4,5)", same.ofNullable(null, 1, 2, 3, 4, 5).toString());
     }
     
     @Test
     public void upToSix() {
+        final Tuple.UpTo upto = new Tuple.UpTo();
         {
-            final UpToSix<String, Integer, String, Integer, String, Integer> t = Tuple.upToSix();
+            final UpToSix<String, Integer, String, Integer, String, Integer> t = upto.six();
             
             assertEquals(1, t.hashCode());
             
             assertEquals(t, t);
-            assertEquals(t, Tuple.upToTwo());
-            assertNotEquals(t, Tuple.upToTwo("abc"));
+            assertEquals(t, upto.two());
+            assertNotEquals(t, upto.two("abc"));
             
             assertEquals("()", t.toString());
 
@@ -1289,13 +1186,13 @@ public class TestTuple {
         }
         
         {
-            final UpToSix<String, Integer, String, Integer, String, Integer> t = Tuple.upToSix("abc");
+            final UpToSix<String, Integer, String, Integer, String, Integer> t = upto.six("abc");
             
             assertEquals(Objects.hash("abc"), t.hashCode());
             
             assertEquals(t, t);
-            assertEquals(t, Tuple.upToTwo("abc"));
-            assertNotEquals(t, Tuple.upToTwo(1));
+            assertEquals(t, upto.two("abc"));
+            assertNotEquals(t, upto.two(1));
             
             assertEquals("(abc)", t.toString());
 
@@ -1307,13 +1204,13 @@ public class TestTuple {
             assertNull(t.x);
             assertNull(t.y);
 
-            final UpToSix<Integer, Integer, Integer, Integer, Integer, Integer> tt = Tuple.upToSixNullable(null);
+            final UpToSix<Integer, Integer, Integer, Integer, Integer, Integer> tt = upto.sixNullable(null);
             assertTrue(UpToSix.class == tt.getClass());
             assertEquals("(null)", tt.toString());
         }
         
         {
-            final UpToSix<String, Integer, String, Integer, String, Integer> t = Tuple.upToSix("abc", 1);
+            final UpToSix<String, Integer, String, Integer, String, Integer> t = upto.six("abc", 1);
             
             assertEquals(Objects.hash("abc", 1), t.hashCode());
             
@@ -1332,13 +1229,13 @@ public class TestTuple {
             assertNull(t.x);
             assertNull(t.y);
 
-            final UpToSix<Integer, Integer, Integer, Integer, Integer, Integer> tt = Tuple.upToSixNullable(null, 1);
+            final UpToSix<Integer, Integer, Integer, Integer, Integer, Integer> tt = upto.sixNullable(null, 1);
             assertTrue(UpToSix.class == tt.getClass());
             assertEquals("(null,1)", tt.toString());
         }
         
         {
-            final UpToSix<String, Integer, String, Integer, String, Integer> t = Tuple.upToSix("abc", 1, "def");
+            final UpToSix<String, Integer, String, Integer, String, Integer> t = upto.six("abc", 1, "def");
             
             assertEquals(Objects.hash("abc", 1, "def"), t.hashCode());
             
@@ -1357,13 +1254,13 @@ public class TestTuple {
             assertNull(t.x);
             assertNull(t.y);
 
-            final UpToSix<Integer, Integer, Integer, Integer, Integer, Integer> tt = Tuple.upToSixNullable(null, 1, 2);
+            final UpToSix<Integer, Integer, Integer, Integer, Integer, Integer> tt = upto.sixNullable(null, 1, 2);
             assertTrue(UpToSix.class == tt.getClass());
             assertEquals("(null,1,2)", tt.toString());
         }
         
         {
-            final UpToSix<String, Integer, String, Integer, String, Integer> t = Tuple.upToSix("abc", 1, "def", 2);
+            final UpToSix<String, Integer, String, Integer, String, Integer> t = upto.six("abc", 1, "def", 2);
             
             assertEquals(Objects.hash("abc", 1, "def", 2), t.hashCode());
             
@@ -1382,13 +1279,13 @@ public class TestTuple {
             assertNull(t.x);
             assertNull(t.y);
 
-            final UpToSix<Integer, Integer, Integer, Integer, Integer, Integer> tt = Tuple.upToSixNullable(null, 1, 2, 3);
+            final UpToSix<Integer, Integer, Integer, Integer, Integer, Integer> tt = upto.sixNullable(null, 1, 2, 3);
             assertTrue(UpToSix.class == tt.getClass());
             assertEquals("(null,1,2,3)", tt.toString());
         }
         
         {
-            final UpToSix<String, Integer, String, Integer, String, Integer> t = Tuple.upToSix("abc", 1, "def", 2, "ghi");
+            final UpToSix<String, Integer, String, Integer, String, Integer> t = upto.six("abc", 1, "def", 2, "ghi");
             
             assertEquals(Objects.hash("abc", 1, "def", 2, "ghi"), t.hashCode());
             
@@ -1407,13 +1304,13 @@ public class TestTuple {
             assertEquals("ghi", t.get5());
             assertNull(t.y);
 
-            final UpToSix<Integer, Integer, Integer, Integer, Integer, Integer> tt = Tuple.upToSixNullable(null, 1, 2, 3, 4);
+            final UpToSix<Integer, Integer, Integer, Integer, Integer, Integer> tt = upto.sixNullable(null, 1, 2, 3, 4);
             assertTrue(UpToSix.class == tt.getClass());
             assertEquals("(null,1,2,3,4)", tt.toString());
         }
         
         {
-            final UpToSix<String, Integer, String, Integer, String, Integer> t = Tuple.upToSix("abc", 1, "def", 2, "ghi", 3);
+            final UpToSix<String, Integer, String, Integer, String, Integer> t = upto.six("abc", 1, "def", 2, "ghi", 3);
             
             assertEquals(Objects.hash("abc", 1, "def", 2, "ghi", 3), t.hashCode());
             
@@ -1432,7 +1329,7 @@ public class TestTuple {
             assertEquals("ghi", t.get5());
             assertEquals(3, t.get6());
 
-            final UpToSix<Integer, Integer, Integer, Integer, Integer, Integer> tt = Tuple.upToSixNullable(null, 1, 2, 3, 4, 5);
+            final UpToSix<Integer, Integer, Integer, Integer, Integer, Integer> tt = upto.sixNullable(null, 1, 2, 3, 4, 5);
             assertTrue(UpToSix.class == tt.getClass());
             assertEquals("(null,1,2,3,4,5)", tt.toString());
         }
@@ -1440,14 +1337,16 @@ public class TestTuple {
     
     @Test
     public void upToSixOf() {
+        final Tuple.UpTo upto = new Tuple.UpTo();
+        final Tuple.UpToSame uptoSame = new Tuple.UpToSame();
         {
-            final UpToSixOf<Integer> t = Tuple.upToSixOf();
+            final UpToSixOf<Integer> t = uptoSame.six();
             
             assertEquals(1, t.hashCode());
             
             assertEquals(t, t);
-            assertEquals(t, Tuple.upToTwo());
-            assertNotEquals(t, Tuple.upToTwo(1));
+            assertEquals(t, upto.two());
+            assertNotEquals(t, upto.two(1));
             
             assertEquals("()", t.toString());
 
@@ -1461,13 +1360,13 @@ public class TestTuple {
         }
         
         {
-            final UpToSixOf<Integer> t = Tuple.upToSixOf(1);
+            final UpToSixOf<Integer> t = uptoSame.six(1);
             
             assertEquals(Objects.hash(1), t.hashCode());
             
             assertEquals(t, t);
-            assertEquals(t, Tuple.upToTwo(1));
-            assertNotEquals(t, Tuple.upToTwo(2));
+            assertEquals(t, upto.two(1));
+            assertNotEquals(t, upto.two(2));
             
             assertEquals("(1)", t.toString());
 
@@ -1479,11 +1378,11 @@ public class TestTuple {
             assertNull(t.x);
             assertNull(t.y);
             
-            assertEquals("(null)", Tuple.upToSixOfNullable(null).toString());
+            assertEquals("(null)", uptoSame.sixNullable(null).toString());
         }
         
         {
-            final UpToSixOf<Integer> t = Tuple.upToSixOf(1, 2);
+            final UpToSixOf<Integer> t = uptoSame.six(1, 2);
             
             assertEquals(Objects.hash(1, 2), t.hashCode());
             
@@ -1502,11 +1401,11 @@ public class TestTuple {
             assertNull(t.x);
             assertNull(t.y);
             
-            assertEquals("(null,1)", Tuple.upToSixOfNullable(null, 1).toString());
+            assertEquals("(null,1)", uptoSame.sixNullable(null, 1).toString());
         }
         
         {
-            final UpToSixOf<Integer> t = Tuple.upToSixOf(1, 2, 3);
+            final UpToSixOf<Integer> t = uptoSame.six(1, 2, 3);
             
             assertEquals(Objects.hash(1, 2, 3), t.hashCode());
             
@@ -1525,11 +1424,11 @@ public class TestTuple {
             assertNull(t.x);
             assertNull(t.y);
             
-            assertEquals("(null,1,2)", Tuple.upToSixOfNullable(null, 1, 2).toString());
+            assertEquals("(null,1,2)", uptoSame.sixNullable(null, 1, 2).toString());
         }
         
         {
-            final UpToSixOf<Integer> t = Tuple.upToSixOf(1, 2, 3, 4);
+            final UpToSixOf<Integer> t = uptoSame.six(1, 2, 3, 4);
             
             assertEquals(Objects.hash(1, 2, 3, 4), t.hashCode());
             
@@ -1548,11 +1447,11 @@ public class TestTuple {
             assertNull(t.x);
             assertNull(t.y);
             
-            assertEquals("(null,1,2,3)", Tuple.upToSixOfNullable(null, 1, 2, 3).toString());
+            assertEquals("(null,1,2,3)", uptoSame.sixNullable(null, 1, 2, 3).toString());
         }
         
         {
-            final UpToSixOf<Integer> t = Tuple.upToSixOf(1, 2, 3, 4, 5);
+            final UpToSixOf<Integer> t = uptoSame.six(1, 2, 3, 4, 5);
             
             assertEquals(Objects.hash(1, 2, 3, 4, 5), t.hashCode());
             
@@ -1571,11 +1470,11 @@ public class TestTuple {
             assertEquals(5, t.get5());
             assertNull(t.y);
             
-            assertEquals("(null,1,2,3,4)", Tuple.upToSixOfNullable(null, 1, 2, 3, 4).toString());
+            assertEquals("(null,1,2,3,4)", uptoSame.sixNullable(null, 1, 2, 3, 4).toString());
         }
         
         {
-            final UpToSixOf<Integer> t = Tuple.upToSixOf(1, 2, 3, 4, 5, 6);
+            final UpToSixOf<Integer> t = uptoSame.six(1, 2, 3, 4, 5, 6);
             
             assertEquals(Objects.hash(1, 2, 3, 4, 5, 6), t.hashCode());
             
@@ -1594,7 +1493,7 @@ public class TestTuple {
             assertEquals(5, t.get5());
             assertEquals(6, t.get6());
             
-            assertEquals("(null,1,2,3,4,5)", Tuple.upToSixOfNullable(null, 1, 2, 3, 4, 5).toString());
+            assertEquals("(null,1,2,3,4,5)", uptoSame.sixNullable(null, 1, 2, 3, 4, 5).toString());
         }
     }
 }

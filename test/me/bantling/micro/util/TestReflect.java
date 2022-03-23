@@ -10,7 +10,7 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
-@SuppressWarnings({ "static-method", "rawtypes" })
+@SuppressWarnings({ "static-method", "static-access", "rawtypes" })
 public class TestReflect {
     static class GAT1<T> {
         T[] array;
@@ -75,24 +75,26 @@ public class TestReflect {
     @Test
     public void resolveType() throws Throwable {
         // input, expected result
+        
+        final Tuple.Same same = new Tuple.Same();
         final List<Tuple.TwoOf<Type>> testCases = Collections.listOf(
-            Tuple.ofSame(int.class, int.class),
-            Tuple.ofSame(Integer.class, Integer.class),
-            Tuple.ofSame(GAT1.class.getDeclaredField("array").getGenericType(), Object[].class),
-            Tuple.ofSame(GAT2.class.getDeclaredField("array").getGenericType(), Number[].class),
-            Tuple.ofSame(GAT3.class.getDeclaredField("array").getGenericType(), Set[].class),
-            Tuple.ofSame(GAT4.class.getDeclaredField("array").getGenericType(), Object[][].class),
-            Tuple.ofSame(GAT5.class.getDeclaredField("array").getGenericType(), Number[][][].class),
-            Tuple.ofSame(GAT6.class.getDeclaredField("array").getGenericType(), Set[][][][].class),
-            Tuple.ofSame(PT1.class.getDeclaredField("list").getGenericType(), List.class),
-            Tuple.ofSame(PT2.class.getDeclaredField("list").getGenericType(), List.class),
-            Tuple.ofSame(PT3.class.getDeclaredField("list").getGenericType(), List.class),
-            Tuple.ofSame(TV1.class.getDeclaredField("value").getGenericType(), Object.class),
-            Tuple.ofSame(TV2.class.getDeclaredField("value").getGenericType(), Number.class),
-            Tuple.ofSame(TV3.class.getDeclaredField("value").getGenericType(), List.class),
-            Tuple.ofSame(((ParameterizedType)(WT1.class.getDeclaredField("list").getGenericType())).getActualTypeArguments()[0], Object.class),
-            Tuple.ofSame(((ParameterizedType)(WT2.class.getDeclaredField("list").getGenericType())).getActualTypeArguments()[0], Number.class),
-            Tuple.ofSame(((ParameterizedType)(WT3.class.getDeclaredField("list").getGenericType())).getActualTypeArguments()[0], Set.class)
+            same.of(int.class, int.class),
+            same.of(Integer.class, Integer.class),
+            same.of(GAT1.class.getDeclaredField("array").getGenericType(), Object[].class),
+            same.of(GAT2.class.getDeclaredField("array").getGenericType(), Number[].class),
+            same.of(GAT3.class.getDeclaredField("array").getGenericType(), Set[].class),
+            same.of(GAT4.class.getDeclaredField("array").getGenericType(), Object[][].class),
+            same.of(GAT5.class.getDeclaredField("array").getGenericType(), Number[][][].class),
+            same.of(GAT6.class.getDeclaredField("array").getGenericType(), Set[][][][].class),
+            same.of(PT1.class.getDeclaredField("list").getGenericType(), List.class),
+            same.of(PT2.class.getDeclaredField("list").getGenericType(), List.class),
+            same.of(PT3.class.getDeclaredField("list").getGenericType(), List.class),
+            same.of(TV1.class.getDeclaredField("value").getGenericType(), Object.class),
+            same.of(TV2.class.getDeclaredField("value").getGenericType(), Number.class),
+            same.of(TV3.class.getDeclaredField("value").getGenericType(), List.class),
+            same.of(((ParameterizedType)(WT1.class.getDeclaredField("list").getGenericType())).getActualTypeArguments()[0], Object.class),
+            same.of(((ParameterizedType)(WT2.class.getDeclaredField("list").getGenericType())).getActualTypeArguments()[0], Number.class),
+            same.of(((ParameterizedType)(WT3.class.getDeclaredField("list").getGenericType())).getActualTypeArguments()[0], Set.class)
         );
         
         for (final Tuple.TwoOf<Type> testCase : testCases) {
@@ -102,10 +104,11 @@ public class TestReflect {
     
     @Test
     public void expandRawType() throws Throwable {
+        final Tuple.UpToSame uptoSame = new Tuple.UpToSame();
         final List<Tuple.UpToFourOf<Class<?>>> testCases = Collections.listOf(
-            Tuple.upToFourOf(List.class, List.class, Object.class),
-            Tuple.upToFourOf(Map.class, Map.class, Object.class, Object.class),
-            Tuple.upToFourOf(TV2.class, TV2.class, Number.class)
+            uptoSame.four(List.class, List.class, Object.class),
+            uptoSame.four(Map.class, Map.class, Object.class, Object.class),
+            uptoSame.four(TV2.class, TV2.class, Number.class)
         );
         
         for (final Tuple.UpToFourOf<Class<?>> testCase : testCases) {
@@ -122,22 +125,23 @@ public class TestReflect {
     @Test
     public void resolveTypeAndArgs() throws Throwable {
         // input, expected result
+        final Tuple t = new Tuple();
         final List<Tuple.Two<Type, List<Type>>> testCases = Collections.listOf(
-            Tuple.of(int.class, Collections.listOf(int.class)),
-            Tuple.of(Integer.class, Collections.listOf(Integer.class)),
-            Tuple.of(GAT1.class.getDeclaredField("array").getGenericType(), Collections.listOf(Object[].class)),
-            Tuple.of(GAT2.class.getDeclaredField("array").getGenericType(), Collections.listOf(Number[].class)),
-            Tuple.of(GAT4.class.getDeclaredField("array").getGenericType(), Collections.listOf(Object[][].class)),
-            Tuple.of(GAT5.class.getDeclaredField("array").getGenericType(), Collections.listOf(Number[][][].class)),
-            Tuple.of(GAT6.class.getDeclaredField("array").getGenericType(), Collections.listOf(Set[][][][].class)),
-            Tuple.of(PT1.class.getDeclaredField("list").getGenericType(), Collections.listOf(List.class, Object.class)),
-            Tuple.of(PT2.class.getDeclaredField("list").getGenericType(), Collections.listOf(List.class, Number.class)),
-            Tuple.of(PT3.class.getDeclaredField("list").getGenericType(), Collections.listOf(List.class, List.class, Number.class)),
-            Tuple.of(TV1.class.getDeclaredField("value").getGenericType(), Collections.listOf(Object.class)),
-            Tuple.of(TV2.class.getDeclaredField("value").getGenericType(), Collections.listOf(Number.class)),
-            Tuple.of(TV3.class.getDeclaredField("value").getGenericType(), Collections.listOf(List.class, String.class)),
-            Tuple.of(((ParameterizedType)(WT1.class.getDeclaredField("list").getGenericType())).getActualTypeArguments()[0], Collections.listOf(Object.class)),
-            Tuple.of(((ParameterizedType)(WT2.class.getDeclaredField("list").getGenericType())).getActualTypeArguments()[0], Collections.listOf(Number.class))
+            t.of(int.class, Collections.listOf(int.class)),
+            t.of(Integer.class, Collections.listOf(Integer.class)),
+            t.of(GAT1.class.getDeclaredField("array").getGenericType(), Collections.listOf(Object[].class)),
+            t.of(GAT2.class.getDeclaredField("array").getGenericType(), Collections.listOf(Number[].class)),
+            t.of(GAT4.class.getDeclaredField("array").getGenericType(), Collections.listOf(Object[][].class)),
+            t.of(GAT5.class.getDeclaredField("array").getGenericType(), Collections.listOf(Number[][][].class)),
+            t.of(GAT6.class.getDeclaredField("array").getGenericType(), Collections.listOf(Set[][][][].class)),
+            t.of(PT1.class.getDeclaredField("list").getGenericType(), Collections.listOf(List.class, Object.class)),
+            t.of(PT2.class.getDeclaredField("list").getGenericType(), Collections.listOf(List.class, Number.class)),
+            t.of(PT3.class.getDeclaredField("list").getGenericType(), Collections.listOf(List.class, List.class, Number.class)),
+            t.of(TV1.class.getDeclaredField("value").getGenericType(), Collections.listOf(Object.class)),
+            t.of(TV2.class.getDeclaredField("value").getGenericType(), Collections.listOf(Number.class)),
+            t.of(TV3.class.getDeclaredField("value").getGenericType(), Collections.listOf(List.class, String.class)),
+            t.of(((ParameterizedType)(WT1.class.getDeclaredField("list").getGenericType())).getActualTypeArguments()[0], Collections.listOf(Object.class)),
+            t.of(((ParameterizedType)(WT2.class.getDeclaredField("list").getGenericType())).getActualTypeArguments()[0], Collections.listOf(Number.class))
         );
 
         for (final Tuple.Two<Type, List<Type>> testCase : testCases) {

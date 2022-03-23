@@ -21,14 +21,14 @@ import java.util.Objects;
  * 
  * 2. Use one specific tuple size of the same type
  * - Declare type as Tuple.{Two,Three,Four,Five,Six}Of<T> with a single generic value
- * - Call appropriate Tuple.ofSame{Nullable?}() overload that accepts N args
+ * - Call appropriate Tuple.Same.of{Nullable?}() overload that accepts N args
  * 
  * EG:
  * Tuple.TwoOf<String> Foo() {
  *   ...
- *   return Tuple.ofSame("foo", "bar")
+ *   return Tuple.Same.of("foo", "bar")
  *   OR
- *   return Tuple.ofSameNullable(null, "bar")
+ *   return Tuple.Same.ofNullable(null, "bar")
  * }
  * 
  * 3. Create a List or Set of tuples of a specific size, with different or same types
@@ -37,7 +37,7 @@ import java.util.Objects;
  *   OR
  *   {List,Set}<Tuple.{Two,Three,Four,Five,Six}Of<T>>
  * - Use Collections.{listOf,setOf}(Tuple.of{Nullable?}(N args)...)
- *    OR Collections.{listOf,setOf)(Tuple.ofSame{Nullable?}(N args)...)
+ *    OR Collections.{listOf,setOf)(Tuple.Same.of{Nullable?}(N args)...)
  * 
  * EG:
  * List<Tuple.Two<String, Integer>> list = Collections.listOf(
@@ -49,8 +49,8 @@ import java.util.Objects;
  * OR
  * 
  * List<Tuple.TwoOf<String>> list = Collections.listOf(
- *   Tuple.ofSame("foo", "bar"),
- *   Tuple.ofSameNullable("foo", null),
+ *   Tuple.Same.of("foo", "bar"),
+ *   Tuple.Same.ofNullable("foo", null),
  *   ...
  * )
  * 
@@ -59,20 +59,20 @@ import java.util.Objects;
  *   Tuple.UpTo{Two,Three,Four,Five,Six}<T,U,...>
  *   OR
  *   Tuple.UpTo{Two,Three,Four,Five,Six}Of<T>
- * - Use Collections.{listOf,setOf}(Tuple.upTo{Two,Three,Four,Five,Six}{Of?}{Nullable?}(0..N values))
+ * - Use Collections.{listOf,setOf}(Tuple.UpTo.{two,three,four,five,six}{Nullable?}(0..N values))
  * - Test number of values in a particular tuple with count() method
  * - NOTE: there are no               upToN{Of?}Nullable() methods of no args,
  *         since they are the same as upToN{Of?}()         methods of no args 
  * 
  * EG:
  * List<Tuple.UpToThree<String, Integer, Double>> list = Collections.listOf(
- *   Tuple.upToThree(),
- *   Tuple.upToThree("foo"),
- *   Tuple.upToThree("bar", 1),
- *   Tuple.upToThree("bar", 1, 3.25),
- *   Tuple.upToThreeNullable(null),
- *   Tuple.upToThreeNullable("baz", null),
- *   Tuple.upToThreeNullable("baz", 1, null),
+ *   Tuple.UpTo.three(),
+ *   Tuple.UpTo.three("foo"),
+ *   Tuple.UpTo.three("bar", 1),
+ *   Tuple.UpTo.three("bar", 1, 3.25),
+ *   Tuple.UpTo.threeNullable(null),
+ *   Tuple.UpTo.threeNullable("baz", null),
+ *   Tuple.UpTo.threeNullable("baz", 1, null),
  *   ...
  * );
  * list.get(0).count() => 0
@@ -86,13 +86,13 @@ import java.util.Objects;
  * OR
  * 
  * List<Tuple.UpToThreeOf<Integer>> list = Collections.listOf(
- *   Tuple.upToThreeOf(),
- *   Tuple.upToThreeOf(1),
- *   Tuple.upToThreeOf(1, 2),
- *   Tuple.upToThreeOf(1, 2, 3),
- *   Tuple.upToThreeOfNullable(null),
- *   Tuple.upToThreeOfNullable(1, null),
- *   Tuple.upToThreeOfNullable(1, 2, null),
+ *   Tuple.UpToSame.three(),
+ *   Tuple.UpToSame.three(1),
+ *   Tuple.UpToSame.three(1, 2),
+ *   Tuple.UpToSame.three(1, 2, 3),
+ *   Tuple.UpToSame.threeNullable(null),
+ *   Tuple.UpToSame.threeNullable(1, null),
+ *   Tuple.UpToSame.threeNullable(1, 2, null),
  *   ...
  * );
  * list.get(0).count() => 0
@@ -103,11 +103,7 @@ import java.util.Objects;
  * list.get(5).count() => 2
  * list.get(6).count() => 3
  */
-public class Tuple {
-    private Tuple() {
-        throw new RuntimeException();
-    }
-    
+public final class Tuple {
     // ==== Base Class
     
     /**
@@ -1036,7 +1032,2460 @@ public class Tuple {
         }
     }
     
-    // ==== Two Named constructors
+    /**
+     * A class that provides named constructors for fixed size tuples with single type
+     */
+    public static final class Same {
+        // ==== Two named constructors
+        
+        /**
+         * Construct a tuple of two non-null values of the same type
+         *  
+         * @param <T> type
+         * @param t first value
+         * @param u second value
+         * @return tuple of two values
+         */
+        public static <T> TwoOf<T> of(
+            final T t,
+            final T u
+        ) {
+            return new TwoOf<>(
+                Objects.requireNonNull(t, "t"),
+                Objects.requireNonNull(u, "u")
+            );
+        }
+
+        /**
+         * Construct a tuple of two nullable values of the same type
+         *  
+         * @param <T> type
+         * @param t first value
+         * @param u second value
+         * @return tuple of two values
+         */
+        public static <T> TwoOf<T> ofNullable(
+            final T t,
+            final T u
+        ) {
+            return new TwoOf<>(
+                t,
+                u
+            );
+        }
+        
+        // ==== Three named constructors
+        
+        /**
+         * Construct a tuple of three non-null values of the same type
+         *  
+         * @param <T> type
+         * @param t first value
+         * @param u second value
+         * @param v third value
+         * @return tuple of three values
+         */
+        public static <T> ThreeOf<T> of(
+            final T t,
+            final T u,
+            final T v
+        ) {
+            return new ThreeOf<>(
+                Objects.requireNonNull(t, "t"),
+                Objects.requireNonNull(u, "u"),
+                Objects.requireNonNull(v, "v")
+            );
+        }
+        
+
+        /**
+         * Construct a tuple of three nullable values of the same type
+         *  
+         * @param <T> type
+         * @param t first value
+         * @param u second value
+         * @param v third value
+         * @return tuple of three values
+         */
+        public static <T> ThreeOf<T> ofNullable(
+            final T t,
+            final T u,
+            final T v
+        ) {
+            return new ThreeOf<>(
+                t,
+                u,
+                v
+            );
+        }
+        
+        // ==== Four named constructors
+        
+        /**
+         * Construct a tuple of four non-null values of the same type
+         *  
+         * @param <T> type
+         * @param t first value
+         * @param u second value
+         * @param v third value
+         * @param w fourth value
+         * @return tuple of four values
+         */
+        public static <T> FourOf<T> of(
+            final T t,
+            final T u,
+            final T v,
+            final T w
+        ) {
+            return new FourOf<>(
+                Objects.requireNonNull(t, "t"),
+                Objects.requireNonNull(u, "u"),
+                Objects.requireNonNull(v, "v"),
+                Objects.requireNonNull(w, "w")
+            );
+        }
+
+        /**
+         * Construct a tuple of four nullable values of the same type
+         *  
+         * @param <T> type
+         * @param t first value
+         * @param u second value
+         * @param v third value
+         * @param w fourth value
+         * @return tuple of four values
+         */
+        public static <T> FourOf<T> ofNullable(
+            final T t,
+            final T u,
+            final T v,
+            final T w
+        ) {
+            return new FourOf<>(
+                t,
+                u,
+                v,
+                w
+            );
+        }
+        
+        // ==== Five named constructors
+        
+        /**
+         * Construct a tuple of five non-null values of the same type
+         *  
+         * @param <T> type
+         * @param t first value
+         * @param u second value
+         * @param v third value
+         * @param w fourth value
+         * @param x fifth value
+         * @return tuple of five values
+         */
+        public static <T> FiveOf<T> of(
+            final T t,
+            final T u,
+            final T v,
+            final T w,
+            final T x
+        ) {
+            return new FiveOf<>(
+                Objects.requireNonNull(t, "t"),
+                Objects.requireNonNull(u, "u"),
+                Objects.requireNonNull(v, "v"),
+                Objects.requireNonNull(w, "w"),
+                Objects.requireNonNull(x, "x")
+            );
+        }
+
+        /**
+         * Construct a tuple of five nullable values of the same type
+         *  
+         * @param <T> type
+         * @param t first value
+         * @param u second value
+         * @param v third value
+         * @param w fourth value
+         * @param x fifth value
+         * @return tuple of five values
+         */
+        public static <T> FiveOf<T> ofNullable(
+            final T t,
+            final T u,
+            final T v,
+            final T w,
+            final T x
+        ) {
+            return new FiveOf<>(
+                t,
+                u,
+                v,
+                w,
+                x
+            );
+        }
+        
+        // ==== Six named constructors
+        
+        /**
+         * Construct a tuple of six non-null values of the same type
+         *  
+         * @param <T> type
+         * @param t first value
+         * @param u second value
+         * @param v third value
+         * @param w fourth value
+         * @param x fifth value
+         * @param y sixth value
+         * @return tuple of six values
+         */
+        public static <T> SixOf<T> of(
+            final T t,
+            final T u,
+            final T v,
+            final T w,
+            final T x,
+            final T y
+        ) {
+            return new SixOf<>(
+                Objects.requireNonNull(t, "t"),
+                Objects.requireNonNull(u, "u"),
+                Objects.requireNonNull(v, "v"),
+                Objects.requireNonNull(w, "w"),
+                Objects.requireNonNull(x, "x"),
+                Objects.requireNonNull(y, "y")
+            );
+        }
+
+        /**
+         * Construct a tuple of six nullable values of the same type
+         *  
+         * @param <T> type
+         * @param t first value
+         * @param u second value
+         * @param v third value
+         * @param w fourth value
+         * @param x fifth value
+         * @param y sixth value
+         * @return tuple of six values
+         */
+        public static <T> SixOf<T> ofNullable(
+            final T t,
+            final T u,
+            final T v,
+            final T w,
+            final T x,
+            final T y
+        ) {
+            return new SixOf<>(
+                t,
+                u,
+                v,
+                w,
+                x,
+                y
+            );
+        }
+    }
+
+    /**
+     * A class that provides named constructors for variable size tuples with different types
+     */
+    public static final class UpTo {
+        
+        // ==== Two named constructors
+
+        /**
+         * Construct a tuple capable of holding up to two values of different types with no values
+         *  
+         * @param <T> first type
+         * @param <U> second type
+         * @return tuple of up to two values that is empty
+         */
+        public static <T, U> UpToTwo<T, U> two(
+        ) {
+            return new UpToTwo<>(
+                0,
+                null,
+                null
+            );
+        }
+
+        /**
+         * Construct a tuple capable of holding up to two values of different types with one non-null value
+         *  
+         * @param <T> first type
+         * @param <U> second type
+         * @param t value
+         * @return tuple of up to two values that has one value
+         */
+        public static <T, U> UpToTwo<T, U> two(
+            final T t
+        ) {
+            return new UpToTwo<>(
+                1,
+                Objects.requireNonNull(t, "t"),
+                null
+            );
+        }
+
+        /**
+         * Construct a tuple capable of holding up to two values of different types with one nullable value
+         *  
+         * @param <T> first type
+         * @param <U> second type
+         * @param t value
+         * @return tuple of up to two values that has one value
+         */
+        public static <T, U> UpToTwo<T, U> twoNullable(
+            final T t
+        ) {
+            return new UpToTwo<>(
+                1,
+                t,
+                null
+            );
+        }
+
+        /**
+         * Construct a tuple capable of holding up to two values of different types with two non-null values
+         *  
+         * @param <T> first type
+         * @param <U> second type
+         * @param t first value
+         * @param u second value
+         * @return tuple of up to two values that has two values
+         */
+        public static <T, U> UpToTwo<T, U> two(
+            final T t,
+            final U u
+        ) {
+            return new UpToTwo<>(
+                2,
+                Objects.requireNonNull(t, "t"),
+                Objects.requireNonNull(u, "u")
+            );
+        }
+
+        /**
+         * Construct a tuple capable of holding up to two values of different types with two nullable values
+         *  
+         * @param <T> first type
+         * @param <U> second type
+         * @param t first value
+         * @param u second value
+         * @return tuple of up to two values that has two values
+         */
+        public static <T, U> UpToTwo<T, U> twoNullable(
+            final T t,
+            final U u
+        ) {
+            return new UpToTwo<>(
+                2,
+                t,
+                u
+            );
+        }
+        
+        // ==== Three named constructors
+        
+        /**
+         * Construct a tuple capable of holding up to three values of different types with no values
+         *  
+         * @param <T> first type
+         * @param <U> second type
+         * @param <V> third type
+         * @return tuple of up to three values that is empty
+         */
+        public static <T, U, V> UpToThree<T, U, V> three(
+        ) {
+            return new UpToThree<>(
+                0,
+                null,
+                null,
+                null
+            );
+        }
+
+        /**
+         * Construct a tuple capable of holding up to three values of different types with one non-null value
+         *  
+         * @param <T> first type
+         * @param <U> second type
+         * @param <V> third type
+         * @param t value
+         * @return tuple of up to three values that has one value
+         */
+        public static <T, U, V> UpToThree<T, U, V> three(
+            final T t
+        ) {
+            return new UpToThree<>(
+                1,
+                Objects.requireNonNull(t, "t"),
+                null,
+                null
+            );
+        }
+
+        /**
+         * Construct a tuple capable of holding up to three values of different types with one nullable value
+         *  
+         * @param <T> first type
+         * @param <U> second type
+         * @param <V> third type
+         * @param t value
+         * @return tuple of up to three values that has one value
+         */
+        public static <T, U, V> UpToThree<T, U, V> threeNullable(
+            final T t
+        ) {
+            return new UpToThree<>(
+                1,
+                t,
+                null,
+                null
+            );
+        }
+
+        /**
+         * Construct a tuple capable of holding up to three values of different types with two non-null values
+         *  
+         * @param <T> first type
+         * @param <U> second type
+         * @param <V> third type
+         * @param t first value
+         * @param u second value
+         * @return tuple of up to three values that has two values
+         */
+        public static <T, U, V> UpToThree<T, U, V> three(
+            final T t,
+            final U u
+        ) {
+            return new UpToThree<>(
+                2,
+                Objects.requireNonNull(t, "t"),
+                Objects.requireNonNull(u, "u"),
+                null
+            );
+        }
+
+        /**
+         * Construct a tuple capable of holding up to three values of different types with two nullable values
+         *  
+         * @param <T> first type
+         * @param <U> second type
+         * @param <V> third type
+         * @param t first value
+         * @param u second value
+         * @return tuple of up to three values that has two values
+         */
+        public static <T, U, V> UpToThree<T, U, V> threeNullable(
+            final T t,
+            final U u
+        ) {
+            return new UpToThree<>(
+                2,
+                t,
+                u,
+                null
+            );
+        }
+
+        /**
+         * Construct a tuple capable of holding up to three values of different types with three non-null values
+         *  
+         * @param <T> first type
+         * @param <U> second type
+         * @param <V> third type
+         * @param t first value
+         * @param u second value
+         * @param v third value
+         * @return tuple of up to three values that has three values
+         */
+        public static <T, U, V> UpToThree<T, U, V> three(
+            final T t,
+            final U u,
+            final V v
+        ) {
+            return new UpToThree<>(
+                3,
+                Objects.requireNonNull(t, "t"),
+                Objects.requireNonNull(u, "u"),
+                Objects.requireNonNull(v, "v")
+            );
+        }
+
+        /**
+         * Construct a tuple capable of holding up to three values of different types with three nullable values
+         *  
+         * @param <T> first type
+         * @param <U> second type
+         * @param <V> third type
+         * @param t first value
+         * @param u second value
+         * @param v third value
+         * @return tuple of up to three values that has three values
+         */
+        public static <T, U, V> UpToThree<T, U, V> threeNullable(
+            final T t,
+            final U u,
+            final V v
+        ) {
+            return new UpToThree<>(
+                3,
+                t,
+                u,
+                v
+            );
+        }
+        
+        // ==== Four named constructors
+
+        /**
+         * Construct a tuple capable of holding up to four values of different types with no values
+         *  
+         * @param <T> first type
+         * @param <U> second type
+         * @param <V> third type
+         * @param <W> fourth type
+         * @return tuple of up to four values that is empty
+         */
+        public static <T, U, V, W> UpToFour<T, U, V, W> four(
+        ) {
+            return new UpToFour<>(
+                0,
+                null,
+                null,
+                null,
+                null
+            );
+        }
+
+        /**
+         * Construct a tuple capable of holding up to four values of different types with one non-null value
+         *  
+         * @param <T> first type
+         * @param <U> second type
+         * @param <V> third type
+         * @param <W> fourth type
+         * @param t value
+         * @return tuple of up to four values that has one value
+         */
+        public static <T, U, V, W> UpToFour<T, U, V, W> four(
+            final T t
+        ) {
+            return new UpToFour<>(
+                1,
+                Objects.requireNonNull(t, "t"),
+                null,
+                null,
+                null
+            );
+        }
+
+        /**
+         * Construct a tuple capable of holding up to four values of different types with one nullable value
+         *  
+         * @param <T> first type
+         * @param <U> second type
+         * @param <V> third type
+         * @param <W> fourth type
+         * @param t value
+         * @return tuple of up to four values that has one value
+         */
+        public static <T, U, V, W> UpToFour<T, U, V, W> fourNullable(
+            final T t
+        ) {
+            return new UpToFour<>(
+                1,
+                t,
+                null,
+                null,
+                null
+            );
+        }
+
+        /**
+         * Construct a tuple capable of holding up to four values of different types with two non-null values
+         *  
+         * @param <T> first type
+         * @param <U> second type
+         * @param <V> third type
+         * @param <W> fourth type
+         * @param t first value
+         * @param u second value
+         * @return tuple of up to four values that has two values
+         */
+        public static <T, U, V, W> UpToFour<T, U, V, W> four(
+            final T t,
+            final U u
+        ) {
+            return new UpToFour<>(
+                2,
+                Objects.requireNonNull(t, "t"),
+                Objects.requireNonNull(u, "u"),
+                null,
+                null
+            );
+        }
+
+        /**
+         * Construct a tuple capable of holding up to four values of different types with two nullable values
+         *  
+         * @param <T> first type
+         * @param <U> second type
+         * @param <V> third type
+         * @param <W> fourth type
+         * @param t first value
+         * @param u second value
+         * @return tuple of up to four values that has two values
+         */
+        public static <T, U, V, W> UpToFour<T, U, V, W> fourNullable(
+            final T t,
+            final U u
+        ) {
+            return new UpToFour<>(
+                2,
+                t,
+                u,
+                null,
+                null
+            );
+        }
+
+        /**
+         * Construct a tuple capable of holding up to four values of different types with three non-null values
+         *  
+         * @param <T> first type
+         * @param <U> second type
+         * @param <V> third type
+         * @param <W> fourth type
+         * @param t first value
+         * @param u second value
+         * @param v third value
+         * @return tuple of up to four values that has three values
+         */
+        public static <T, U, V, W> UpToFour<T, U, V, W> four(
+            final T t,
+            final U u,
+            final V v
+        ) {
+            return new UpToFour<>(
+                3,
+                Objects.requireNonNull(t, "t"),
+                Objects.requireNonNull(u, "u"),
+                Objects.requireNonNull(v, "v"),
+                null
+            );
+        }
+
+        /**
+         * Construct a tuple capable of holding up to four values of different types with three nullable values
+         *  
+         * @param <T> first type
+         * @param <U> second type
+         * @param <V> third type
+         * @param <W> fourth type
+         * @param t first value
+         * @param u second value
+         * @param v third value
+         * @return tuple of up to four values that has three values
+         */
+        public static <T, U, V, W> UpToFour<T, U, V, W> fourNullable(
+            final T t,
+            final U u,
+            final V v
+        ) {
+            return new UpToFour<>(
+                3,
+                t,
+                u,
+                v,
+                null
+            );
+        }
+
+        /**
+         * Construct a tuple capable of holding up to four values of different types with four non-null values
+         *  
+         * @param <T> first type
+         * @param <U> second type
+         * @param <V> third type
+         * @param <W> fourth type
+         * @param t first value
+         * @param u second value
+         * @param v third value
+         * @param w third value
+         * @return tuple of up to four values that has four values
+         */
+        public static <T, U, V, W> UpToFour<T, U, V, W> four(
+            final T t,
+            final U u,
+            final V v,
+            final W w
+        ) {
+            return new UpToFour<>(
+                4,
+                Objects.requireNonNull(t, "t"),
+                Objects.requireNonNull(u, "u"),
+                Objects.requireNonNull(v, "v"),
+                Objects.requireNonNull(w, "w")
+            );
+        }
+
+        /**
+         * Construct a tuple capable of holding up to four values of different types with four nullable values
+         *  
+         * @param <T> first type
+         * @param <U> second type
+         * @param <V> third type
+         * @param <W> fourth type
+         * @param t first value
+         * @param u second value
+         * @param v third value
+         * @param w fourth value
+         * @return tuple of up to four values that has four values
+         */
+        public static <T, U, V, W> UpToFour<T, U, V, W> fourNullable(
+            final T t,
+            final U u,
+            final V v,
+            final W w
+        ) {
+            return new UpToFour<>(
+                4,
+                t,
+                u,
+                v,
+                w
+            );
+        }
+        
+        // ==== Five named constructors
+
+        /**
+         * Construct a tuple capable of holding up to five values of different types with no values
+         *  
+         * @param <T> first type
+         * @param <U> second type
+         * @param <V> third type
+         * @param <W> fourth type
+         * @param <X> fifth type
+         * @return tuple of up to five values that is empty
+         */
+        public static <T, U, V, W, X> UpToFive<T, U, V, W, X> five(
+        ) {
+            return new UpToFive<>(
+                0,
+                null,
+                null,
+                null,
+                null,
+                null
+            );
+        }
+
+        /**
+         * Construct a tuple capable of holding up to five values of different types with one non-null value
+         *  
+         * @param <T> first type
+         * @param <U> second type
+         * @param <V> third type
+         * @param <W> fourth type
+         * @param <X> fifth type
+         * @param t value
+         * @return tuple of up to five values that has one value
+         */
+        public static <T, U, V, W, X> UpToFive<T, U, V, W, X> five(
+            final T t
+        ) {
+            return new UpToFive<>(
+                1,
+                Objects.requireNonNull(t, "t"),
+                null,
+                null,
+                null,
+                null
+            );
+        }
+
+        /**
+         * Construct a tuple capable of holding up to five values of different types with one nullable value
+         *  
+         * @param <T> first type
+         * @param <U> second type
+         * @param <V> third type
+         * @param <W> fourth type
+         * @param <X> fifth type
+         * @param t value
+         * @return tuple of up to five values that has one value
+         */
+        public static <T, U, V, W, X> UpToFive<T, U, V, W, X> fiveNullable(
+            final T t
+        ) {
+            return new UpToFive<>(
+                1,
+                t,
+                null,
+                null,
+                null,
+                null
+            );
+        }
+
+        /**
+         * Construct a tuple capable of holding up to five values of different types with two non-null values
+         *  
+         * @param <T> first type
+         * @param <U> second type
+         * @param <V> third type
+         * @param <W> fourth type
+         * @param <X> fifth type
+         * @param t first value
+         * @param u second value
+         * @return tuple of up to five values that has two values
+         */
+        public static <T, U, V, W, X> UpToFive<T, U, V, W, X> five(
+            final T t,
+            final U u
+        ) {
+            return new UpToFive<>(
+                2,
+                Objects.requireNonNull(t, "t"),
+                Objects.requireNonNull(u, "u"),
+                null,
+                null,
+                null
+            );
+        }
+
+        /**
+         * Construct a tuple capable of holding up to five values of different types with two nullable values
+         *  
+         * @param <T> first type
+         * @param <U> second type
+         * @param <V> third type
+         * @param <W> fourth type
+         * @param <X> fifth type
+         * @param t first value
+         * @param u second value
+         * @return tuple of up to five values that has two values
+         */
+        public static <T, U, V, W, X> UpToFive<T, U, V, W, X> fiveNullable(
+            final T t,
+            final U u
+        ) {
+            return new UpToFive<>(
+                2,
+                t,
+                u,
+                null,
+                null,
+                null
+            );
+        }
+
+        /**
+         * Construct a tuple capable of holding up to five values of different types with three non-null values
+         *  
+         * @param <T> first type
+         * @param <U> second type
+         * @param <V> third type
+         * @param <W> fourth type
+         * @param <X> fifth type
+         * @param t first value
+         * @param u second value
+         * @param v third value
+         * @return tuple of up to five values that has three values
+         */
+        public static <T, U, V, W, X> UpToFive<T, U, V, W, X> five(
+            final T t,
+            final U u,
+            final V v
+        ) {
+            return new UpToFive<>(
+                3,
+                Objects.requireNonNull(t, "t"),
+                Objects.requireNonNull(u, "u"),
+                Objects.requireNonNull(v, "v"),
+                null,
+                null
+            );
+        }
+
+        /**
+         * Construct a tuple capable of holding up to five values of different types with three nullable values
+         *  
+         * @param <T> first type
+         * @param <U> second type
+         * @param <V> third type
+         * @param <W> fourth type
+         * @param <X> fifth type
+         * @param t first value
+         * @param u second value
+         * @param v third value
+         * @return tuple of up to five values that has three values
+         */
+        public static <T, U, V, W, X> UpToFive<T, U, V, W, X> fiveNullable(
+            final T t,
+            final U u,
+            final V v
+        ) {
+            return new UpToFive<>(
+                3,
+                t,
+                u,
+                v,
+                null,
+                null
+            );
+        }
+
+        /**
+         * Construct a tuple capable of holding up to five values of different types with four non-null values
+         *  
+         * @param <T> first type
+         * @param <U> second type
+         * @param <V> third type
+         * @param <W> fourth type
+         * @param <X> fifth type
+         * @param t first value
+         * @param u second value
+         * @param v third value
+         * @param w third value
+         * @return tuple of up to five values that has four values
+         */
+        public static <T, U, V, W, X> UpToFive<T, U, V, W, X> five(
+            final T t,
+            final U u,
+            final V v,
+            final W w
+        ) {
+            return new UpToFive<>(
+                4,
+                Objects.requireNonNull(t, "t"),
+                Objects.requireNonNull(u, "u"),
+                Objects.requireNonNull(v, "v"),
+                Objects.requireNonNull(w, "w"),
+                null
+            );
+        }
+
+        /**
+         * Construct a tuple capable of holding up to five values of different types with four nullable values
+         *  
+         * @param <T> first type
+         * @param <U> second type
+         * @param <V> third type
+         * @param <W> fourth type
+         * @param <X> fifth type
+         * @param t first value
+         * @param u second value
+         * @param v third value
+         * @param w fourth value
+         * @return tuple of up to five values that has four values
+         */
+        public static <T, U, V, W, X> UpToFive<T, U, V, W, X> fiveNullable(
+            final T t,
+            final U u,
+            final V v,
+            final W w
+        ) {
+            return new UpToFive<>(
+                4,
+                t,
+                u,
+                v,
+                w,
+                null
+            );
+        }
+
+        /**
+         * Construct a tuple capable of holding up to five values of different types with five non-null values
+         *  
+         * @param <T> first type
+         * @param <U> second type
+         * @param <V> third type
+         * @param <W> fourth type
+         * @param <X> fifth type
+         * @param t first value
+         * @param u second value
+         * @param v third value
+         * @param w fourth value
+         * @param x fifth value
+         * @return tuple of up to five values that has five values
+         */
+        public static <T, U, V, W, X> UpToFive<T, U, V, W, X> five(
+            final T t,
+            final U u,
+            final V v,
+            final W w,
+            final X x
+        ) {
+            return new UpToFive<>(
+                5,
+                Objects.requireNonNull(t, "t"),
+                Objects.requireNonNull(u, "u"),
+                Objects.requireNonNull(v, "v"),
+                Objects.requireNonNull(w, "w"),
+                Objects.requireNonNull(x, "x")
+            );
+        }
+
+        /**
+         * Construct a tuple capable of holding up to five values of different types with five nullable values
+         *  
+         * @param <T> first type
+         * @param <U> second type
+         * @param <V> third type
+         * @param <W> fourth type
+         * @param <X> fifth type
+         * @param t first value
+         * @param u second value
+         * @param v third value
+         * @param w fourth value
+         * @param x fifth value
+         * @return tuple of up to five values that has five values
+         */
+        public static <T, U, V, W, X> UpToFive<T, U, V, W, X> fiveNullable(
+            final T t,
+            final U u,
+            final V v,
+            final W w,
+            final X x
+        ) {
+            return new UpToFive<>(
+                5,
+                t,
+                u,
+                v,
+                w,
+                x
+            );
+        }
+        
+        // ==== Six named constructors
+
+        /**
+         * Construct a tuple capable of holding up to six values of different types with no values
+         *  
+         * @param <T> first type
+         * @param <U> second type
+         * @param <V> third type
+         * @param <W> fourth type
+         * @param <X> fifth type
+         * @param <Y> sixth type
+         * @return tuple of up to six values that is empty
+         */
+        public static <T, U, V, W, X, Y> UpToSix<T, U, V, W, X, Y> six(
+        ) {
+            return new UpToSix<>(
+                0,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+            );
+        }
+
+        /**
+         * Construct a tuple capable of holding up to six values of different types with one non-null value
+         *  
+         * @param <T> first type
+         * @param <U> second type
+         * @param <V> third type
+         * @param <W> fourth type
+         * @param <X> fifth type
+         * @param <Y> sixth type
+         * @param t value
+         * @return tuple of up to six values that has one value
+         */
+        public static <T, U, V, W, X, Y> UpToSix<T, U, V, W, X, Y> six(
+            final T t
+        ) {
+            return new UpToSix<>(
+                1,
+                Objects.requireNonNull(t, "t"),
+                null,
+                null,
+                null,
+                null,
+                null
+            );
+        }
+
+        /**
+         * Construct a tuple capable of holding up to six values of different types with one nullable value
+         *  
+         * @param <T> first type
+         * @param <U> second type
+         * @param <V> third type
+         * @param <W> fourth type
+         * @param <X> fifth type
+         * @param <Y> sixth type
+         * @param t value
+         * @return tuple of up to six values that has one value
+         */
+        public static <T, U, V, W, X, Y> UpToSix<T, U, V, W, X, Y> sixNullable(
+            final T t
+        ) {
+            return new UpToSix<>(
+                1,
+                t,
+                null,
+                null,
+                null,
+                null,
+                null
+            );
+        }
+
+        /**
+         * Construct a tuple capable of holding up to six values of different types with two non-null values
+         *  
+         * @param <T> first type
+         * @param <U> second type
+         * @param <V> third type
+         * @param <W> fourth type
+         * @param <X> fifth type
+         * @param <Y> sixth type
+         * @param t first value
+         * @param u second value
+         * @return tuple of up to six values that has two values
+         */
+        public static <T, U, V, W, X, Y> UpToSix<T, U, V, W, X, Y> six(
+            final T t,
+            final U u
+        ) {
+            return new UpToSix<>(
+                2,
+                Objects.requireNonNull(t, "t"),
+                Objects.requireNonNull(u, "u"),
+                null,
+                null,
+                null,
+                null
+            );
+        }
+
+        /**
+         * Construct a tuple capable of holding up to six values of different types with two nullable values
+         *  
+         * @param <T> first type
+         * @param <U> second type
+         * @param <V> third type
+         * @param <W> fourth type
+         * @param <X> fifth type
+         * @param <Y> sixth type
+         * @param t first value
+         * @param u second value
+         * @return tuple of up to six values that has two values
+         */
+        public static <T, U, V, W, X, Y> UpToSix<T, U, V, W, X, Y> sixNullable(
+            final T t,
+            final U u
+        ) {
+            return new UpToSix<>(
+                2,
+                t,
+                u,
+                null,
+                null,
+                null,
+                null
+            );
+        }
+
+        /**
+         * Construct a tuple capable of holding up to six values of different types with three non-null values
+         *  
+         * @param <T> first type
+         * @param <U> second type
+         * @param <V> third type
+         * @param <W> fourth type
+         * @param <X> fifth type
+         * @param <Y> sixth type
+         * @param t first value
+         * @param u second value
+         * @param v third value
+         * @return tuple of up to six values that has three values
+         */
+        public static <T, U, V, W, X, Y> UpToSix<T, U, V, W, X, Y> six(
+            final T t,
+            final U u,
+            final V v
+        ) {
+            return new UpToSix<>(
+                3,
+                Objects.requireNonNull(t, "t"),
+                Objects.requireNonNull(u, "u"),
+                Objects.requireNonNull(v, "v"),
+                null,
+                null,
+                null
+            );
+        }
+
+        /**
+         * Construct a tuple capable of holding up to six values of different types with three nullable values
+         *  
+         * @param <T> first type
+         * @param <U> second type
+         * @param <V> third type
+         * @param <W> fourth type
+         * @param <X> fifth type
+         * @param <Y> sixth type
+         * @param t first value
+         * @param u second value
+         * @param v third value
+         * @return tuple of up to six values that has three values
+         */
+        public static <T, U, V, W, X, Y> UpToSix<T, U, V, W, X, Y> sixNullable(
+            final T t,
+            final U u,
+            final V v
+        ) {
+            return new UpToSix<>(
+                3,
+                t,
+                u,
+                v,
+                null,
+                null,
+                null
+            );
+        }
+
+        /**
+         * Construct a tuple capable of holding up to six values of different types with four non-null values
+         *  
+         * @param <T> first type
+         * @param <U> second type
+         * @param <V> third type
+         * @param <W> fourth type
+         * @param <X> fifth type
+         * @param <Y> sixth type
+         * @param t first value
+         * @param u second value
+         * @param v third value
+         * @param w third value
+         * @return tuple of up to six values that has four values
+         */
+        public static <T, U, V, W, X, Y> UpToSix<T, U, V, W, X, Y> six(
+            final T t,
+            final U u,
+            final V v,
+            final W w
+        ) {
+            return new UpToSix<>(
+                4,
+                Objects.requireNonNull(t, "t"),
+                Objects.requireNonNull(u, "u"),
+                Objects.requireNonNull(v, "v"),
+                Objects.requireNonNull(w, "w"),
+                null,
+                null
+            );
+        }
+
+        /**
+         * Construct a tuple capable of holding up to six values of different types with four nullable values
+         *  
+         * @param <T> first type
+         * @param <U> second type
+         * @param <V> third type
+         * @param <W> fourth type
+         * @param <X> fifth type
+         * @param <Y> sixth type
+         * @param t first value
+         * @param u second value
+         * @param v third value
+         * @param w fourth value
+         * @return tuple of up to six values that has four values
+         */
+        public static <T, U, V, W, X, Y> UpToSix<T, U, V, W, X, Y> sixNullable(
+            final T t,
+            final U u,
+            final V v,
+            final W w
+        ) {
+            return new UpToSix<>(
+                4,
+                t,
+                u,
+                v,
+                w,
+                null,
+                null
+            );
+        }
+
+        /**
+         * Construct a tuple capable of holding up to six values of different types with five non-null values
+         *  
+         * @param <T> first type
+         * @param <U> second type
+         * @param <V> third type
+         * @param <W> fourth type
+         * @param <X> fifth type
+         * @param <Y> sixth type
+         * @param t first value
+         * @param u second value
+         * @param v third value
+         * @param w fourth value
+         * @param x fifth value
+         * @return tuple of up to six values that has five values
+         */
+        public static <T, U, V, W, X, Y> UpToSix<T, U, V, W, X, Y> six(
+            final T t,
+            final U u,
+            final V v,
+            final W w,
+            final X x
+        ) {
+            return new UpToSix<>(
+                5,
+                Objects.requireNonNull(t, "t"),
+                Objects.requireNonNull(u, "u"),
+                Objects.requireNonNull(v, "v"),
+                Objects.requireNonNull(w, "w"),
+                Objects.requireNonNull(x, "x"),
+                null
+            );
+        }
+
+        /**
+         * Construct a tuple capable of holding up to six values of different types with five nullable values
+         *  
+         * @param <T> first type
+         * @param <U> second type
+         * @param <V> third type
+         * @param <W> fourth type
+         * @param <X> fifth type
+         * @param <Y> sixth type
+         * @param t first value
+         * @param u second value
+         * @param v third value
+         * @param w fourth value
+         * @param x fifth value
+         * @return tuple of up to six values that has five values
+         */
+        public static <T, U, V, W, X, Y> UpToSix<T, U, V, W, X, Y> sixNullable(
+            final T t,
+            final U u,
+            final V v,
+            final W w,
+            final X x
+        ) {
+            return new UpToSix<>(
+                5,
+                t,
+                u,
+                v,
+                w,
+                x,
+                null
+            );
+        }
+
+        /**
+         * Construct a tuple capable of holding up to six values of different types with six non-null values
+         *  
+         * @param <T> first type
+         * @param <U> second type
+         * @param <V> third type
+         * @param <W> fourth type
+         * @param <X> fifth type
+         * @param <Y> sixth type
+         * @param t first value
+         * @param u second value
+         * @param v third value
+         * @param w fourth value
+         * @param x fifth value
+         * @param y sixth value
+         * @return tuple of up to six values that has six values
+         */
+        public static <T, U, V, W, X, Y> UpToSix<T, U, V, W, X, Y> six(
+            final T t,
+            final U u,
+            final V v,
+            final W w,
+            final X x,
+            final Y y
+        ) {
+            return new UpToSix<>(
+                6,
+                Objects.requireNonNull(t, "t"),
+                Objects.requireNonNull(u, "u"),
+                Objects.requireNonNull(v, "v"),
+                Objects.requireNonNull(w, "w"),
+                Objects.requireNonNull(x, "x"),
+                Objects.requireNonNull(y, "y")
+            );
+        }
+
+        /**
+         * Construct a tuple capable of holding up to six values of different types with six nullable values
+         *  
+         * @param <T> first type
+         * @param <U> second type
+         * @param <V> third type
+         * @param <W> fourth type
+         * @param <X> fifth type
+         * @param <Y> sixth type
+         * @param t first value
+         * @param u second value
+         * @param v third value
+         * @param w fourth value
+         * @param x fifth value
+         * @param y sixth value
+         * @return tuple of up to six values that has six values
+         */
+        public static <T, U, V, W, X, Y> UpToSix<T, U, V, W, X, Y> sixNullable(
+            final T t,
+            final U u,
+            final V v,
+            final W w,
+            final X x,
+            final Y y
+        ) {
+            return new UpToSix<>(
+                6,
+                t,
+                u,
+                v,
+                w,
+                x,
+                y
+            );
+        }
+    }
+
+    /**
+     * A class that provides named constructors for variable size tuples with a single type
+     */
+    public static final class UpToSame {
+        
+        // ==== Two named constructors
+
+        /**
+         * Construct a tuple capable of holding up to two values of the same type with no values
+         *  
+         * @param <T> type
+         * @return tuple of up to two values that is empty
+         */
+        public static <T> UpToTwoOf<T> two(
+        ) {
+            return new UpToTwoOf<>(
+                0,
+                null,
+                null
+            );
+        }
+
+        /**
+         * Construct a tuple capable of holding up to two values of the same type with one non-null value
+         *  
+         * @param <T> type
+         * @param t value
+         * @return tuple of up to two values that has one value
+         */
+        public static <T> UpToTwoOf<T> two(
+            final T t
+        ) {
+            return new UpToTwoOf<>(
+                1,
+                Objects.requireNonNull(t, "t"),
+                null
+            );
+        }
+
+        /**
+         * Construct a tuple capable of holding up to two values of the same type with one nullable value
+         *  
+         * @param <T> type
+         * @param t value
+         * @return tuple of up to two values that has one value
+         */
+        public static <T> UpToTwoOf<T> twoNullable(
+            final T t
+        ) {
+            return new UpToTwoOf<>(
+                1,
+                t,
+                null
+            );
+        }
+
+        /**
+         * Construct a tuple capable of holding up to two values of the same type with two non-null values
+         *  
+         * @param <T> type
+         * @param t first value
+         * @param u second value
+         * @return tuple of up to two values that has two values
+         */
+        public static <T> UpToTwoOf<T> two(
+            final T t,
+            final T u
+        ) {
+            return new UpToTwoOf<>(
+                2,
+                Objects.requireNonNull(t, "t"),
+                Objects.requireNonNull(u, "u")
+            );
+        }
+
+        /**
+         * Construct a tuple capable of holding up to two values of the same type with two nullable values
+         *  
+         * @param <T> type
+         * @param t first value
+         * @param u second value
+         * @return tuple of up to two values that has two values
+         */
+        public static <T> UpToTwoOf<T> twoNullable(
+            final T t,
+            final T u
+        ) {
+            return new UpToTwoOf<>(
+                2,
+                t,
+                u
+            );
+        }
+        
+        // ==== Three named constructors
+
+        /**
+         * Construct a tuple capable of holding up to three values of the same type with no values
+         *  
+         * @param <T> type
+         * @return tuple of up to three values that is empty
+         */
+        public static <T> UpToThreeOf<T> three(
+        ) {
+            return new UpToThreeOf<>(
+                0,
+                null,
+                null,
+                null
+            );
+        }
+
+        /**
+         * Construct a tuple capable of holding up to three values of the same type with one non-null value
+         *  
+         * @param <T> type
+         * @param t value
+         * @return tuple of up to three values that has one value
+         */
+        public static <T> UpToThreeOf<T> three(
+            final T t
+        ) {
+            return new UpToThreeOf<>(
+                1,
+                Objects.requireNonNull(t, "t"),
+                null,
+                null
+            );
+        }
+
+        /**
+         * Construct a tuple capable of holding up to three values of the same type with one nullable value
+         *  
+         * @param <T> type
+         * @param t value
+         * @return tuple of up to three values that has one value
+         */
+        public static <T> UpToThreeOf<T> threeNullable(
+            final T t
+        ) {
+            return new UpToThreeOf<>(
+                1,
+                t,
+                null,
+                null
+            );
+        }
+
+        /**
+         * Construct a tuple capable of holding up to three values of the same type with two non-null values
+         *  
+         * @param <T> type
+         * @param t first value
+         * @param u second value
+         * @return tuple of up to three values that has two values
+         */
+        public static <T> UpToThreeOf<T> three(
+            final T t,
+            final T u
+        ) {
+            return new UpToThreeOf<>(
+                2,
+                Objects.requireNonNull(t, "t"),
+                Objects.requireNonNull(u, "u"),
+                null
+            );
+        }
+
+        /**
+         * Construct a tuple capable of holding up to three values of the same type with two nullable values
+         *  
+         * @param <T> type
+         * @param t first value
+         * @param u second value
+         * @return tuple of up to three values that has two values
+         */
+        public static <T> UpToThreeOf<T> threeNullable(
+            final T t,
+            final T u
+        ) {
+            return new UpToThreeOf<>(
+                2,
+                t,
+                u,
+                null
+            );
+        }
+
+        /**
+         * Construct a tuple capable of holding up to three values of the same type with three non-null values
+         *  
+         * @param <T> type
+         * @param t first value
+         * @param u second value
+         * @param v third value
+         * @return tuple of up to three values that has three values
+         */
+        public static <T> UpToThreeOf<T> three(
+            final T t,
+            final T u,
+            final T v
+        ) {
+            return new UpToThreeOf<>(
+                3,
+                Objects.requireNonNull(t, "t"),
+                Objects.requireNonNull(u, "u"),
+                Objects.requireNonNull(v, "v")
+            );
+        }
+
+        /**
+         * Construct a tuple capable of holding up to three values of the same type with three nullable values
+         *  
+         * @param <T> type
+         * @param t first value
+         * @param u second value
+         * @param v third value
+         * @return tuple of up to three values that has three values
+         */
+        public static <T> UpToThreeOf<T> threeNullable(
+            final T t,
+            final T u,
+            final T v
+        ) {
+            return new UpToThreeOf<>(
+                3,
+                t,
+                u,
+                v
+            );
+        }
+        
+        // ==== Four named constructors
+
+        /**
+         * Construct a tuple capable of holding up to four values of the same type with no values
+         *  
+         * @param <T> type
+         * @return tuple of up to four values that is empty
+         */
+        public static <T> UpToFourOf<T> four(
+        ) {
+            return new UpToFourOf<>(
+                0,
+                null,
+                null,
+                null,
+                null
+            );
+        }
+
+        /**
+         * Construct a tuple capable of holding up to four values of the same type with one non-null value
+         *  
+         * @param <T> type
+         * @param t value
+         * @return tuple of up to four values that has one value
+         */
+        public static <T> UpToFourOf<T> four(
+            final T t
+        ) {
+            return new UpToFourOf<>(
+                1,
+                Objects.requireNonNull(t, "t"),
+                null,
+                null,
+                null
+            );
+        }
+
+        /**
+         * Construct a tuple capable of holding up to four values of the same type with one nullable value
+         *  
+         * @param <T> type
+         * @param t value
+         * @return tuple of up to four values that has one value
+         */
+        public static <T> UpToFourOf<T> fourNullable(
+            final T t
+        ) {
+            return new UpToFourOf<>(
+                1,
+                t,
+                null,
+                null,
+                null
+            );
+        }
+
+        /**
+         * Construct a tuple capable of holding up to four values of the same type with two non-null values
+         *  
+         * @param <T> type
+         * @param t first value
+         * @param u second value
+         * @return tuple of up to four values that has two values
+         */
+        public static <T> UpToFourOf<T> four(
+            final T t,
+            final T u
+        ) {
+            return new UpToFourOf<>(
+                2,
+                Objects.requireNonNull(t, "t"),
+                Objects.requireNonNull(u, "u"),
+                null,
+                null
+            );
+        }
+
+        /**
+         * Construct a tuple capable of holding up to four values of the same type with two nullable values
+         *  
+         * @param <T> type
+         * @param t first value
+         * @param u second value
+         * @return tuple of up to four values that has two values
+         */
+        public static <T> UpToFourOf<T> fourNullable(
+            final T t,
+            final T u
+        ) {
+            return new UpToFourOf<>(
+                2,
+                t,
+                u,
+                null,
+                null
+            );
+        }
+
+        /**
+         * Construct a tuple capable of holding up to four values of the same type with three non-null values
+         *  
+         * @param <T> type
+         * @param t first value
+         * @param u second value
+         * @param v third value
+         * @return tuple of up to four values that has three values
+         */
+        public static <T> UpToFourOf<T> four(
+            final T t,
+            final T u,
+            final T v
+        ) {
+            return new UpToFourOf<>(
+                3,
+                Objects.requireNonNull(t, "t"),
+                Objects.requireNonNull(u, "u"),
+                Objects.requireNonNull(v, "v"),
+                null
+            );
+        }
+
+        /**
+         * Construct a tuple capable of holding up to four values of the same type with three nullable values
+         *  
+         * @param <T> type
+         * @param t first value
+         * @param u second value
+         * @param v third value
+         * @return tuple of up to four values that has three values
+         */
+        public static <T> UpToFourOf<T> fourNullable(
+            final T t,
+            final T u,
+            final T v
+        ) {
+            return new UpToFourOf<>(
+                3,
+                t,
+                u,
+                v,
+                null
+            );
+        }
+
+        /**
+         * Construct a tuple capable of holding up to four values of the same type with four non-null values
+         *  
+         * @param <T> type
+         * @param t first value
+         * @param u second value
+         * @param v third value
+         * @param v fourth value
+         * @return tuple of up to four values that has four values
+         */
+        public static <T> UpToFourOf<T> four(
+            final T t,
+            final T u,
+            final T v,
+            final T w
+        ) {
+            return new UpToFourOf<>(
+                4,
+                Objects.requireNonNull(t, "t"),
+                Objects.requireNonNull(u, "u"),
+                Objects.requireNonNull(v, "v"),
+                Objects.requireNonNull(w, "w")
+            );
+        }
+
+        /**
+         * Construct a tuple capable of holding up to four values of the same type with four nullable values
+         *  
+         * @param <T> type
+         * @param t first value
+         * @param u second value
+         * @param v third value
+         * @param w fourth value
+         * @return tuple of up to four values that has four values
+         */
+        public static <T> UpToFourOf<T> fourNullable(
+            final T t,
+            final T u,
+            final T v,
+            final T w
+        ) {
+            return new UpToFourOf<>(
+                4,
+                t,
+                u,
+                v,
+                w
+            );
+        }
+        
+        // ==== Five named constructors
+
+        /**
+         * Construct a tuple capable of holding up to five values of the same type with no values
+         *  
+         * @param <T> type
+         * @return tuple of up to five values that is empty
+         */
+        public static <T> UpToFiveOf<T> five(
+        ) {
+            return new UpToFiveOf<>(
+                0,
+                null,
+                null,
+                null,
+                null,
+                null
+            );
+        }
+
+        /**
+         * Construct a tuple capable of holding up to five values of the same type with one non-null value
+         *  
+         * @param <T> type
+         * @param t value
+         * @return tuple of up to five values that has one value
+         */
+        public static <T> UpToFiveOf<T> five(
+            final T t
+        ) {
+            return new UpToFiveOf<>(
+                1,
+                Objects.requireNonNull(t, "t"),
+                null,
+                null,
+                null,
+                null
+            );
+        }
+
+        /**
+         * Construct a tuple capable of holding up to five values of the same type with one nullable value
+         *  
+         * @param <T> type
+         * @param t value
+         * @return tuple of up to five values that has one value
+         */
+        public static <T> UpToFiveOf<T> fiveNullable(
+            final T t
+        ) {
+            return new UpToFiveOf<>(
+                1,
+                t,
+                null,
+                null,
+                null,
+                null
+            );
+        }
+
+        /**
+         * Construct a tuple capable of holding up to five values of the same type with two non-null values
+         *  
+         * @param <T> type
+         * @param t first value
+         * @param u second value
+         * @return tuple of up to five values that has two values
+         */
+        public static <T> UpToFiveOf<T> five(
+            final T t,
+            final T u
+        ) {
+            return new UpToFiveOf<>(
+                2,
+                Objects.requireNonNull(t, "t"),
+                Objects.requireNonNull(u, "u"),
+                null,
+                null,
+                null
+            );
+        }
+
+        /**
+         * Construct a tuple capable of holding up to five values of the same type with two nullable values
+         *  
+         * @param <T> type
+         * @param t first value
+         * @param u second value
+         * @return tuple of up to five values that has two values
+         */
+        public static <T> UpToFiveOf<T> fiveNullable(
+            final T t,
+            final T u
+        ) {
+            return new UpToFiveOf<>(
+                2,
+                t,
+                u,
+                null,
+                null,
+                null
+            );
+        }
+
+        /**
+         * Construct a tuple capable of holding up to five values of the same type with three non-null values
+         *  
+         * @param <T> type
+         * @param t first value
+         * @param u second value
+         * @param v third value
+         * @return tuple of up to five values that has three values
+         */
+        public static <T> UpToFiveOf<T> five(
+            final T t,
+            final T u,
+            final T v
+        ) {
+            return new UpToFiveOf<>(
+                3,
+                Objects.requireNonNull(t, "t"),
+                Objects.requireNonNull(u, "u"),
+                Objects.requireNonNull(v, "v"),
+                null,
+                null
+            );
+        }
+
+        /**
+         * Construct a tuple capable of holding up to five values of the same type with three nullable values
+         *  
+         * @param <T> type
+         * @param t first value
+         * @param u second value
+         * @param v third value
+         * @return tuple of up to five values that has three values
+         */
+        public static <T> UpToFiveOf<T> fiveNullable(
+            final T t,
+            final T u,
+            final T v
+        ) {
+            return new UpToFiveOf<>(
+                3,
+                t,
+                u,
+                v,
+                null,
+                null
+            );
+        }
+
+        /**
+         * Construct a tuple capable of holding up to five values of the same type with four non-null values
+         *  
+         * @param <T> type
+         * @param t first value
+         * @param u second value
+         * @param v third value
+         * @param v fourth value
+         * @return tuple of up to five values that has four values
+         */
+        public static <T> UpToFiveOf<T> five(
+            final T t,
+            final T u,
+            final T v,
+            final T w
+        ) {
+            return new UpToFiveOf<>(
+                4,
+                Objects.requireNonNull(t, "t"),
+                Objects.requireNonNull(u, "u"),
+                Objects.requireNonNull(v, "v"),
+                Objects.requireNonNull(w, "w"),
+                null
+            );
+        }
+
+        /**
+         * Construct a tuple capable of holding up to five values of the same type with four nullable values
+         *  
+         * @param <T> type
+         * @param t first value
+         * @param u second value
+         * @param v third value
+         * @param w fourth value
+         * @return tuple of up to five values that has four values
+         */
+        public static <T> UpToFiveOf<T> fiveNullable(
+            final T t,
+            final T u,
+            final T v,
+            final T w
+        ) {
+            return new UpToFiveOf<>(
+                4,
+                t,
+                u,
+                v,
+                w,
+                null
+            );
+        }
+
+        /**
+         * Construct a tuple capable of holding up to five values of the same type with five non-null values
+         *  
+         * @param <T> type
+         * @param t first value
+         * @param u second value
+         * @param v third value
+         * @param v fourth value
+         * @param x fifth value
+         * @return tuple of up to five values that has five values
+         */
+        public static <T> UpToFiveOf<T> five(
+            final T t,
+            final T u,
+            final T v,
+            final T w,
+            final T x
+        ) {
+            return new UpToFiveOf<>(
+                5,
+                Objects.requireNonNull(t, "t"),
+                Objects.requireNonNull(u, "u"),
+                Objects.requireNonNull(v, "v"),
+                Objects.requireNonNull(w, "w"),
+                Objects.requireNonNull(x, "x")
+            );
+        }
+
+        /**
+         * Construct a tuple capable of holding up to five values of the same type with five nullable values
+         *  
+         * @param <T> type
+         * @param t first value
+         * @param u second value
+         * @param v third value
+         * @param w fourth value
+         * @param x fifth value
+         * @return tuple of up to five values that has five values
+         */
+        public static <T> UpToFiveOf<T> fiveNullable(
+            final T t,
+            final T u,
+            final T v,
+            final T w,
+            final T x
+        ) {
+            return new UpToFiveOf<>(
+                5,
+                t,
+                u,
+                v,
+                w,
+                x
+            );
+        }
+        
+        // ==== Six named constructors
+
+        /**
+         * Construct a tuple capable of holding up to six values of the same type with no values
+         *  
+         * @param <T> type
+         * @return tuple of up to six values that is empty
+         */
+        public static <T> UpToSixOf<T> six(
+        ) {
+            return new UpToSixOf<>(
+                0,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+            );
+        }
+
+        /**
+         * Construct a tuple capable of holding up to six values of the same type with one non-null value
+         *  
+         * @param <T> type
+         * @param t value
+         * @return tuple of up to six values that has one value
+         */
+        public static <T> UpToSixOf<T> six(
+            final T t
+        ) {
+            return new UpToSixOf<>(
+                1,
+                Objects.requireNonNull(t, "t"),
+                null,
+                null,
+                null,
+                null,
+                null
+            );
+        }
+
+        /**
+         * Construct a tuple capable of holding up to six values of the same type with one nullable value
+         *  
+         * @param <T> type
+         * @param t value
+         * @return tuple of up to six values that has one value
+         */
+        public static <T> UpToSixOf<T> sixNullable(
+            final T t
+        ) {
+            return new UpToSixOf<>(
+                1,
+                t,
+                null,
+                null,
+                null,
+                null,
+                null
+            );
+        }
+
+        /**
+         * Construct a tuple capable of holding up to six values of the same type with two non-null values
+         *  
+         * @param <T> type
+         * @param t first value
+         * @param u second value
+         * @return tuple of up to six values that has two values
+         */
+        public static <T> UpToSixOf<T> six(
+            final T t,
+            final T u
+        ) {
+            return new UpToSixOf<>(
+                2,
+                Objects.requireNonNull(t, "t"),
+                Objects.requireNonNull(u, "u"),
+                null,
+                null,
+                null,
+                null
+            );
+        }
+
+        /**
+         * Construct a tuple capable of holding up to six values of the same type with two nullable values
+         *  
+         * @param <T> type
+         * @param t first value
+         * @param u second value
+         * @return tuple of up to six values that has two values
+         */
+        public static <T> UpToSixOf<T> sixNullable(
+            final T t,
+            final T u
+        ) {
+            return new UpToSixOf<>(
+                2,
+                t,
+                u,
+                null,
+                null,
+                null,
+                null
+            );
+        }
+
+        /**
+         * Construct a tuple capable of holding up to six values of the same type with three non-null values
+         *  
+         * @param <T> type
+         * @param t first value
+         * @param u second value
+         * @param v third value
+         * @return tuple of up to six values that has three values
+         */
+        public static <T> UpToSixOf<T> six(
+            final T t,
+            final T u,
+            final T v
+        ) {
+            return new UpToSixOf<>(
+                3,
+                Objects.requireNonNull(t, "t"),
+                Objects.requireNonNull(u, "u"),
+                Objects.requireNonNull(v, "v"),
+                null,
+                null,
+                null
+            );
+        }
+
+        /**
+         * Construct a tuple capable of holding up to six values of the same type with three nullable values
+         *  
+         * @param <T> type
+         * @param t first value
+         * @param u second value
+         * @param v third value
+         * @return tuple of up to six values that has three values
+         */
+        public static <T> UpToSixOf<T> sixNullable(
+            final T t,
+            final T u,
+            final T v
+        ) {
+            return new UpToSixOf<>(
+                3,
+                t,
+                u,
+                v,
+                null,
+                null,
+                null
+            );
+        }
+
+        /**
+         * Construct a tuple capable of holding up to six values of the same type with four non-null values
+         *  
+         * @param <T> type
+         * @param t first value
+         * @param u second value
+         * @param v third value
+         * @param v fourth value
+         * @return tuple of up to six values that has four values
+         */
+        public static <T> UpToSixOf<T> six(
+            final T t,
+            final T u,
+            final T v,
+            final T w
+        ) {
+            return new UpToSixOf<>(
+                4,
+                Objects.requireNonNull(t, "t"),
+                Objects.requireNonNull(u, "u"),
+                Objects.requireNonNull(v, "v"),
+                Objects.requireNonNull(w, "w"),
+                null,
+                null
+            );
+        }
+
+        /**
+         * Construct a tuple capable of holding up to six values of the same type with four nullable values
+         *  
+         * @param <T> type
+         * @param t first value
+         * @param u second value
+         * @param v third value
+         * @param w fourth value
+         * @return tuple of up to six values that has four values
+         */
+        public static <T> UpToSixOf<T> sixNullable(
+            final T t,
+            final T u,
+            final T v,
+            final T w
+        ) {
+            return new UpToSixOf<>(
+                4,
+                t,
+                u,
+                v,
+                w,
+                null,
+                null
+            );
+        }
+
+        /**
+         * Construct a tuple capable of holding up to six values of the same type with five non-null values
+         *  
+         * @param <T> type
+         * @param t first value
+         * @param u second value
+         * @param v third value
+         * @param v fourth value
+         * @param x fifth value
+         * @return tuple of up to six values that has five values
+         */
+        public static <T> UpToSixOf<T> six(
+            final T t,
+            final T u,
+            final T v,
+            final T w,
+            final T x
+        ) {
+            return new UpToSixOf<>(
+                5,
+                Objects.requireNonNull(t, "t"),
+                Objects.requireNonNull(u, "u"),
+                Objects.requireNonNull(v, "v"),
+                Objects.requireNonNull(w, "w"),
+                Objects.requireNonNull(x, "x"),
+                null
+            );
+        }
+
+        /**
+         * Construct a tuple capable of holding up to six values of the same type with five nullable values
+         *  
+         * @param <T> type
+         * @param t first value
+         * @param u second value
+         * @param v third value
+         * @param w fourth value
+         * @param x fifth value
+         * @return tuple of up to six values that has five values
+         */
+        public static <T> UpToSixOf<T> sixNullable(
+            final T t,
+            final T u,
+            final T v,
+            final T w,
+            final T x
+        ) {
+            return new UpToSixOf<>(
+                5,
+                t,
+                u,
+                v,
+                w,
+                x,
+                null
+            );
+        }
+
+        /**
+         * Construct a tuple capable of holding up to six values of the same type with six non-null values
+         *  
+         * @param <T> type
+         * @param t first value
+         * @param u second value
+         * @param v third value
+         * @param v fourth value
+         * @param x fifth value
+         * @param y sixth value
+         * @return tuple of up to six values that has six values
+         */
+        public static <T> UpToSixOf<T> six(
+            final T t,
+            final T u,
+            final T v,
+            final T w,
+            final T x,
+            final T y
+        ) {
+            return new UpToSixOf<>(
+                6,
+                Objects.requireNonNull(t, "t"),
+                Objects.requireNonNull(u, "u"),
+                Objects.requireNonNull(v, "v"),
+                Objects.requireNonNull(w, "w"),
+                Objects.requireNonNull(x, "x"),
+                Objects.requireNonNull(y, "y")
+            );
+        }
+
+        /**
+         * Construct a tuple capable of holding up to six values of the same type with six nullable values
+         *  
+         * @param <T> type
+         * @param t first value
+         * @param u second value
+         * @param v third value
+         * @param w fourth value
+         * @param x fifth value
+         * @param y sixth value
+         * @return tuple of up to six values that has six values
+         */
+        public static <T> UpToSixOf<T> sixNullable(
+            final T t,
+            final T u,
+            final T v,
+            final T w,
+            final T x,
+            final T y
+        ) {
+            return new UpToSixOf<>(
+                6,
+                t,
+                u,
+                v,
+                w,
+                x,
+                y
+            );
+        }
+    }
+    
+    // ==== Named constructors for fixed tuples with different types
     
     /**
      * Construct a tuple of two non-null values of different types
@@ -1071,221 +3520,6 @@ public class Tuple {
         final U u
     ) {
         return new Two<>(
-            t,
-            u
-        );
-    }
-
-    /**
-     * Construct a tuple of two non-null values of the same type
-     *  
-     * @param <T> type
-     * @param t first value
-     * @param u second value
-     * @return tuple of two values
-     */
-    public static <T> TwoOf<T> ofSame(
-        final T t,
-        final T u
-    ) {
-        return new TwoOf<>(
-            Objects.requireNonNull(t, "t"),
-            Objects.requireNonNull(u, "u")
-        );
-    }
-
-    /**
-     * Construct a tuple of two nullable values of the same type
-     *  
-     * @param <T> type
-     * @param t first value
-     * @param u second value
-     * @return tuple of two values
-     */
-    public static <T> TwoOf<T> ofSameNullable(
-        final T t,
-        final T u
-    ) {
-        return new TwoOf<>(
-            t,
-            u
-        );
-    }
-
-    /**
-     * Construct a tuple capable of holding up to two values of different types with no values
-     *  
-     * @param <T> first type
-     * @param <U> second type
-     * @return tuple of up to two values that is empty
-     */
-    public static <T, U> UpToTwo<T, U> upToTwo(
-    ) {
-        return new UpToTwo<>(
-            0,
-            null,
-            null
-        );
-    }
-
-    /**
-     * Construct a tuple capable of holding up to two values of different types with one non-null value
-     *  
-     * @param <T> first type
-     * @param <U> second type
-     * @param t value
-     * @return tuple of up to two values that has one value
-     */
-    public static <T, U> UpToTwo<T, U> upToTwo(
-        final T t
-    ) {
-        return new UpToTwo<>(
-            1,
-            Objects.requireNonNull(t, "t"),
-            null
-        );
-    }
-
-    /**
-     * Construct a tuple capable of holding up to two values of different types with one nullable value
-     *  
-     * @param <T> first type
-     * @param <U> second type
-     * @param t value
-     * @return tuple of up to two values that has one value
-     */
-    public static <T, U> UpToTwo<T, U> upToTwoNullable(
-        final T t
-    ) {
-        return new UpToTwo<>(
-            1,
-            t,
-            null
-        );
-    }
-
-    /**
-     * Construct a tuple capable of holding up to two values of different types with two non-null values
-     *  
-     * @param <T> first type
-     * @param <U> second type
-     * @param t first value
-     * @param u second value
-     * @return tuple of up to two values that has two values
-     */
-    public static <T, U> UpToTwo<T, U> upToTwo(
-        final T t,
-        final U u
-    ) {
-        return new UpToTwo<>(
-            2,
-            Objects.requireNonNull(t, "t"),
-            Objects.requireNonNull(u, "u")
-        );
-    }
-
-    /**
-     * Construct a tuple capable of holding up to two values of different types with two nullable values
-     *  
-     * @param <T> first type
-     * @param <U> second type
-     * @param t first value
-     * @param u second value
-     * @return tuple of up to two values that has two values
-     */
-    public static <T, U> UpToTwo<T, U> upToTwoNullable(
-        final T t,
-        final U u
-    ) {
-        return new UpToTwo<>(
-            2,
-            t,
-            u
-        );
-    }
-
-    /**
-     * Construct a tuple capable of holding up to two values of the same type with no values
-     *  
-     * @param <T> type
-     * @return tuple of up to two values that is empty
-     */
-    public static <T> UpToTwoOf<T> upToTwoOf(
-    ) {
-        return new UpToTwoOf<>(
-            0,
-            null,
-            null
-        );
-    }
-
-    /**
-     * Construct a tuple capable of holding up to two values of the same type with one non-null value
-     *  
-     * @param <T> type
-     * @param t value
-     * @return tuple of up to two values that has one value
-     */
-    public static <T> UpToTwoOf<T> upToTwoOf(
-        final T t
-    ) {
-        return new UpToTwoOf<>(
-            1,
-            Objects.requireNonNull(t, "t"),
-            null
-        );
-    }
-
-    /**
-     * Construct a tuple capable of holding up to two values of the same type with one nullable value
-     *  
-     * @param <T> type
-     * @param t value
-     * @return tuple of up to two values that has one value
-     */
-    public static <T> UpToTwoOf<T> upToTwoOfNullable(
-        final T t
-    ) {
-        return new UpToTwoOf<>(
-            1,
-            t,
-            null
-        );
-    }
-
-    /**
-     * Construct a tuple capable of holding up to two values of the same type with two non-null values
-     *  
-     * @param <T> type
-     * @param t first value
-     * @param u second value
-     * @return tuple of up to two values that has two values
-     */
-    public static <T> UpToTwoOf<T> upToTwoOf(
-        final T t,
-        final T u
-    ) {
-        return new UpToTwoOf<>(
-            2,
-            Objects.requireNonNull(t, "t"),
-            Objects.requireNonNull(u, "u")
-        );
-    }
-
-    /**
-     * Construct a tuple capable of holding up to two values of the same type with two nullable values
-     *  
-     * @param <T> type
-     * @param t first value
-     * @param u second value
-     * @return tuple of up to two values that has two values
-     */
-    public static <T> UpToTwoOf<T> upToTwoOfNullable(
-        final T t,
-        final T u
-    ) {
-        return new UpToTwoOf<>(
-            2,
             t,
             u
         );
@@ -1333,335 +3567,6 @@ public class Tuple {
         final V v
     ) {
         return new Three<>(
-            t,
-            u,
-            v
-        );
-    }
-    
-    /**
-     * Construct a tuple of three non-null values of the same type
-     *  
-     * @param <T> type
-     * @param t first value
-     * @param u second value
-     * @param v third value
-     * @return tuple of three values
-     */
-    public static <T> ThreeOf<T> ofSame(
-        final T t,
-        final T u,
-        final T v
-    ) {
-        return new ThreeOf<>(
-            Objects.requireNonNull(t, "t"),
-            Objects.requireNonNull(u, "u"),
-            Objects.requireNonNull(v, "v")
-        );
-    }
-    
-
-    /**
-     * Construct a tuple of three nullable values of the same type
-     *  
-     * @param <T> type
-     * @param t first value
-     * @param u second value
-     * @param v third value
-     * @return tuple of three values
-     */
-    public static <T> ThreeOf<T> ofSameNullable(
-        final T t,
-        final T u,
-        final T v
-    ) {
-        return new ThreeOf<>(
-            t,
-            u,
-            v
-        );
-    }
-
-    /**
-     * Construct a tuple capable of holding up to three values of different types with no values
-     *  
-     * @param <T> first type
-     * @param <U> second type
-     * @param <V> third type
-     * @return tuple of up to three values that is empty
-     */
-    public static <T, U, V> UpToThree<T, U, V> upToThree(
-    ) {
-        return new UpToThree<>(
-            0,
-            null,
-            null,
-            null
-        );
-    }
-
-    /**
-     * Construct a tuple capable of holding up to three values of different types with one non-null value
-     *  
-     * @param <T> first type
-     * @param <U> second type
-     * @param <V> third type
-     * @param t value
-     * @return tuple of up to three values that has one value
-     */
-    public static <T, U, V> UpToThree<T, U, V> upToThree(
-        final T t
-    ) {
-        return new UpToThree<>(
-            1,
-            Objects.requireNonNull(t, "t"),
-            null,
-            null
-        );
-    }
-
-    /**
-     * Construct a tuple capable of holding up to three values of different types with one nullable value
-     *  
-     * @param <T> first type
-     * @param <U> second type
-     * @param <V> third type
-     * @param t value
-     * @return tuple of up to three values that has one value
-     */
-    public static <T, U, V> UpToThree<T, U, V> upToThreeNullable(
-        final T t
-    ) {
-        return new UpToThree<>(
-            1,
-            t,
-            null,
-            null
-        );
-    }
-
-    /**
-     * Construct a tuple capable of holding up to three values of different types with two non-null values
-     *  
-     * @param <T> first type
-     * @param <U> second type
-     * @param <V> third type
-     * @param t first value
-     * @param u second value
-     * @return tuple of up to three values that has two values
-     */
-    public static <T, U, V> UpToThree<T, U, V> upToThree(
-        final T t,
-        final U u
-    ) {
-        return new UpToThree<>(
-            2,
-            Objects.requireNonNull(t, "t"),
-            Objects.requireNonNull(u, "u"),
-            null
-        );
-    }
-
-    /**
-     * Construct a tuple capable of holding up to three values of different types with two nullable values
-     *  
-     * @param <T> first type
-     * @param <U> second type
-     * @param <V> third type
-     * @param t first value
-     * @param u second value
-     * @return tuple of up to three values that has two values
-     */
-    public static <T, U, V> UpToThree<T, U, V> upToThreeNullable(
-        final T t,
-        final U u
-    ) {
-        return new UpToThree<>(
-            2,
-            t,
-            u,
-            null
-        );
-    }
-
-    /**
-     * Construct a tuple capable of holding up to three values of different types with three non-null values
-     *  
-     * @param <T> first type
-     * @param <U> second type
-     * @param <V> third type
-     * @param t first value
-     * @param u second value
-     * @param v third value
-     * @return tuple of up to three values that has three values
-     */
-    public static <T, U, V> UpToThree<T, U, V> upToThree(
-        final T t,
-        final U u,
-        final V v
-    ) {
-        return new UpToThree<>(
-            3,
-            Objects.requireNonNull(t, "t"),
-            Objects.requireNonNull(u, "u"),
-            Objects.requireNonNull(v, "v")
-        );
-    }
-
-    /**
-     * Construct a tuple capable of holding up to three values of different types with three nullable values
-     *  
-     * @param <T> first type
-     * @param <U> second type
-     * @param <V> third type
-     * @param t first value
-     * @param u second value
-     * @param v third value
-     * @return tuple of up to three values that has three values
-     */
-    public static <T, U, V> UpToThree<T, U, V> upToThreeNullable(
-        final T t,
-        final U u,
-        final V v
-    ) {
-        return new UpToThree<>(
-            3,
-            t,
-            u,
-            v
-        );
-    }
-
-    /**
-     * Construct a tuple capable of holding up to three values of the same type with no values
-     *  
-     * @param <T> type
-     * @return tuple of up to three values that is empty
-     */
-    public static <T> UpToThreeOf<T> upToThreeOf(
-    ) {
-        return new UpToThreeOf<>(
-            0,
-            null,
-            null,
-            null
-        );
-    }
-
-    /**
-     * Construct a tuple capable of holding up to three values of the same type with one non-null value
-     *  
-     * @param <T> type
-     * @param t value
-     * @return tuple of up to three values that has one value
-     */
-    public static <T> UpToThreeOf<T> upToThreeOf(
-        final T t
-    ) {
-        return new UpToThreeOf<>(
-            1,
-            Objects.requireNonNull(t, "t"),
-            null,
-            null
-        );
-    }
-
-    /**
-     * Construct a tuple capable of holding up to three values of the same type with one nullable value
-     *  
-     * @param <T> type
-     * @param t value
-     * @return tuple of up to three values that has one value
-     */
-    public static <T> UpToThreeOf<T> upToThreeOfNullable(
-        final T t
-    ) {
-        return new UpToThreeOf<>(
-            1,
-            t,
-            null,
-            null
-        );
-    }
-
-    /**
-     * Construct a tuple capable of holding up to three values of the same type with two non-null values
-     *  
-     * @param <T> type
-     * @param t first value
-     * @param u second value
-     * @return tuple of up to three values that has two values
-     */
-    public static <T> UpToThreeOf<T> upToThreeOf(
-        final T t,
-        final T u
-    ) {
-        return new UpToThreeOf<>(
-            2,
-            Objects.requireNonNull(t, "t"),
-            Objects.requireNonNull(u, "u"),
-            null
-        );
-    }
-
-    /**
-     * Construct a tuple capable of holding up to three values of the same type with two nullable values
-     *  
-     * @param <T> type
-     * @param t first value
-     * @param u second value
-     * @return tuple of up to three values that has two values
-     */
-    public static <T> UpToThreeOf<T> upToThreeOfNullable(
-        final T t,
-        final T u
-    ) {
-        return new UpToThreeOf<>(
-            2,
-            t,
-            u,
-            null
-        );
-    }
-
-    /**
-     * Construct a tuple capable of holding up to three values of the same type with three non-null values
-     *  
-     * @param <T> type
-     * @param t first value
-     * @param u second value
-     * @param v third value
-     * @return tuple of up to three values that has three values
-     */
-    public static <T> UpToThreeOf<T> upToThreeOf(
-        final T t,
-        final T u,
-        final T v
-    ) {
-        return new UpToThreeOf<>(
-            3,
-            Objects.requireNonNull(t, "t"),
-            Objects.requireNonNull(u, "u"),
-            Objects.requireNonNull(v, "v")
-        );
-    }
-
-    /**
-     * Construct a tuple capable of holding up to three values of the same type with three nullable values
-     *  
-     * @param <T> type
-     * @param t first value
-     * @param u second value
-     * @param v third value
-     * @return tuple of up to three values that has three values
-     */
-    public static <T> UpToThreeOf<T> upToThreeOfNullable(
-        final T t,
-        final T u,
-        final T v
-    ) {
-        return new UpToThreeOf<>(
-            3,
             t,
             u,
             v
@@ -1717,467 +3622,6 @@ public class Tuple {
         final W w
     ) {
         return new Four<>(
-            t,
-            u,
-            v,
-            w
-        );
-    }
-    
-    /**
-     * Construct a tuple of four non-null values of the same type
-     *  
-     * @param <T> type
-     * @param t first value
-     * @param u second value
-     * @param v third value
-     * @param w fourth value
-     * @return tuple of four values
-     */
-    public static <T> FourOf<T> ofSame(
-        final T t,
-        final T u,
-        final T v,
-        final T w
-    ) {
-        return new FourOf<>(
-            Objects.requireNonNull(t, "t"),
-            Objects.requireNonNull(u, "u"),
-            Objects.requireNonNull(v, "v"),
-            Objects.requireNonNull(w, "w")
-        );
-    }
-
-    /**
-     * Construct a tuple of four nullable values of the same type
-     *  
-     * @param <T> type
-     * @param t first value
-     * @param u second value
-     * @param v third value
-     * @param w fourth value
-     * @return tuple of four values
-     */
-    public static <T> FourOf<T> ofSameNullable(
-        final T t,
-        final T u,
-        final T v,
-        final T w
-    ) {
-        return new FourOf<>(
-            t,
-            u,
-            v,
-            w
-        );
-    }
-
-    /**
-     * Construct a tuple capable of holding up to four values of different types with no values
-     *  
-     * @param <T> first type
-     * @param <U> second type
-     * @param <V> third type
-     * @param <W> fourth type
-     * @return tuple of up to four values that is empty
-     */
-    public static <T, U, V, W> UpToFour<T, U, V, W> upToFour(
-    ) {
-        return new UpToFour<>(
-            0,
-            null,
-            null,
-            null,
-            null
-        );
-    }
-
-    /**
-     * Construct a tuple capable of holding up to four values of different types with one non-null value
-     *  
-     * @param <T> first type
-     * @param <U> second type
-     * @param <V> third type
-     * @param <W> fourth type
-     * @param t value
-     * @return tuple of up to four values that has one value
-     */
-    public static <T, U, V, W> UpToFour<T, U, V, W> upToFour(
-        final T t
-    ) {
-        return new UpToFour<>(
-            1,
-            Objects.requireNonNull(t, "t"),
-            null,
-            null,
-            null
-        );
-    }
-
-    /**
-     * Construct a tuple capable of holding up to four values of different types with one nullable value
-     *  
-     * @param <T> first type
-     * @param <U> second type
-     * @param <V> third type
-     * @param <W> fourth type
-     * @param t value
-     * @return tuple of up to four values that has one value
-     */
-    public static <T, U, V, W> UpToFour<T, U, V, W> upToFourNullable(
-        final T t
-    ) {
-        return new UpToFour<>(
-            1,
-            t,
-            null,
-            null,
-            null
-        );
-    }
-
-    /**
-     * Construct a tuple capable of holding up to four values of different types with two non-null values
-     *  
-     * @param <T> first type
-     * @param <U> second type
-     * @param <V> third type
-     * @param <W> fourth type
-     * @param t first value
-     * @param u second value
-     * @return tuple of up to four values that has two values
-     */
-    public static <T, U, V, W> UpToFour<T, U, V, W> upToFour(
-        final T t,
-        final U u
-    ) {
-        return new UpToFour<>(
-            2,
-            Objects.requireNonNull(t, "t"),
-            Objects.requireNonNull(u, "u"),
-            null,
-            null
-        );
-    }
-
-    /**
-     * Construct a tuple capable of holding up to four values of different types with two nullable values
-     *  
-     * @param <T> first type
-     * @param <U> second type
-     * @param <V> third type
-     * @param <W> fourth type
-     * @param t first value
-     * @param u second value
-     * @return tuple of up to four values that has two values
-     */
-    public static <T, U, V, W> UpToFour<T, U, V, W> upToFourNullable(
-        final T t,
-        final U u
-    ) {
-        return new UpToFour<>(
-            2,
-            t,
-            u,
-            null,
-            null
-        );
-    }
-
-    /**
-     * Construct a tuple capable of holding up to four values of different types with three non-null values
-     *  
-     * @param <T> first type
-     * @param <U> second type
-     * @param <V> third type
-     * @param <W> fourth type
-     * @param t first value
-     * @param u second value
-     * @param v third value
-     * @return tuple of up to four values that has three values
-     */
-    public static <T, U, V, W> UpToFour<T, U, V, W> upToFour(
-        final T t,
-        final U u,
-        final V v
-    ) {
-        return new UpToFour<>(
-            3,
-            Objects.requireNonNull(t, "t"),
-            Objects.requireNonNull(u, "u"),
-            Objects.requireNonNull(v, "v"),
-            null
-        );
-    }
-
-    /**
-     * Construct a tuple capable of holding up to four values of different types with three nullable values
-     *  
-     * @param <T> first type
-     * @param <U> second type
-     * @param <V> third type
-     * @param <W> fourth type
-     * @param t first value
-     * @param u second value
-     * @param v third value
-     * @return tuple of up to four values that has three values
-     */
-    public static <T, U, V, W> UpToFour<T, U, V, W> upToFourNullable(
-        final T t,
-        final U u,
-        final V v
-    ) {
-        return new UpToFour<>(
-            3,
-            t,
-            u,
-            v,
-            null
-        );
-    }
-
-    /**
-     * Construct a tuple capable of holding up to four values of different types with four non-null values
-     *  
-     * @param <T> first type
-     * @param <U> second type
-     * @param <V> third type
-     * @param <W> fourth type
-     * @param t first value
-     * @param u second value
-     * @param v third value
-     * @param w third value
-     * @return tuple of up to four values that has four values
-     */
-    public static <T, U, V, W> UpToFour<T, U, V, W> upToFour(
-        final T t,
-        final U u,
-        final V v,
-        final W w
-    ) {
-        return new UpToFour<>(
-            4,
-            Objects.requireNonNull(t, "t"),
-            Objects.requireNonNull(u, "u"),
-            Objects.requireNonNull(v, "v"),
-            Objects.requireNonNull(w, "w")
-        );
-    }
-
-    /**
-     * Construct a tuple capable of holding up to four values of different types with four nullable values
-     *  
-     * @param <T> first type
-     * @param <U> second type
-     * @param <V> third type
-     * @param <W> fourth type
-     * @param t first value
-     * @param u second value
-     * @param v third value
-     * @param w fourth value
-     * @return tuple of up to four values that has four values
-     */
-    public static <T, U, V, W> UpToFour<T, U, V, W> upToFourNullable(
-        final T t,
-        final U u,
-        final V v,
-        final W w
-    ) {
-        return new UpToFour<>(
-            4,
-            t,
-            u,
-            v,
-            w
-        );
-    }
-
-    /**
-     * Construct a tuple capable of holding up to four values of the same type with no values
-     *  
-     * @param <T> type
-     * @return tuple of up to four values that is empty
-     */
-    public static <T> UpToFourOf<T> upToFourOf(
-    ) {
-        return new UpToFourOf<>(
-            0,
-            null,
-            null,
-            null,
-            null
-        );
-    }
-
-    /**
-     * Construct a tuple capable of holding up to four values of the same type with one non-null value
-     *  
-     * @param <T> type
-     * @param t value
-     * @return tuple of up to four values that has one value
-     */
-    public static <T> UpToFourOf<T> upToFourOf(
-        final T t
-    ) {
-        return new UpToFourOf<>(
-            1,
-            Objects.requireNonNull(t, "t"),
-            null,
-            null,
-            null
-        );
-    }
-
-    /**
-     * Construct a tuple capable of holding up to four values of the same type with one nullable value
-     *  
-     * @param <T> type
-     * @param t value
-     * @return tuple of up to four values that has one value
-     */
-    public static <T> UpToFourOf<T> upToFourOfNullable(
-        final T t
-    ) {
-        return new UpToFourOf<>(
-            1,
-            t,
-            null,
-            null,
-            null
-        );
-    }
-
-    /**
-     * Construct a tuple capable of holding up to four values of the same type with two non-null values
-     *  
-     * @param <T> type
-     * @param t first value
-     * @param u second value
-     * @return tuple of up to four values that has two values
-     */
-    public static <T> UpToFourOf<T> upToFourOf(
-        final T t,
-        final T u
-    ) {
-        return new UpToFourOf<>(
-            2,
-            Objects.requireNonNull(t, "t"),
-            Objects.requireNonNull(u, "u"),
-            null,
-            null
-        );
-    }
-
-    /**
-     * Construct a tuple capable of holding up to four values of the same type with two nullable values
-     *  
-     * @param <T> type
-     * @param t first value
-     * @param u second value
-     * @return tuple of up to four values that has two values
-     */
-    public static <T> UpToFourOf<T> upToFourOfNullable(
-        final T t,
-        final T u
-    ) {
-        return new UpToFourOf<>(
-            2,
-            t,
-            u,
-            null,
-            null
-        );
-    }
-
-    /**
-     * Construct a tuple capable of holding up to four values of the same type with three non-null values
-     *  
-     * @param <T> type
-     * @param t first value
-     * @param u second value
-     * @param v third value
-     * @return tuple of up to four values that has three values
-     */
-    public static <T> UpToFourOf<T> upToFourOf(
-        final T t,
-        final T u,
-        final T v
-    ) {
-        return new UpToFourOf<>(
-            3,
-            Objects.requireNonNull(t, "t"),
-            Objects.requireNonNull(u, "u"),
-            Objects.requireNonNull(v, "v"),
-            null
-        );
-    }
-
-    /**
-     * Construct a tuple capable of holding up to four values of the same type with three nullable values
-     *  
-     * @param <T> type
-     * @param t first value
-     * @param u second value
-     * @param v third value
-     * @return tuple of up to four values that has three values
-     */
-    public static <T> UpToFourOf<T> upToFourOfNullable(
-        final T t,
-        final T u,
-        final T v
-    ) {
-        return new UpToFourOf<>(
-            3,
-            t,
-            u,
-            v,
-            null
-        );
-    }
-
-    /**
-     * Construct a tuple capable of holding up to four values of the same type with four non-null values
-     *  
-     * @param <T> type
-     * @param t first value
-     * @param u second value
-     * @param v third value
-     * @param v fourth value
-     * @return tuple of up to four values that has four values
-     */
-    public static <T> UpToFourOf<T> upToFourOf(
-        final T t,
-        final T u,
-        final T v,
-        final T w
-    ) {
-        return new UpToFourOf<>(
-            4,
-            Objects.requireNonNull(t, "t"),
-            Objects.requireNonNull(u, "u"),
-            Objects.requireNonNull(v, "v"),
-            Objects.requireNonNull(w, "w")
-        );
-    }
-
-    /**
-     * Construct a tuple capable of holding up to four values of the same type with four nullable values
-     *  
-     * @param <T> type
-     * @param t first value
-     * @param u second value
-     * @param v third value
-     * @param w fourth value
-     * @return tuple of up to four values that has four values
-     */
-    public static <T> UpToFourOf<T> upToFourOfNullable(
-        final T t,
-        final T u,
-        final T v,
-        final T w
-    ) {
-        return new UpToFourOf<>(
-            4,
             t,
             u,
             v,
@@ -2249,620 +3693,6 @@ public class Tuple {
         );
     }
     
-    /**
-     * Construct a tuple of five non-null values of the same type
-     *  
-     * @param <T> type
-     * @param t first value
-     * @param u second value
-     * @param v third value
-     * @param w fourth value
-     * @param x fifth value
-     * @return tuple of five values
-     */
-    public static <T> FiveOf<T> ofSame(
-        final T t,
-        final T u,
-        final T v,
-        final T w,
-        final T x
-    ) {
-        return new FiveOf<>(
-            Objects.requireNonNull(t, "t"),
-            Objects.requireNonNull(u, "u"),
-            Objects.requireNonNull(v, "v"),
-            Objects.requireNonNull(w, "w"),
-            Objects.requireNonNull(x, "x")
-        );
-    }
-
-    /**
-     * Construct a tuple of five nullable values of the same type
-     *  
-     * @param <T> type
-     * @param t first value
-     * @param u second value
-     * @param v third value
-     * @param w fourth value
-     * @param x fifth value
-     * @return tuple of five values
-     */
-    public static <T> FiveOf<T> ofSameNullable(
-        final T t,
-        final T u,
-        final T v,
-        final T w,
-        final T x
-    ) {
-        return new FiveOf<>(
-            t,
-            u,
-            v,
-            w,
-            x
-        );
-    }
-
-    /**
-     * Construct a tuple capable of holding up to five values of different types with no values
-     *  
-     * @param <T> first type
-     * @param <U> second type
-     * @param <V> third type
-     * @param <W> fourth type
-     * @param <X> fifth type
-     * @return tuple of up to five values that is empty
-     */
-    public static <T, U, V, W, X> UpToFive<T, U, V, W, X> upToFive(
-    ) {
-        return new UpToFive<>(
-            0,
-            null,
-            null,
-            null,
-            null,
-            null
-        );
-    }
-
-    /**
-     * Construct a tuple capable of holding up to five values of different types with one non-null value
-     *  
-     * @param <T> first type
-     * @param <U> second type
-     * @param <V> third type
-     * @param <W> fourth type
-     * @param <X> fifth type
-     * @param t value
-     * @return tuple of up to five values that has one value
-     */
-    public static <T, U, V, W, X> UpToFive<T, U, V, W, X> upToFive(
-        final T t
-    ) {
-        return new UpToFive<>(
-            1,
-            Objects.requireNonNull(t, "t"),
-            null,
-            null,
-            null,
-            null
-        );
-    }
-
-    /**
-     * Construct a tuple capable of holding up to five values of different types with one nullable value
-     *  
-     * @param <T> first type
-     * @param <U> second type
-     * @param <V> third type
-     * @param <W> fourth type
-     * @param <X> fifth type
-     * @param t value
-     * @return tuple of up to five values that has one value
-     */
-    public static <T, U, V, W, X> UpToFive<T, U, V, W, X> upToFiveNullable(
-        final T t
-    ) {
-        return new UpToFive<>(
-            1,
-            t,
-            null,
-            null,
-            null,
-            null
-        );
-    }
-
-    /**
-     * Construct a tuple capable of holding up to five values of different types with two non-null values
-     *  
-     * @param <T> first type
-     * @param <U> second type
-     * @param <V> third type
-     * @param <W> fourth type
-     * @param <X> fifth type
-     * @param t first value
-     * @param u second value
-     * @return tuple of up to five values that has two values
-     */
-    public static <T, U, V, W, X> UpToFive<T, U, V, W, X> upToFive(
-        final T t,
-        final U u
-    ) {
-        return new UpToFive<>(
-            2,
-            Objects.requireNonNull(t, "t"),
-            Objects.requireNonNull(u, "u"),
-            null,
-            null,
-            null
-        );
-    }
-
-    /**
-     * Construct a tuple capable of holding up to five values of different types with two nullable values
-     *  
-     * @param <T> first type
-     * @param <U> second type
-     * @param <V> third type
-     * @param <W> fourth type
-     * @param <X> fifth type
-     * @param t first value
-     * @param u second value
-     * @return tuple of up to five values that has two values
-     */
-    public static <T, U, V, W, X> UpToFive<T, U, V, W, X> upToFiveNullable(
-        final T t,
-        final U u
-    ) {
-        return new UpToFive<>(
-            2,
-            t,
-            u,
-            null,
-            null,
-            null
-        );
-    }
-
-    /**
-     * Construct a tuple capable of holding up to five values of different types with three non-null values
-     *  
-     * @param <T> first type
-     * @param <U> second type
-     * @param <V> third type
-     * @param <W> fourth type
-     * @param <X> fifth type
-     * @param t first value
-     * @param u second value
-     * @param v third value
-     * @return tuple of up to five values that has three values
-     */
-    public static <T, U, V, W, X> UpToFive<T, U, V, W, X> upToFive(
-        final T t,
-        final U u,
-        final V v
-    ) {
-        return new UpToFive<>(
-            3,
-            Objects.requireNonNull(t, "t"),
-            Objects.requireNonNull(u, "u"),
-            Objects.requireNonNull(v, "v"),
-            null,
-            null
-        );
-    }
-
-    /**
-     * Construct a tuple capable of holding up to five values of different types with three nullable values
-     *  
-     * @param <T> first type
-     * @param <U> second type
-     * @param <V> third type
-     * @param <W> fourth type
-     * @param <X> fifth type
-     * @param t first value
-     * @param u second value
-     * @param v third value
-     * @return tuple of up to five values that has three values
-     */
-    public static <T, U, V, W, X> UpToFive<T, U, V, W, X> upToFiveNullable(
-        final T t,
-        final U u,
-        final V v
-    ) {
-        return new UpToFive<>(
-            3,
-            t,
-            u,
-            v,
-            null,
-            null
-        );
-    }
-
-    /**
-     * Construct a tuple capable of holding up to five values of different types with four non-null values
-     *  
-     * @param <T> first type
-     * @param <U> second type
-     * @param <V> third type
-     * @param <W> fourth type
-     * @param <X> fifth type
-     * @param t first value
-     * @param u second value
-     * @param v third value
-     * @param w third value
-     * @return tuple of up to five values that has four values
-     */
-    public static <T, U, V, W, X> UpToFive<T, U, V, W, X> upToFive(
-        final T t,
-        final U u,
-        final V v,
-        final W w
-    ) {
-        return new UpToFive<>(
-            4,
-            Objects.requireNonNull(t, "t"),
-            Objects.requireNonNull(u, "u"),
-            Objects.requireNonNull(v, "v"),
-            Objects.requireNonNull(w, "w"),
-            null
-        );
-    }
-
-    /**
-     * Construct a tuple capable of holding up to five values of different types with four nullable values
-     *  
-     * @param <T> first type
-     * @param <U> second type
-     * @param <V> third type
-     * @param <W> fourth type
-     * @param <X> fifth type
-     * @param t first value
-     * @param u second value
-     * @param v third value
-     * @param w fourth value
-     * @return tuple of up to five values that has four values
-     */
-    public static <T, U, V, W, X> UpToFive<T, U, V, W, X> upToFiveNullable(
-        final T t,
-        final U u,
-        final V v,
-        final W w
-    ) {
-        return new UpToFive<>(
-            4,
-            t,
-            u,
-            v,
-            w,
-            null
-        );
-    }
-
-    /**
-     * Construct a tuple capable of holding up to five values of different types with five non-null values
-     *  
-     * @param <T> first type
-     * @param <U> second type
-     * @param <V> third type
-     * @param <W> fourth type
-     * @param <X> fifth type
-     * @param t first value
-     * @param u second value
-     * @param v third value
-     * @param w fourth value
-     * @param x fifth value
-     * @return tuple of up to five values that has five values
-     */
-    public static <T, U, V, W, X> UpToFive<T, U, V, W, X> upToFive(
-        final T t,
-        final U u,
-        final V v,
-        final W w,
-        final X x
-    ) {
-        return new UpToFive<>(
-            5,
-            Objects.requireNonNull(t, "t"),
-            Objects.requireNonNull(u, "u"),
-            Objects.requireNonNull(v, "v"),
-            Objects.requireNonNull(w, "w"),
-            Objects.requireNonNull(x, "x")
-        );
-    }
-
-    /**
-     * Construct a tuple capable of holding up to five values of different types with five nullable values
-     *  
-     * @param <T> first type
-     * @param <U> second type
-     * @param <V> third type
-     * @param <W> fourth type
-     * @param <X> fifth type
-     * @param t first value
-     * @param u second value
-     * @param v third value
-     * @param w fourth value
-     * @param x fifth value
-     * @return tuple of up to five values that has five values
-     */
-    public static <T, U, V, W, X> UpToFive<T, U, V, W, X> upToFiveNullable(
-        final T t,
-        final U u,
-        final V v,
-        final W w,
-        final X x
-    ) {
-        return new UpToFive<>(
-            5,
-            t,
-            u,
-            v,
-            w,
-            x
-        );
-    }
-
-    /**
-     * Construct a tuple capable of holding up to five values of the same type with no values
-     *  
-     * @param <T> type
-     * @return tuple of up to five values that is empty
-     */
-    public static <T> UpToFiveOf<T> upToFiveOf(
-    ) {
-        return new UpToFiveOf<>(
-            0,
-            null,
-            null,
-            null,
-            null,
-            null
-        );
-    }
-
-    /**
-     * Construct a tuple capable of holding up to five values of the same type with one non-null value
-     *  
-     * @param <T> type
-     * @param t value
-     * @return tuple of up to five values that has one value
-     */
-    public static <T> UpToFiveOf<T> upToFiveOf(
-        final T t
-    ) {
-        return new UpToFiveOf<>(
-            1,
-            Objects.requireNonNull(t, "t"),
-            null,
-            null,
-            null,
-            null
-        );
-    }
-
-    /**
-     * Construct a tuple capable of holding up to five values of the same type with one nullable value
-     *  
-     * @param <T> type
-     * @param t value
-     * @return tuple of up to five values that has one value
-     */
-    public static <T> UpToFiveOf<T> upToFiveOfNullable(
-        final T t
-    ) {
-        return new UpToFiveOf<>(
-            1,
-            t,
-            null,
-            null,
-            null,
-            null
-        );
-    }
-
-    /**
-     * Construct a tuple capable of holding up to five values of the same type with two non-null values
-     *  
-     * @param <T> type
-     * @param t first value
-     * @param u second value
-     * @return tuple of up to five values that has two values
-     */
-    public static <T> UpToFiveOf<T> upToFiveOf(
-        final T t,
-        final T u
-    ) {
-        return new UpToFiveOf<>(
-            2,
-            Objects.requireNonNull(t, "t"),
-            Objects.requireNonNull(u, "u"),
-            null,
-            null,
-            null
-        );
-    }
-
-    /**
-     * Construct a tuple capable of holding up to five values of the same type with two nullable values
-     *  
-     * @param <T> type
-     * @param t first value
-     * @param u second value
-     * @return tuple of up to five values that has two values
-     */
-    public static <T> UpToFiveOf<T> upToFiveOfNullable(
-        final T t,
-        final T u
-    ) {
-        return new UpToFiveOf<>(
-            2,
-            t,
-            u,
-            null,
-            null,
-            null
-        );
-    }
-
-    /**
-     * Construct a tuple capable of holding up to five values of the same type with three non-null values
-     *  
-     * @param <T> type
-     * @param t first value
-     * @param u second value
-     * @param v third value
-     * @return tuple of up to five values that has three values
-     */
-    public static <T> UpToFiveOf<T> upToFiveOf(
-        final T t,
-        final T u,
-        final T v
-    ) {
-        return new UpToFiveOf<>(
-            3,
-            Objects.requireNonNull(t, "t"),
-            Objects.requireNonNull(u, "u"),
-            Objects.requireNonNull(v, "v"),
-            null,
-            null
-        );
-    }
-
-    /**
-     * Construct a tuple capable of holding up to five values of the same type with three nullable values
-     *  
-     * @param <T> type
-     * @param t first value
-     * @param u second value
-     * @param v third value
-     * @return tuple of up to five values that has three values
-     */
-    public static <T> UpToFiveOf<T> upToFiveOfNullable(
-        final T t,
-        final T u,
-        final T v
-    ) {
-        return new UpToFiveOf<>(
-            3,
-            t,
-            u,
-            v,
-            null,
-            null
-        );
-    }
-
-    /**
-     * Construct a tuple capable of holding up to five values of the same type with four non-null values
-     *  
-     * @param <T> type
-     * @param t first value
-     * @param u second value
-     * @param v third value
-     * @param v fourth value
-     * @return tuple of up to five values that has four values
-     */
-    public static <T> UpToFiveOf<T> upToFiveOf(
-        final T t,
-        final T u,
-        final T v,
-        final T w
-    ) {
-        return new UpToFiveOf<>(
-            4,
-            Objects.requireNonNull(t, "t"),
-            Objects.requireNonNull(u, "u"),
-            Objects.requireNonNull(v, "v"),
-            Objects.requireNonNull(w, "w"),
-            null
-        );
-    }
-
-    /**
-     * Construct a tuple capable of holding up to five values of the same type with four nullable values
-     *  
-     * @param <T> type
-     * @param t first value
-     * @param u second value
-     * @param v third value
-     * @param w fourth value
-     * @return tuple of up to five values that has four values
-     */
-    public static <T> UpToFiveOf<T> upToFiveOfNullable(
-        final T t,
-        final T u,
-        final T v,
-        final T w
-    ) {
-        return new UpToFiveOf<>(
-            4,
-            t,
-            u,
-            v,
-            w,
-            null
-        );
-    }
-
-    /**
-     * Construct a tuple capable of holding up to five values of the same type with five non-null values
-     *  
-     * @param <T> type
-     * @param t first value
-     * @param u second value
-     * @param v third value
-     * @param v fourth value
-     * @param x fifth value
-     * @return tuple of up to five values that has five values
-     */
-    public static <T> UpToFiveOf<T> upToFiveOf(
-        final T t,
-        final T u,
-        final T v,
-        final T w,
-        final T x
-    ) {
-        return new UpToFiveOf<>(
-            5,
-            Objects.requireNonNull(t, "t"),
-            Objects.requireNonNull(u, "u"),
-            Objects.requireNonNull(v, "v"),
-            Objects.requireNonNull(w, "w"),
-            Objects.requireNonNull(x, "x")
-        );
-    }
-
-    /**
-     * Construct a tuple capable of holding up to five values of the same type with five nullable values
-     *  
-     * @param <T> type
-     * @param t first value
-     * @param u second value
-     * @param v third value
-     * @param w fourth value
-     * @param x fifth value
-     * @return tuple of up to five values that has five values
-     */
-    public static <T> UpToFiveOf<T> upToFiveOfNullable(
-        final T t,
-        final T u,
-        final T v,
-        final T w,
-        final T x
-    ) {
-        return new UpToFiveOf<>(
-            5,
-            t,
-            u,
-            v,
-            w,
-            x
-        );
-    }
-    
     // ==== Six Named constructors
 
     /**
@@ -2926,793 +3756,6 @@ public class Tuple {
         final Y y
     ) {
         return new Six<>(
-            t,
-            u,
-            v,
-            w,
-            x,
-            y
-        );
-    }
-    
-    /**
-     * Construct a tuple of six non-null values of the same type
-     *  
-     * @param <T> type
-     * @param t first value
-     * @param u second value
-     * @param v third value
-     * @param w fourth value
-     * @param x fifth value
-     * @param y sixth value
-     * @return tuple of six values
-     */
-    public static <T> SixOf<T> ofSame(
-        final T t,
-        final T u,
-        final T v,
-        final T w,
-        final T x,
-        final T y
-    ) {
-        return new SixOf<>(
-            Objects.requireNonNull(t, "t"),
-            Objects.requireNonNull(u, "u"),
-            Objects.requireNonNull(v, "v"),
-            Objects.requireNonNull(w, "w"),
-            Objects.requireNonNull(x, "x"),
-            Objects.requireNonNull(y, "y")
-        );
-    }
-
-    /**
-     * Construct a tuple of six nullable values of the same type
-     *  
-     * @param <T> type
-     * @param t first value
-     * @param u second value
-     * @param v third value
-     * @param w fourth value
-     * @param x fifth value
-     * @param y sixth value
-     * @return tuple of six values
-     */
-    public static <T> SixOf<T> ofSameNullable(
-        final T t,
-        final T u,
-        final T v,
-        final T w,
-        final T x,
-        final T y
-    ) {
-        return new SixOf<>(
-            t,
-            u,
-            v,
-            w,
-            x,
-            y
-        );
-    }
-
-    /**
-     * Construct a tuple capable of holding up to six values of different types with no values
-     *  
-     * @param <T> first type
-     * @param <U> second type
-     * @param <V> third type
-     * @param <W> fourth type
-     * @param <X> fifth type
-     * @param <Y> sixth type
-     * @return tuple of up to six values that is empty
-     */
-    public static <T, U, V, W, X, Y> UpToSix<T, U, V, W, X, Y> upToSix(
-    ) {
-        return new UpToSix<>(
-            0,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null
-        );
-    }
-
-    /**
-     * Construct a tuple capable of holding up to six values of different types with one non-null value
-     *  
-     * @param <T> first type
-     * @param <U> second type
-     * @param <V> third type
-     * @param <W> fourth type
-     * @param <X> fifth type
-     * @param <Y> sixth type
-     * @param t value
-     * @return tuple of up to six values that has one value
-     */
-    public static <T, U, V, W, X, Y> UpToSix<T, U, V, W, X, Y> upToSix(
-        final T t
-    ) {
-        return new UpToSix<>(
-            1,
-            Objects.requireNonNull(t, "t"),
-            null,
-            null,
-            null,
-            null,
-            null
-        );
-    }
-
-    /**
-     * Construct a tuple capable of holding up to six values of different types with one nullable value
-     *  
-     * @param <T> first type
-     * @param <U> second type
-     * @param <V> third type
-     * @param <W> fourth type
-     * @param <X> fifth type
-     * @param <Y> sixth type
-     * @param t value
-     * @return tuple of up to six values that has one value
-     */
-    public static <T, U, V, W, X, Y> UpToSix<T, U, V, W, X, Y> upToSixNullable(
-        final T t
-    ) {
-        return new UpToSix<>(
-            1,
-            t,
-            null,
-            null,
-            null,
-            null,
-            null
-        );
-    }
-
-    /**
-     * Construct a tuple capable of holding up to six values of different types with two non-null values
-     *  
-     * @param <T> first type
-     * @param <U> second type
-     * @param <V> third type
-     * @param <W> fourth type
-     * @param <X> fifth type
-     * @param <Y> sixth type
-     * @param t first value
-     * @param u second value
-     * @return tuple of up to six values that has two values
-     */
-    public static <T, U, V, W, X, Y> UpToSix<T, U, V, W, X, Y> upToSix(
-        final T t,
-        final U u
-    ) {
-        return new UpToSix<>(
-            2,
-            Objects.requireNonNull(t, "t"),
-            Objects.requireNonNull(u, "u"),
-            null,
-            null,
-            null,
-            null
-        );
-    }
-
-    /**
-     * Construct a tuple capable of holding up to six values of different types with two nullable values
-     *  
-     * @param <T> first type
-     * @param <U> second type
-     * @param <V> third type
-     * @param <W> fourth type
-     * @param <X> fifth type
-     * @param <Y> sixth type
-     * @param t first value
-     * @param u second value
-     * @return tuple of up to six values that has two values
-     */
-    public static <T, U, V, W, X, Y> UpToSix<T, U, V, W, X, Y> upToSixNullable(
-        final T t,
-        final U u
-    ) {
-        return new UpToSix<>(
-            2,
-            t,
-            u,
-            null,
-            null,
-            null,
-            null
-        );
-    }
-
-    /**
-     * Construct a tuple capable of holding up to six values of different types with three non-null values
-     *  
-     * @param <T> first type
-     * @param <U> second type
-     * @param <V> third type
-     * @param <W> fourth type
-     * @param <X> fifth type
-     * @param <Y> sixth type
-     * @param t first value
-     * @param u second value
-     * @param v third value
-     * @return tuple of up to six values that has three values
-     */
-    public static <T, U, V, W, X, Y> UpToSix<T, U, V, W, X, Y> upToSix(
-        final T t,
-        final U u,
-        final V v
-    ) {
-        return new UpToSix<>(
-            3,
-            Objects.requireNonNull(t, "t"),
-            Objects.requireNonNull(u, "u"),
-            Objects.requireNonNull(v, "v"),
-            null,
-            null,
-            null
-        );
-    }
-
-    /**
-     * Construct a tuple capable of holding up to six values of different types with three nullable values
-     *  
-     * @param <T> first type
-     * @param <U> second type
-     * @param <V> third type
-     * @param <W> fourth type
-     * @param <X> fifth type
-     * @param <Y> sixth type
-     * @param t first value
-     * @param u second value
-     * @param v third value
-     * @return tuple of up to six values that has three values
-     */
-    public static <T, U, V, W, X, Y> UpToSix<T, U, V, W, X, Y> upToSixNullable(
-        final T t,
-        final U u,
-        final V v
-    ) {
-        return new UpToSix<>(
-            3,
-            t,
-            u,
-            v,
-            null,
-            null,
-            null
-        );
-    }
-
-    /**
-     * Construct a tuple capable of holding up to six values of different types with four non-null values
-     *  
-     * @param <T> first type
-     * @param <U> second type
-     * @param <V> third type
-     * @param <W> fourth type
-     * @param <X> fifth type
-     * @param <Y> sixth type
-     * @param t first value
-     * @param u second value
-     * @param v third value
-     * @param w third value
-     * @return tuple of up to six values that has four values
-     */
-    public static <T, U, V, W, X, Y> UpToSix<T, U, V, W, X, Y> upToSix(
-        final T t,
-        final U u,
-        final V v,
-        final W w
-    ) {
-        return new UpToSix<>(
-            4,
-            Objects.requireNonNull(t, "t"),
-            Objects.requireNonNull(u, "u"),
-            Objects.requireNonNull(v, "v"),
-            Objects.requireNonNull(w, "w"),
-            null,
-            null
-        );
-    }
-
-    /**
-     * Construct a tuple capable of holding up to six values of different types with four nullable values
-     *  
-     * @param <T> first type
-     * @param <U> second type
-     * @param <V> third type
-     * @param <W> fourth type
-     * @param <X> fifth type
-     * @param <Y> sixth type
-     * @param t first value
-     * @param u second value
-     * @param v third value
-     * @param w fourth value
-     * @return tuple of up to six values that has four values
-     */
-    public static <T, U, V, W, X, Y> UpToSix<T, U, V, W, X, Y> upToSixNullable(
-        final T t,
-        final U u,
-        final V v,
-        final W w
-    ) {
-        return new UpToSix<>(
-            4,
-            t,
-            u,
-            v,
-            w,
-            null,
-            null
-        );
-    }
-
-    /**
-     * Construct a tuple capable of holding up to six values of different types with five non-null values
-     *  
-     * @param <T> first type
-     * @param <U> second type
-     * @param <V> third type
-     * @param <W> fourth type
-     * @param <X> fifth type
-     * @param <Y> sixth type
-     * @param t first value
-     * @param u second value
-     * @param v third value
-     * @param w fourth value
-     * @param x fifth value
-     * @return tuple of up to six values that has five values
-     */
-    public static <T, U, V, W, X, Y> UpToSix<T, U, V, W, X, Y> upToSix(
-        final T t,
-        final U u,
-        final V v,
-        final W w,
-        final X x
-    ) {
-        return new UpToSix<>(
-            5,
-            Objects.requireNonNull(t, "t"),
-            Objects.requireNonNull(u, "u"),
-            Objects.requireNonNull(v, "v"),
-            Objects.requireNonNull(w, "w"),
-            Objects.requireNonNull(x, "x"),
-            null
-        );
-    }
-
-    /**
-     * Construct a tuple capable of holding up to six values of different types with five nullable values
-     *  
-     * @param <T> first type
-     * @param <U> second type
-     * @param <V> third type
-     * @param <W> fourth type
-     * @param <X> fifth type
-     * @param <Y> sixth type
-     * @param t first value
-     * @param u second value
-     * @param v third value
-     * @param w fourth value
-     * @param x fifth value
-     * @return tuple of up to six values that has five values
-     */
-    public static <T, U, V, W, X, Y> UpToSix<T, U, V, W, X, Y> upToSixNullable(
-        final T t,
-        final U u,
-        final V v,
-        final W w,
-        final X x
-    ) {
-        return new UpToSix<>(
-            5,
-            t,
-            u,
-            v,
-            w,
-            x,
-            null
-        );
-    }
-
-    /**
-     * Construct a tuple capable of holding up to six values of different types with six non-null values
-     *  
-     * @param <T> first type
-     * @param <U> second type
-     * @param <V> third type
-     * @param <W> fourth type
-     * @param <X> fifth type
-     * @param <Y> sixth type
-     * @param t first value
-     * @param u second value
-     * @param v third value
-     * @param w fourth value
-     * @param x fifth value
-     * @param y sixth value
-     * @return tuple of up to six values that has six values
-     */
-    public static <T, U, V, W, X, Y> UpToSix<T, U, V, W, X, Y> upToSix(
-        final T t,
-        final U u,
-        final V v,
-        final W w,
-        final X x,
-        final Y y
-    ) {
-        return new UpToSix<>(
-            6,
-            Objects.requireNonNull(t, "t"),
-            Objects.requireNonNull(u, "u"),
-            Objects.requireNonNull(v, "v"),
-            Objects.requireNonNull(w, "w"),
-            Objects.requireNonNull(x, "x"),
-            Objects.requireNonNull(y, "y")
-        );
-    }
-
-    /**
-     * Construct a tuple capable of holding up to six values of different types with six nullable values
-     *  
-     * @param <T> first type
-     * @param <U> second type
-     * @param <V> third type
-     * @param <W> fourth type
-     * @param <X> fifth type
-     * @param <Y> sixth type
-     * @param t first value
-     * @param u second value
-     * @param v third value
-     * @param w fourth value
-     * @param x fifth value
-     * @param y sixth value
-     * @return tuple of up to six values that has six values
-     */
-    public static <T, U, V, W, X, Y> UpToSix<T, U, V, W, X, Y> upToSixNullable(
-        final T t,
-        final U u,
-        final V v,
-        final W w,
-        final X x,
-        final Y y
-    ) {
-        return new UpToSix<>(
-            6,
-            t,
-            u,
-            v,
-            w,
-            x,
-            y
-        );
-    }
-
-    /**
-     * Construct a tuple capable of holding up to six values of the same type with no values
-     *  
-     * @param <T> type
-     * @return tuple of up to six values that is empty
-     */
-    public static <T> UpToSixOf<T> upToSixOf(
-    ) {
-        return new UpToSixOf<>(
-            0,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null
-        );
-    }
-
-    /**
-     * Construct a tuple capable of holding up to six values of the same type with one non-null value
-     *  
-     * @param <T> type
-     * @param t value
-     * @return tuple of up to six values that has one value
-     */
-    public static <T> UpToSixOf<T> upToSixOf(
-        final T t
-    ) {
-        return new UpToSixOf<>(
-            1,
-            Objects.requireNonNull(t, "t"),
-            null,
-            null,
-            null,
-            null,
-            null
-        );
-    }
-
-    /**
-     * Construct a tuple capable of holding up to six values of the same type with one nullable value
-     *  
-     * @param <T> type
-     * @param t value
-     * @return tuple of up to six values that has one value
-     */
-    public static <T> UpToSixOf<T> upToSixOfNullable(
-        final T t
-    ) {
-        return new UpToSixOf<>(
-            1,
-            t,
-            null,
-            null,
-            null,
-            null,
-            null
-        );
-    }
-
-    /**
-     * Construct a tuple capable of holding up to six values of the same type with two non-null values
-     *  
-     * @param <T> type
-     * @param t first value
-     * @param u second value
-     * @return tuple of up to six values that has two values
-     */
-    public static <T> UpToSixOf<T> upToSixOf(
-        final T t,
-        final T u
-    ) {
-        return new UpToSixOf<>(
-            2,
-            Objects.requireNonNull(t, "t"),
-            Objects.requireNonNull(u, "u"),
-            null,
-            null,
-            null,
-            null
-        );
-    }
-
-    /**
-     * Construct a tuple capable of holding up to six values of the same type with two nullable values
-     *  
-     * @param <T> type
-     * @param t first value
-     * @param u second value
-     * @return tuple of up to six values that has two values
-     */
-    public static <T> UpToSixOf<T> upToSixOfNullable(
-        final T t,
-        final T u
-    ) {
-        return new UpToSixOf<>(
-            2,
-            t,
-            u,
-            null,
-            null,
-            null,
-            null
-        );
-    }
-
-    /**
-     * Construct a tuple capable of holding up to six values of the same type with three non-null values
-     *  
-     * @param <T> type
-     * @param t first value
-     * @param u second value
-     * @param v third value
-     * @return tuple of up to six values that has three values
-     */
-    public static <T> UpToSixOf<T> upToSixOf(
-        final T t,
-        final T u,
-        final T v
-    ) {
-        return new UpToSixOf<>(
-            3,
-            Objects.requireNonNull(t, "t"),
-            Objects.requireNonNull(u, "u"),
-            Objects.requireNonNull(v, "v"),
-            null,
-            null,
-            null
-        );
-    }
-
-    /**
-     * Construct a tuple capable of holding up to six values of the same type with three nullable values
-     *  
-     * @param <T> type
-     * @param t first value
-     * @param u second value
-     * @param v third value
-     * @return tuple of up to six values that has three values
-     */
-    public static <T> UpToSixOf<T> upToSixOfNullable(
-        final T t,
-        final T u,
-        final T v
-    ) {
-        return new UpToSixOf<>(
-            3,
-            t,
-            u,
-            v,
-            null,
-            null,
-            null
-        );
-    }
-
-    /**
-     * Construct a tuple capable of holding up to six values of the same type with four non-null values
-     *  
-     * @param <T> type
-     * @param t first value
-     * @param u second value
-     * @param v third value
-     * @param v fourth value
-     * @return tuple of up to six values that has four values
-     */
-    public static <T> UpToSixOf<T> upToSixOf(
-        final T t,
-        final T u,
-        final T v,
-        final T w
-    ) {
-        return new UpToSixOf<>(
-            4,
-            Objects.requireNonNull(t, "t"),
-            Objects.requireNonNull(u, "u"),
-            Objects.requireNonNull(v, "v"),
-            Objects.requireNonNull(w, "w"),
-            null,
-            null
-        );
-    }
-
-    /**
-     * Construct a tuple capable of holding up to six values of the same type with four nullable values
-     *  
-     * @param <T> type
-     * @param t first value
-     * @param u second value
-     * @param v third value
-     * @param w fourth value
-     * @return tuple of up to six values that has four values
-     */
-    public static <T> UpToSixOf<T> upToSixOfNullable(
-        final T t,
-        final T u,
-        final T v,
-        final T w
-    ) {
-        return new UpToSixOf<>(
-            4,
-            t,
-            u,
-            v,
-            w,
-            null,
-            null
-        );
-    }
-
-    /**
-     * Construct a tuple capable of holding up to six values of the same type with five non-null values
-     *  
-     * @param <T> type
-     * @param t first value
-     * @param u second value
-     * @param v third value
-     * @param v fourth value
-     * @param x fifth value
-     * @return tuple of up to six values that has five values
-     */
-    public static <T> UpToSixOf<T> upToSixOf(
-        final T t,
-        final T u,
-        final T v,
-        final T w,
-        final T x
-    ) {
-        return new UpToSixOf<>(
-            5,
-            Objects.requireNonNull(t, "t"),
-            Objects.requireNonNull(u, "u"),
-            Objects.requireNonNull(v, "v"),
-            Objects.requireNonNull(w, "w"),
-            Objects.requireNonNull(x, "x"),
-            null
-        );
-    }
-
-    /**
-     * Construct a tuple capable of holding up to six values of the same type with five nullable values
-     *  
-     * @param <T> type
-     * @param t first value
-     * @param u second value
-     * @param v third value
-     * @param w fourth value
-     * @param x fifth value
-     * @return tuple of up to six values that has five values
-     */
-    public static <T> UpToSixOf<T> upToSixOfNullable(
-        final T t,
-        final T u,
-        final T v,
-        final T w,
-        final T x
-    ) {
-        return new UpToSixOf<>(
-            5,
-            t,
-            u,
-            v,
-            w,
-            x,
-            null
-        );
-    }
-
-    /**
-     * Construct a tuple capable of holding up to six values of the same type with six non-null values
-     *  
-     * @param <T> type
-     * @param t first value
-     * @param u second value
-     * @param v third value
-     * @param v fourth value
-     * @param x fifth value
-     * @param y sixth value
-     * @return tuple of up to six values that has six values
-     */
-    public static <T> UpToSixOf<T> upToSixOf(
-        final T t,
-        final T u,
-        final T v,
-        final T w,
-        final T x,
-        final T y
-    ) {
-        return new UpToSixOf<>(
-            6,
-            Objects.requireNonNull(t, "t"),
-            Objects.requireNonNull(u, "u"),
-            Objects.requireNonNull(v, "v"),
-            Objects.requireNonNull(w, "w"),
-            Objects.requireNonNull(x, "x"),
-            Objects.requireNonNull(y, "y")
-        );
-    }
-
-    /**
-     * Construct a tuple capable of holding up to six values of the same type with six nullable values
-     *  
-     * @param <T> type
-     * @param t first value
-     * @param u second value
-     * @param v third value
-     * @param w fourth value
-     * @param x fifth value
-     * @param y sixth value
-     * @return tuple of up to six values that has six values
-     */
-    public static <T> UpToSixOf<T> upToSixOfNullable(
-        final T t,
-        final T u,
-        final T v,
-        final T w,
-        final T x,
-        final T y
-    ) {
-        return new UpToSixOf<>(
-            6,
             t,
             u,
             v,
