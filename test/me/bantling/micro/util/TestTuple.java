@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.Objects;
 
@@ -19,6 +20,16 @@ import me.bantling.micro.util.Tuple.Three;
 import me.bantling.micro.util.Tuple.ThreeOf;
 import me.bantling.micro.util.Tuple.Two;
 import me.bantling.micro.util.Tuple.TwoOf;
+import me.bantling.micro.util.Tuple.UnionFive;
+import me.bantling.micro.util.Tuple.UnionFiveOf;
+import me.bantling.micro.util.Tuple.UnionFour;
+import me.bantling.micro.util.Tuple.UnionFourOf;
+import me.bantling.micro.util.Tuple.UnionSix;
+import me.bantling.micro.util.Tuple.UnionSixOf;
+import me.bantling.micro.util.Tuple.UnionThree;
+import me.bantling.micro.util.Tuple.UnionThreeOf;
+import me.bantling.micro.util.Tuple.UnionTwo;
+import me.bantling.micro.util.Tuple.UnionTwoOf;
 import me.bantling.micro.util.Tuple.UpToFive;
 import me.bantling.micro.util.Tuple.UpToFiveOf;
 import me.bantling.micro.util.Tuple.UpToFour;
@@ -49,7 +60,7 @@ public class TestTuple {
         
         assertEquals("(abc,1)", t.toString());
         
-        assertEquals(2, t.count);
+        assertEquals(2, t.size);
         assertEquals("abc", t.get1());
         assertEquals(1, t.get2());
         assertNull(t.v);
@@ -77,7 +88,7 @@ public class TestTuple {
         
         assertEquals("(1,2)", t.toString());
         
-        assertEquals(2, t.count);
+        assertEquals(2, t.size);
         assertEquals(1, t.get1());
         assertEquals(2, t.get2());
         assertNull(t.v);
@@ -96,7 +107,7 @@ public class TestTuple {
         {
             final UpToTwo<String, Integer> t = upto.two();
             
-            assertEquals(1, t.hashCode());
+            assertEquals(Objects.hash(), t.hashCode());
             
             assertEquals(t, t);
             assertEquals(t, upto.two());
@@ -105,6 +116,7 @@ public class TestTuple {
             
             assertEquals("()", t.toString());
             
+            assertEquals(2, t.size);
             assertEquals(0, t.count);
             assertNull(t.t);
             assertNull(t.u);
@@ -239,6 +251,138 @@ public class TestTuple {
     }
     
     @Test
+    public void unionTwo() {
+        final Tuple.Union union = new Tuple.Union();
+        
+        {
+            final UnionTwo<String, Integer> t = union.twoFirst("abc");
+            
+            assertEquals(Objects.hashCode("abc"), t.hashCode());
+            
+            assertEquals(t, t);
+            assertEquals(t, union.twoFirst("abc"));
+            assertNotEquals(t, union.twoFirst(1));
+            assertNotEquals(t, "");
+            
+            assertEquals("(abc)", t.toString());
+            
+            assertEquals(1, t.getPosition());
+            assertEquals("abc", t.get1());
+            
+            try {
+                t.get2();
+                fail();
+            } catch (final Throwable th) {
+                assertEquals(
+                    String.format(Tuple.UNION_ERROR_FMT, 1),
+                    th.getMessage()
+                );
+            }
+            
+            assertNull(t.u);
+            assertNull(t.v);
+            assertNull(t.w);
+            assertNull(t.x);
+            assertNull(t.y);
+
+            final UnionTwo<Integer, Integer> tt = union.twoFirstNullable(null);
+            assertTrue(UnionTwo.class == tt.getClass());
+            assertEquals(0, tt.hashCode());
+            assertEquals("(null)", tt.toString());
+        }
+        
+        {
+            final UnionTwo<String, Integer> t = union.twoSecond(1);
+            
+            assertEquals(1, t.hashCode());
+            
+            assertEquals(t, t);
+            assertEquals(t, Tuple.UpTo.twoNullable(null, 1));
+            assertNotEquals(t, Tuple.of("abc", 1));
+            assertNotEquals(t, "");
+            
+            assertEquals("(1)", t.toString());
+
+            assertEquals(2, t.getPosition());
+            assertEquals(1, t.get2());
+            
+            try {
+                t.get1();
+                fail();
+            } catch (final Throwable th) {
+                assertEquals(
+                    String.format(Tuple.UNION_ERROR_FMT, 2),
+                    th.getMessage()
+                );
+            }
+
+            assertNull(t.t);
+            assertNull(t.v);
+            assertNull(t.w);
+            assertNull(t.x);
+            assertNull(t.y);
+
+            final UnionTwo<Integer, Integer> tt = union.twoSecondNullable(null);
+            assertTrue(UnionTwo.class == tt.getClass());
+            assertEquals(0, tt.hashCode());
+            assertEquals("(null)", tt.toString());
+        }
+    }
+    
+    @Test
+    public void unionTwoOf() {
+        final Tuple.Union union = new Tuple.Union();
+        final Tuple.UnionSame unionSame = new Tuple.UnionSame();
+        
+        {
+            final UnionTwoOf<Integer> t = unionSame.twoFirst(1);
+            
+            assertEquals(1, t.hashCode());
+            
+            assertEquals(t, t);
+            assertEquals(t, union.twoFirst(1));
+            assertNotEquals(t, union.twoSecond(1));
+            
+            assertEquals("(1)", t.toString());
+
+            assertEquals(1, t.getPosition());
+            assertEquals(1, t.get1());
+            assertNull(t.u);
+            assertNull(t.v);
+            assertNull(t.w);
+            assertNull(t.x);
+            assertNull(t.y);
+
+            final UnionTwoOf<Integer> tt = unionSame.twoFirstNullable(null);
+            assertEquals("(null)", tt.toString());
+        }
+        
+        {
+            final UnionTwoOf<Integer> t = unionSame.twoSecond(2);
+            
+            assertEquals(2, t.hashCode());
+            
+            assertEquals(t, t);
+            assertEquals(t, Tuple.ofNullable(null, 2));
+            assertNotEquals(t, Tuple.of(1, 2));
+            
+            assertEquals("(2)", t.toString());
+
+            assertEquals(2, t.getPosition());
+            assertEquals(2, t.get2());
+            assertNull(t.t);
+            assertNull(t.v);
+            assertNull(t.w);
+            assertNull(t.x);
+            assertNull(t.y);
+
+            final UnionTwoOf<Integer> tt = unionSame.twoSecondNullable(null);
+            assertEquals(0, tt.hashCode());
+            assertEquals("(null)", tt.toString());
+        }
+    }
+    
+    @Test
     public void three() {
         final Three<String, Integer, String> t = Tuple.of("abc", 1, "def");
         
@@ -251,7 +395,7 @@ public class TestTuple {
         
         assertEquals("(abc,1,def)", t.toString());
 
-        assertEquals(3, t.count);
+        assertEquals(3, t.size);
         assertEquals("abc", t.get1());
         assertEquals(1, t.get2());
         assertEquals("def", t.get3());
@@ -278,7 +422,7 @@ public class TestTuple {
         
         assertEquals("(1,2,3)", t.toString());
         
-        assertEquals(3, t.count);
+        assertEquals(3, t.size);
         assertEquals(1, t.get1());
         assertEquals(2, t.get2());
         assertEquals(3, t.get3());
@@ -299,8 +443,8 @@ public class TestTuple {
             assertEquals(1, t.hashCode());
             
             assertEquals(t, t);
-            assertEquals(t, upto.two());
-            assertNotEquals(t, upto.two("abc"));
+            assertEquals(t, upto.three());
+            assertNotEquals(t, upto.three("abc"));
             
             assertEquals("()", t.toString());
 
@@ -318,8 +462,8 @@ public class TestTuple {
             assertEquals(Objects.hash("abc"), t.hashCode());
             
             assertEquals(t, t);
-            assertEquals(t, upto.two("abc"));
-            assertNotEquals(t, upto.two(1));
+            assertEquals(t, upto.three("abc"));
+            assertNotEquals(t, upto.three(1));
             
             assertEquals("(abc)", t.toString());
 
@@ -397,8 +541,8 @@ public class TestTuple {
             assertEquals(1, t.hashCode());
             
             assertEquals(t, t);
-            assertEquals(t, upto.two());
-            assertNotEquals(t, upto.two(1));
+            assertEquals(t, upto.three());
+            assertNotEquals(t, upto.three(1));
             
             assertEquals("()", t.toString());
             
@@ -417,8 +561,8 @@ public class TestTuple {
             assertEquals(Objects.hash(1), t.hashCode());
             
             assertEquals(t, t);
-            assertEquals(t, upto.two(1));
-            assertNotEquals(t, upto.two(2));
+            assertEquals(t, upto.three(1));
+            assertNotEquals(t, upto.three(2));
             
             assertEquals("(1)", t.toString());
 
@@ -482,6 +626,138 @@ public class TestTuple {
     }
     
     @Test
+    public void unionThree() {
+        final Tuple.Union union = new Tuple.Union();
+        
+        {
+            final UnionThree<String, Integer, String> t = union.threeFirst("abc");
+            
+            assertEquals(Objects.hashCode("abc"), t.hashCode());
+            
+            assertEquals(t, t);
+            assertEquals(t, union.twoFirst("abc"));
+            assertNotEquals(t, union.twoFirst(1));
+            assertNotEquals(t, "");
+            
+            assertEquals("(abc)", t.toString());
+            
+            assertEquals(1, t.getPosition());
+            assertEquals("abc", t.get1());
+            
+            try {
+                t.get2();
+                fail();
+            } catch (final Throwable th) {
+                assertEquals(
+                    String.format(Tuple.UNION_ERROR_FMT, 1),
+                    th.getMessage()
+                );
+            }
+            
+            assertNull(t.u);
+            assertNull(t.v);
+            assertNull(t.w);
+            assertNull(t.x);
+            assertNull(t.y);
+
+            final UnionThree<Integer, Integer, Integer> tt = union.threeFirstNullable(null);
+            assertTrue(UnionThree.class == tt.getClass());
+            assertEquals(0, tt.hashCode());
+            assertEquals("(null)", tt.toString());
+        }
+        
+        {
+            final UnionThree<String, Integer, String> t = union.threeThird("abc");
+            
+            assertEquals("abc".hashCode(), t.hashCode());
+            
+            assertEquals(t, t);
+            assertEquals(t, Tuple.UpTo.threeNullable(null, null, "abc"));
+            assertNotEquals(t, Tuple.of("abc", 1));
+            assertNotEquals(t, "");
+            
+            assertEquals("(abc)", t.toString());
+
+            assertEquals(3, t.getPosition());
+            assertEquals("abc", t.get3());
+            
+            try {
+                t.get1();
+                fail();
+            } catch (final Throwable th) {
+                assertEquals(
+                    String.format(Tuple.UNION_ERROR_FMT, 3),
+                    th.getMessage()
+                );
+            }
+
+            assertNull(t.t);
+            assertNull(t.u);
+            assertNull(t.w);
+            assertNull(t.x);
+            assertNull(t.y);
+
+            final UnionThree<Integer, Integer, Integer> tt = union.threeSecondNullable(null);
+            assertTrue(UnionThree.class == tt.getClass());
+            assertEquals(0, tt.hashCode());
+            assertEquals("(null)", tt.toString());
+        }
+    }
+    
+    @Test
+    public void unionThreeOf() {
+        final Tuple.Union union = new Tuple.Union();
+        final Tuple.UnionSame unionSame = new Tuple.UnionSame();
+        
+        {
+            final UnionThreeOf<Integer> t = unionSame.threeFirst(1);
+            
+            assertEquals(1, t.hashCode());
+            
+            assertEquals(t, t);
+            assertEquals(t, union.twoFirst(1));
+            assertNotEquals(t, union.twoSecond(1));
+            
+            assertEquals("(1)", t.toString());
+
+            assertEquals(1, t.getPosition());
+            assertEquals(1, t.get1());
+            assertNull(t.u);
+            assertNull(t.v);
+            assertNull(t.w);
+            assertNull(t.x);
+            assertNull(t.y);
+
+            final UnionThreeOf<Integer> tt = unionSame.threeFirstNullable(null);
+            assertEquals("(null)", tt.toString());
+        }
+        
+        {
+            final UnionThreeOf<Integer> t = unionSame.threeThird(2);
+            
+            assertEquals(2, t.hashCode());
+            
+            assertEquals(t, t);
+            assertEquals(t, Tuple.ofNullable(null, null, 2));
+            assertNotEquals(t, Tuple.of(1, 2));
+            
+            assertEquals("(2)", t.toString());
+
+            assertEquals(3, t.getPosition());
+            assertEquals(2, t.get3());
+            assertNull(t.t);
+            assertNull(t.u);
+            assertNull(t.w);
+            assertNull(t.x);
+            assertNull(t.y);
+
+            final UnionThreeOf<Integer> tt = unionSame.threeThirdNullable(null);
+            assertEquals(0, tt.hashCode());
+            assertEquals("(null)", tt.toString());
+        }
+    }
+    
+    @Test
     public void four() {
         final Four<String, Integer, String, Integer> t = Tuple.of("abc", 1, "def", 2);
         
@@ -494,7 +770,7 @@ public class TestTuple {
         
         assertEquals("(abc,1,def,2)", t.toString());
 
-        assertEquals(4, t.count);
+        assertEquals(4, t.size);
         assertEquals("abc", t.get1());
         assertEquals(1, t.get2());
         assertEquals("def", t.get3());
@@ -521,7 +797,7 @@ public class TestTuple {
         
         assertEquals("(1,2,3,4)", t.toString());
         
-        assertEquals(4, t.count);
+        assertEquals(4, t.size);
         assertEquals(1, t.get1());
         assertEquals(2, t.get2());
         assertEquals(3, t.get3());
@@ -541,8 +817,8 @@ public class TestTuple {
             assertEquals(1, t.hashCode());
             
             assertEquals(t, t);
-            assertEquals(t, upto.two());
-            assertNotEquals(t, upto.two("abc"));
+            assertEquals(t, upto.four());
+            assertNotEquals(t, upto.four("abc"));
             
             assertEquals("()", t.toString());
 
@@ -561,8 +837,8 @@ public class TestTuple {
             assertEquals(Objects.hash("abc"), t.hashCode());
             
             assertEquals(t, t);
-            assertEquals(t, upto.two("abc"));
-            assertNotEquals(t, upto.two(1));
+            assertEquals(t, upto.four("abc"));
+            assertNotEquals(t, upto.four(1));
             
             assertEquals("(abc)", t.toString());
 
@@ -665,8 +941,8 @@ public class TestTuple {
             assertEquals(1, t.hashCode());
             
             assertEquals(t, t);
-            assertEquals(t, upto.two());
-            assertNotEquals(t, upto.two(1));
+            assertEquals(t, upto.four());
+            assertNotEquals(t, upto.four(1));
             
             assertEquals("()", t.toString());
 
@@ -685,8 +961,8 @@ public class TestTuple {
             assertEquals(Objects.hash(1), t.hashCode());
             
             assertEquals(t, t);
-            assertEquals(t, upto.two(1));
-            assertNotEquals(t, upto.two(2));
+            assertEquals(t, upto.four(1));
+            assertNotEquals(t, upto.four(2));
             
             assertEquals("(1)", t.toString());
 
@@ -772,6 +1048,138 @@ public class TestTuple {
     }
     
     @Test
+    public void unionFour() {
+        final Tuple.Union union = new Tuple.Union();
+        
+        {
+            final UnionFour<String, Integer, String, Integer> t = union.fourFirst("abc");
+            
+            assertEquals(Objects.hashCode("abc"), t.hashCode());
+            
+            assertEquals(t, t);
+            assertEquals(t, union.twoFirst("abc"));
+            assertNotEquals(t, union.twoFirst(1));
+            assertNotEquals(t, "");
+            
+            assertEquals("(abc)", t.toString());
+            
+            assertEquals(1, t.getPosition());
+            assertEquals("abc", t.get1());
+            
+            try {
+                t.get2();
+                fail();
+            } catch (final Throwable th) {
+                assertEquals(
+                    String.format(Tuple.UNION_ERROR_FMT, 1),
+                    th.getMessage()
+                );
+            }
+            
+            assertNull(t.u);
+            assertNull(t.v);
+            assertNull(t.w);
+            assertNull(t.x);
+            assertNull(t.y);
+
+            final UnionFour<Integer, Integer, Integer, Integer> tt = union.fourFirstNullable(null);
+            assertTrue(UnionFour.class == tt.getClass());
+            assertEquals(0, tt.hashCode());
+            assertEquals("(null)", tt.toString());
+        }
+        
+        {
+            final UnionFour<String, Integer, String, Integer> t = union.fourFourth(1);
+            
+            assertEquals(1, t.hashCode());
+            
+            assertEquals(t, t);
+            assertEquals(t, Tuple.UpTo.fourNullable(null, null, null, 1));
+            assertNotEquals(t, Tuple.of("abc", 1));
+            assertNotEquals(t, "");
+            
+            assertEquals("(1)", t.toString());
+
+            assertEquals(4, t.getPosition());
+            assertEquals(1, t.get4());
+            
+            try {
+                t.get1();
+                fail();
+            } catch (final Throwable th) {
+                assertEquals(
+                    String.format(Tuple.UNION_ERROR_FMT, 4),
+                    th.getMessage()
+                );
+            }
+
+            assertNull(t.t);
+            assertNull(t.u);
+            assertNull(t.v);
+            assertNull(t.x);
+            assertNull(t.y);
+
+            final UnionFour<Integer, Integer, Integer, Integer> tt = union.fourSecondNullable(null);
+            assertTrue(UnionFour.class == tt.getClass());
+            assertEquals(0, tt.hashCode());
+            assertEquals("(null)", tt.toString());
+        }
+    }
+    
+    @Test
+    public void unionFourOf() {
+        final Tuple.Union union = new Tuple.Union();
+        final Tuple.UnionSame unionSame = new Tuple.UnionSame();
+        
+        {
+            final UnionFourOf<Integer> t = unionSame.fourFirst(1);
+            
+            assertEquals(1, t.hashCode());
+            
+            assertEquals(t, t);
+            assertEquals(t, union.twoFirst(1));
+            assertNotEquals(t, union.twoSecond(1));
+            
+            assertEquals("(1)", t.toString());
+
+            assertEquals(1, t.getPosition());
+            assertEquals(1, t.get1());
+            assertNull(t.u);
+            assertNull(t.v);
+            assertNull(t.w);
+            assertNull(t.x);
+            assertNull(t.y);
+
+            final UnionFourOf<Integer> tt = unionSame.fourFirstNullable(null);
+            assertEquals("(null)", tt.toString());
+        }
+        
+        {
+            final UnionFourOf<Integer> t = unionSame.fourFourth(2);
+            
+            assertEquals(2, t.hashCode());
+            
+            assertEquals(t, t);
+            assertEquals(t, Tuple.ofNullable(null, null, null, 2));
+            assertNotEquals(t, Tuple.of(1, 2));
+            
+            assertEquals("(2)", t.toString());
+
+            assertEquals(4, t.getPosition());
+            assertEquals(2, t.get4());
+            assertNull(t.t);
+            assertNull(t.u);
+            assertNull(t.v);
+            assertNull(t.x);
+            assertNull(t.y);
+
+            final UnionFourOf<Integer> tt = unionSame.fourFourthNullable(null);
+            assertEquals(0, tt.hashCode());
+            assertEquals("(null)", tt.toString());
+        }
+    }
+    
+    @Test
     public void five() {
         final Five<String, Integer, String, Integer, String> t = Tuple.of("abc", 1, "def", 2, "ghi");
         
@@ -784,7 +1192,7 @@ public class TestTuple {
         
         assertEquals("(abc,1,def,2,ghi)", t.toString());
 
-        assertEquals(5, t.count);
+        assertEquals(5, t.size);
         assertEquals("abc", t.get1());
         assertEquals(1, t.get2());
         assertEquals("def", t.get3());
@@ -811,7 +1219,7 @@ public class TestTuple {
         
         assertEquals("(1,2,3,4,5)", t.toString());
         
-        assertEquals(5, t.count);
+        assertEquals(5, t.size);
         assertEquals(1, t.get1());
         assertEquals(2, t.get2());
         assertEquals(3, t.get3());
@@ -831,8 +1239,8 @@ public class TestTuple {
             assertEquals(1, t.hashCode());
             
             assertEquals(t, t);
-            assertEquals(t, upto.two());
-            assertNotEquals(t, upto.two("abc"));
+            assertEquals(t, upto.five());
+            assertNotEquals(t, upto.five("abc"));
             
             assertEquals("()", t.toString());
 
@@ -853,8 +1261,8 @@ public class TestTuple {
             assertEquals(Objects.hash("abc"), t.hashCode());
             
             assertEquals(t, t);
-            assertEquals(t, upto.two("abc"));
-            assertNotEquals(t, upto.two(1));
+            assertEquals(t, upto.five("abc"));
+            assertNotEquals(t, upto.five(1));
             
             assertEquals("(abc)", t.toString());
 
@@ -982,8 +1390,8 @@ public class TestTuple {
             assertEquals(1, t.hashCode());
             
             assertEquals(t, t);
-            assertEquals(t, upto.two());
-            assertNotEquals(t, upto.two(1));
+            assertEquals(t, upto.five());
+            assertNotEquals(t, upto.five(1));
             
             assertEquals("()", t.toString());
 
@@ -1002,8 +1410,8 @@ public class TestTuple {
             assertEquals(Objects.hash(1), t.hashCode());
             
             assertEquals(t, t);
-            assertEquals(t, upto.two(1));
-            assertNotEquals(t, upto.two(2));
+            assertEquals(t, upto.five(1));
+            assertNotEquals(t, upto.five(2));
             
             assertEquals("(1)", t.toString());
 
@@ -1112,6 +1520,138 @@ public class TestTuple {
     }
     
     @Test
+    public void unionFive() {
+        final Tuple.Union union = new Tuple.Union();
+        
+        {
+            final UnionFive<String, Integer, String, Integer, String> t = union.fiveFirst("abc");
+            
+            assertEquals(Objects.hashCode("abc"), t.hashCode());
+            
+            assertEquals(t, t);
+            assertEquals(t, union.twoFirst("abc"));
+            assertNotEquals(t, union.twoFirst(1));
+            assertNotEquals(t, "");
+            
+            assertEquals("(abc)", t.toString());
+            
+            assertEquals(1, t.getPosition());
+            assertEquals("abc", t.get1());
+            
+            try {
+                t.get2();
+                fail();
+            } catch (final Throwable th) {
+                assertEquals(
+                    String.format(Tuple.UNION_ERROR_FMT, 1),
+                    th.getMessage()
+                );
+            }
+            
+            assertNull(t.u);
+            assertNull(t.v);
+            assertNull(t.w);
+            assertNull(t.x);
+            assertNull(t.y);
+
+            final UnionFive<Integer, Integer, Integer, Integer, Integer> tt = union.fiveFirstNullable(null);
+            assertTrue(UnionFive.class == tt.getClass());
+            assertEquals(0, tt.hashCode());
+            assertEquals("(null)", tt.toString());
+        }
+        
+        {
+            final UnionFive<String, Integer, String, Integer, String> t = union.fiveFifth("abc");
+            
+            assertEquals("abc".hashCode(), t.hashCode());
+            
+            assertEquals(t, t);
+            assertEquals(t, Tuple.UpTo.fiveNullable(null, null, null, null, "abc"));
+            assertNotEquals(t, Tuple.of("abc", 1));
+            assertNotEquals(t, "");
+            
+            assertEquals("(abc)", t.toString());
+
+            assertEquals(5, t.getPosition());
+            assertEquals("abc", t.get5());
+            
+            try {
+                t.get1();
+                fail();
+            } catch (final Throwable th) {
+                assertEquals(
+                    String.format(Tuple.UNION_ERROR_FMT, 5),
+                    th.getMessage()
+                );
+            }
+
+            assertNull(t.t);
+            assertNull(t.u);
+            assertNull(t.v);
+            assertNull(t.w);
+            assertNull(t.y);
+
+            final UnionFive<Integer, Integer, Integer, Integer, Integer> tt = union.fiveSecondNullable(null);
+            assertTrue(UnionFive.class == tt.getClass());
+            assertEquals(0, tt.hashCode());
+            assertEquals("(null)", tt.toString());
+        }
+    }
+    
+    @Test
+    public void unionFiveOf() {
+        final Tuple.Union union = new Tuple.Union();
+        final Tuple.UnionSame unionSame = new Tuple.UnionSame();
+        
+        {
+            final UnionFiveOf<Integer> t = unionSame.fiveFirst(1);
+            
+            assertEquals(1, t.hashCode());
+            
+            assertEquals(t, t);
+            assertEquals(t, union.twoFirst(1));
+            assertNotEquals(t, union.twoSecond(1));
+            
+            assertEquals("(1)", t.toString());
+
+            assertEquals(1, t.getPosition());
+            assertEquals(1, t.get1());
+            assertNull(t.u);
+            assertNull(t.v);
+            assertNull(t.w);
+            assertNull(t.x);
+            assertNull(t.y);
+
+            final UnionFiveOf<Integer> tt = unionSame.fiveFirstNullable(null);
+            assertEquals("(null)", tt.toString());
+        }
+        
+        {
+            final UnionFiveOf<Integer> t = unionSame.fiveFifth(2);
+            
+            assertEquals(2, t.hashCode());
+            
+            assertEquals(t, t);
+            assertEquals(t, Tuple.ofNullable(null, null, null, null, 2));
+            assertNotEquals(t, Tuple.of(1, 2));
+            
+            assertEquals("(2)", t.toString());
+
+            assertEquals(5, t.getPosition());
+            assertEquals(2, t.get5());
+            assertNull(t.t);
+            assertNull(t.u);
+            assertNull(t.v);
+            assertNull(t.w);
+            assertNull(t.y);
+
+            final UnionFiveOf<Integer> tt = unionSame.fiveFifthNullable(null);
+            assertEquals(0, tt.hashCode());
+            assertEquals("(null)", tt.toString());
+        }
+    }
+    
+    @Test
     public void six() {
         final Six<String, Integer, String, Integer, String, Integer> t = Tuple.of("abc", 1, "def", 2, "ghi", 3);
         
@@ -1124,7 +1664,7 @@ public class TestTuple {
         
         assertEquals("(abc,1,def,2,ghi,3)", t.toString());
 
-        assertEquals(6, t.count);
+        assertEquals(6, t.size);
         assertEquals("abc", t.get1());
         assertEquals(1, t.get2());
         assertEquals("def", t.get3());
@@ -1151,7 +1691,7 @@ public class TestTuple {
         
         assertEquals("(1,2,3,4,5,6)", t.toString());
         
-        assertEquals(6, t.count);
+        assertEquals(6, t.size);
         assertEquals(1, t.get1());
         assertEquals(2, t.get2());
         assertEquals(3, t.get3());
@@ -1171,8 +1711,8 @@ public class TestTuple {
             assertEquals(1, t.hashCode());
             
             assertEquals(t, t);
-            assertEquals(t, upto.two());
-            assertNotEquals(t, upto.two("abc"));
+            assertEquals(t, upto.six());
+            assertNotEquals(t, upto.six("abc"));
             
             assertEquals("()", t.toString());
 
@@ -1191,8 +1731,8 @@ public class TestTuple {
             assertEquals(Objects.hash("abc"), t.hashCode());
             
             assertEquals(t, t);
-            assertEquals(t, upto.two("abc"));
-            assertNotEquals(t, upto.two(1));
+            assertEquals(t, upto.six("abc"));
+            assertNotEquals(t, upto.six(1));
             
             assertEquals("(abc)", t.toString());
 
@@ -1345,8 +1885,8 @@ public class TestTuple {
             assertEquals(1, t.hashCode());
             
             assertEquals(t, t);
-            assertEquals(t, upto.two());
-            assertNotEquals(t, upto.two(1));
+            assertEquals(t, upto.six());
+            assertNotEquals(t, upto.six(1));
             
             assertEquals("()", t.toString());
 
@@ -1365,8 +1905,8 @@ public class TestTuple {
             assertEquals(Objects.hash(1), t.hashCode());
             
             assertEquals(t, t);
-            assertEquals(t, upto.two(1));
-            assertNotEquals(t, upto.two(2));
+            assertEquals(t, upto.six(1));
+            assertNotEquals(t, upto.six(2));
             
             assertEquals("(1)", t.toString());
 
@@ -1494,6 +2034,138 @@ public class TestTuple {
             assertEquals(6, t.get6());
             
             assertEquals("(null,1,2,3,4,5)", uptoSame.sixNullable(null, 1, 2, 3, 4, 5).toString());
+        }
+    }
+    
+    @Test
+    public void unionSix() {
+        final Tuple.Union union = new Tuple.Union();
+        
+        {
+            final UnionSix<String, Integer, String, Integer, String, Integer> t = union.sixFirst("abc");
+            
+            assertEquals("abc".hashCode(), t.hashCode());
+            
+            assertEquals(t, t);
+            assertEquals(t, union.twoFirst("abc"));
+            assertNotEquals(t, union.twoFirst(1));
+            assertNotEquals(t, "");
+            
+            assertEquals("(abc)", t.toString());
+            
+            assertEquals(1, t.getPosition());
+            assertEquals("abc", t.get1());
+            
+            try {
+                t.get2();
+                fail();
+            } catch (final Throwable th) {
+                assertEquals(
+                    String.format(Tuple.UNION_ERROR_FMT, 1),
+                    th.getMessage()
+                );
+            }
+            
+            assertNull(t.u);
+            assertNull(t.v);
+            assertNull(t.w);
+            assertNull(t.x);
+            assertNull(t.y);
+
+            final UnionSix<Integer, Integer, Integer, Integer, Integer, Integer> tt = union.sixFirstNullable(null);
+            assertTrue(UnionSix.class == tt.getClass());
+            assertEquals(0, tt.hashCode());
+            assertEquals("(null)", tt.toString());
+        }
+        
+        {
+            final UnionSix<String, Integer, String, Integer, String, Integer> t = union.sixSixth(1);
+            
+            assertEquals(1, t.hashCode());
+            
+            assertEquals(t, t);
+            assertEquals(t, Tuple.UpTo.sixNullable(null, null, null, null, null, 1));
+            assertNotEquals(t, Tuple.of("abc", 1));
+            assertNotEquals(t, "");
+            
+            assertEquals("(1)", t.toString());
+
+            assertEquals(6, t.getPosition());
+            assertEquals(1, t.get6());
+            
+            try {
+                t.get1();
+                fail();
+            } catch (final Throwable th) {
+                assertEquals(
+                    String.format(Tuple.UNION_ERROR_FMT, 6),
+                    th.getMessage()
+                );
+            }
+
+            assertNull(t.t);
+            assertNull(t.u);
+            assertNull(t.v);
+            assertNull(t.w);
+            assertNull(t.x);
+
+            final UnionSix<Integer, Integer, Integer, Integer, Integer, Integer> tt = union.sixSecondNullable(null);
+            assertTrue(UnionSix.class == tt.getClass());
+            assertEquals(0, tt.hashCode());
+            assertEquals("(null)", tt.toString());
+        }
+    }
+    
+    @Test
+    public void unionSixOf() {
+        final Tuple.Union union = new Tuple.Union();
+        final Tuple.UnionSame unionSame = new Tuple.UnionSame();
+        
+        {
+            final UnionSixOf<Integer> t = unionSame.sixFirst(1);
+            
+            assertEquals(1, t.hashCode());
+            
+            assertEquals(t, t);
+            assertEquals(t, union.twoFirst(1));
+            assertNotEquals(t, union.twoSecond(1));
+            
+            assertEquals("(1)", t.toString());
+
+            assertEquals(1, t.getPosition());
+            assertEquals(1, t.get1());
+            assertNull(t.u);
+            assertNull(t.v);
+            assertNull(t.w);
+            assertNull(t.x);
+            assertNull(t.y);
+
+            final UnionSixOf<Integer> tt = unionSame.sixFirstNullable(null);
+            assertEquals("(null)", tt.toString());
+        }
+        
+        {
+            final UnionSixOf<Integer> t = unionSame.sixSixth(2);
+            
+            assertEquals(2, t.hashCode());
+            
+            assertEquals(t, t);
+            assertEquals(t, Tuple.ofNullable(null, null, null, null, null, 2));
+            assertNotEquals(t, Tuple.of(1, 2));
+            
+            assertEquals("(2)", t.toString());
+
+            assertEquals(6, t.getPosition());
+            assertEquals(2, t.get6());
+            assertNull(t.t);
+            assertNull(t.u);
+            assertNull(t.v);
+            assertNull(t.w);
+            assertNull(t.x);
+
+            final UnionSixOf<Integer> tt = unionSame.sixSixthNullable(null);
+            assertEquals(0, tt.hashCode());
+            assertEquals("(null)", tt.toString());
         }
     }
 }

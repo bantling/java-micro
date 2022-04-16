@@ -34,7 +34,7 @@ public class VariablePart {
     /**
      * Only the path parameter is hashed, to enable matching up against another path parameter.
      * A given path part is either variable or it isn't, and if it is variable, it must be one specific type of variable.
-     * As such, the hash code is 1 if it has no variable path part, else 31 if it does.
+     * As such, the hash code is 1231 if it has no variable path part, else 1237 if it does.
      */
     @Override
     public int hashCode() {

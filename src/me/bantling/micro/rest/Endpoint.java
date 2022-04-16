@@ -6,7 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * A REST method for an endpoint, that has an {@link HttpMethod} and a url.
+ * A REST method for an endpoint, that has a method and a url.
  * The url may define any number of variables, where a variable is a type contained in curly braces.
  * The allowable types are:
  * - boolean
@@ -16,6 +16,7 @@ import java.lang.annotation.Target;
  * - uuid
  * 
  * EG, the url /customer/{uuid} indicates a fixed part customer followed by a variable part that must be a valid uuid.
+ * @see HttpMethod for method constants
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)

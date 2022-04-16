@@ -17,11 +17,11 @@ public class ServerBuilder {
     
     // ==== Fields
 
-    // A variable part matcher  
-    static final Pattern VARIABLE_PATH_PART = Pattern.compile("[{]([A-Za-z]*)[}]");
+    // A variable part matcher for {name}
+    static final Pattern VARIABLE_PATH_PART = Pattern.compile("[{]([A-Za-z]+)[}]");
 
-    // A query params matcher
-    static final Pattern QUERY_PARAMS_PART = Pattern.compile("([A-Za-z0-9]+):([A-Za-z]+)([+])?");
+    // A query params matcher for name:type[+]?, where optional + means param is required
+    static final Pattern QUERY_PARAMS_PART = Pattern.compile("([A-Za-z0-9_]+):([A-Za-z]+)([+])?");
     
     // URL cannot be empty
     static final String URL_CANNOT_BE_EMPTY = "The url cannot be empty";
@@ -33,7 +33,7 @@ public class ServerBuilder {
     static final String ILLEGAL_QUERY_MSG =
         "%s is not a valid query param, it must be of the form paramName:paramType optionally followed by a plus sign";
     
-    private final Map<String, Map<String, PathPart>> services = new HashMap<>();
+    private final Map<String, Map<String, PathElement>> services = new HashMap<>();
     
     // ==== Construct
     
@@ -41,21 +41,17 @@ public class ServerBuilder {
         //
     }
     
-    public static ServerBuilder begin() {
-        return new ServerBuilder();
-    }
+    // ==== Helpers
     
     /**
-     * Parse a url into a list of {@link PathPart}s.
+     * Parse a url into a list of {@link PathElement}s.
      * @param url
      * @return
      */
-    static List<PathPart> parseURL(final String url) {
+    static PathElement parseURL(final String url) {
         if (Objects.requireNonNull(url, "url").isEmpty()) {
             throw new IllegalArgumentException(URL_CANNOT_BE_EMPTY);
         }
-        
-        final List<PathPart> pathParts = new LinkedList<>();
         
         // - Remove leading /, if any
         // - Replace all occurences of multiple consecutive slashes with a single slash
@@ -65,32 +61,47 @@ public class ServerBuilder {
             (coalescedSlashes.charAt(0) == '/' ? coalescedSlashes.substring(1) : coalescedSlashes).
             split("/");
 
+        
+        // Track first path part, as we need to return it. Create variable part and map of next parts in it.
+        final PathElement firstPathPart = new PathElement();
+//        firstPathPart.variablePart = new VariablePart();
+        firstPathPart.nextParts = new HashMap<>();
+        
+        // Track last part so we can check it for query params later 
         String lastPart = parts[0];
-        PathPart lastPathPart = new PathPart();
+        // Track prev path part so we can link it to this path part via map
+        PathElement prevPathPart = firstPathPart;
+        // Track last path part so we can add any query params to it 
+        PathElement lastPathPart = firstPathPart;
+        
+        // Iterate all parts from first to last
         for (int i = 0; i < parts.length; i++) {
+            // Advance last part every loop, so it is the last part after the loop ends
             lastPart = parts[i];
             
             // Is it a variable path part?
             final Matcher m = VARIABLE_PATH_PART.matcher(lastPart);
             if (!m.find()) {
                 // If not, must be fixed
-                lastPathPart.fixedPart = lastPart;
+//                lastPathPart.fixedPart = lastPart;
             } else {
                 // If so, get variable type
-                lastPathPart.variablePart.pathParam = Optional.of(VariableParamType.from(m.group(1)));
+//                lastPathPart.variablePart.pathParam = Optional.of(VariableParamType.from(m.group(1)));
             }
             
-            // Add path part to list
-            pathParts.add(lastPathPart);
+            // Add path part to map if it is not the first part
+            if (i > 0) {
+                prevPathPart.nextParts.put(prevPathPart, lastPathPart);
+            }
 
             // Create a new last path part if at least one more part exists
             if (i < parts.length - 1) {
-                lastPathPart = new PathPart();
+                lastPathPart = new PathElement();
             }
         }
         
         // Is there a single question mark in the URL after one or more path parts?
-        final String[] querySplit = (lastPart != null ? lastPart : "").split("[?]");
+        final String[] querySplit = lastPart.split("[?]");
         if (querySplit.length > 2) {
             throw new IllegalArgumentException(QUERY_PARAMS_ONE_QUESTION_MARK);
         }
@@ -107,14 +118,14 @@ public class ServerBuilder {
                 final String paramName = m.group(1);
                 final VariableParamType paramType = VariableParamType.from(m.group(2));
                 final boolean required = m.group(3) != null;
-                lastPathPart.variablePart.queryParams.put(
-                    paramName,
-                    new QueryParam(paramName, paramType, required)
-                );
+//                lastPathPart.variablePart.queryParams.put(
+//                    paramName,
+//                    new QueryParam(paramName, paramType, required)
+//                );
             }
         }
         
-        return pathParts;
+        return firstPathPart;
     }
     
     /**
@@ -140,18 +151,65 @@ public class ServerBuilder {
      * @param url
      * @return
      */
-    public ServerBuilder addEndpoint(
+    void addEndpoint(
         final String method,
         final String url
     ) {
-        return null;
+        //
     }
     
-    // ==== Helper methods
-    
+    /**
+     * Create a server for the given endpoints
+     * 
+     * @return server
+     */
     Server end() {
         return new Server(services);
     }
     
-    // ==== Steps
+    // ==== Builder
+    
+    /**
+     * Begin building a Server
+     * 
+     * @return builder
+     */
+    public static ServerBuilder begin() {
+        return new ServerBuilder();
+    }
+    
+    /**
+     * Add required first endpoint
+     */
+    public class FirstEndpoint {
+        public MoreEndPoints add(
+            final String method,
+            final String url
+        ) {
+            ServerBuilder.this.addEndpoint(method, url);
+            return new MoreEndPoints();
+        }
+    }
+    
+    /**
+     * Add optional additional endpoints
+     */
+    public class MoreEndPoints {
+        public MoreEndPoints add(
+            final String method,
+            final String url
+        ) {
+            addEndpoint(method, url);
+            return new MoreEndPoints();
+        }
+        
+        /**
+         * End building, returning a Server for all the provided endpoints.
+         * 
+         * @return server
+         */
+        public Server end() {
+            return ServerBuilder.this.end();
+        }
+    }
 }

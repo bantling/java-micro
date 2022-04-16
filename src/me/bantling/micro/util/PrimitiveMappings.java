@@ -10,38 +10,32 @@ public class PrimitiveMappings {
     /**
      * Map primitives types to their wrapper types
      */
-    public static final Map<Class<?>, Class<?>> PRIMITIVE_TO_WRAPPER = Collections.map(
-        new HashMap<Class<?>, Class<?>>()
-    ).add(
-        void.class,    Void.class,
-        boolean.class, Boolean.class,
-        byte.class,    Byte.class,
-        char.class,    Character.class,
-        short.class,   Short.class,
-        int.class,     Integer.class,
-        long.class,    Long.class,
-        float.class,   Float.class,
-        double.class,  Double.class
-    ).toUnmodifiableMap();
+    public static final Map<Class<?>, Class<?>> PRIMITIVE_TO_WRAPPER = Collections.unmodifiableMapOf(
+        Tuple.of(void.class,    Void.class),
+        Tuple.of(boolean.class, Boolean.class),
+        Tuple.of(byte.class,    Byte.class),
+        Tuple.of(char.class,    Character.class),
+        Tuple.of(short.class,   Short.class),
+        Tuple.of(int.class,     Integer.class),
+        Tuple.of(long.class,    Long.class),
+        Tuple.of(float.class,   Float.class),
+        Tuple.of(double.class,  Double.class)
+    );
 
     /**
      * Map wrappers types to their primitive types
      */
-    public static final Map<Class<?>, Class<?>> WRAPPER_TO_PRIMITIVE = Collections.map(
-        new HashMap<Class<?>, Class<?>>()
-    ).
-    add(
-        Void.class,      void.class,
-        Boolean.class,   boolean.class,
-        Byte.class,      byte.class,
-        Character.class, char.class,
-        Short.class,     short.class,
-        Integer.class,   int.class,
-        Long.class,      long.class,
-        Float.class,     float.class,
-        Double.class,    double.class
-    ).
-    toUnmodifiableMap();
+    public static final Map<Class<?>, Class<?>> WRAPPER_TO_PRIMITIVE = Collections.unmodifiableMapOf(
+        Tuple.of(Void.class,      void.class),
+        Tuple.of(Boolean.class,   boolean.class),
+        Tuple.of(Byte.class,      byte.class),
+        Tuple.of(Character.class, char.class),
+        Tuple.of(Short.class,     short.class),
+        Tuple.of(Integer.class,   int.class),
+        Tuple.of(Long.class,      long.class),
+        Tuple.of(Float.class,     float.class),
+        Tuple.of(Double.class,    double.class)
+    );
     
     /**
      * Zero Byte constant
@@ -86,51 +80,42 @@ public class PrimitiveMappings {
     /**
      * Map primitives types to their zero values
      */
-    public static final Map<Class<?>, Object> PRIMITIVE_TO_ZERO_VALUE = Collections.map(
-        new HashMap<Class<?>, Object>()
-    ).
-    add(
-        void.class,    null,
-        boolean.class, Boolean.FALSE,
-        byte.class,    ZERO_BYTE,
-        char.class,    ZERO_CHARACTER,
-        short.class,   ZERO_SHORT,
-        int.class,     ZERO_INTEGER,
-        long.class,    ZERO_LONG,
-        float.class,   ZERO_FLOAT,
-        double.class,  ZERO_DOUBLE
-    ).
-    toUnmodifiableMap();
+    public static final Map<Class<?>, Object> PRIMITIVE_TO_ZERO_VALUE = Collections.unmodifiableMapOf(
+        Tuple.of(void.class,    null),
+        Tuple.of(boolean.class, Boolean.FALSE),
+        Tuple.of(byte.class,    ZERO_BYTE),
+        Tuple.of(char.class,    ZERO_CHARACTER),
+        Tuple.of(short.class,   ZERO_SHORT),
+        Tuple.of(int.class,     ZERO_INTEGER),
+        Tuple.of(long.class,    ZERO_LONG),
+        Tuple.of(float.class,   ZERO_FLOAT),
+        Tuple.of(double.class,  ZERO_DOUBLE)
+    );
     
     /**
      * Map primitives wrapper types to their zero values, and String to ""
      */
-    public static final Map<Class<?>, Object> WRAPPER_TO_ZERO_VALUE = Collections.map(
-        new HashMap<Class<?>, Object>()
-    ).
-    add(
-        Void.class,      null,
-        Boolean.class,   Boolean.FALSE,
-        Byte.class,      ZERO_BYTE,
-        Character.class, ZERO_CHARACTER,
-        Short.class,     ZERO_SHORT,
-        Integer.class,   ZERO_INTEGER,
-        Long.class,      ZERO_LONG,
-        Float.class,     ZERO_FLOAT,
-        Double.class,    ZERO_DOUBLE,
-        String.class,    EMPTY_STRING
-    ).
-    toUnmodifiableMap();
+    public static final Map<Class<?>, Object> WRAPPER_TO_ZERO_VALUE = Collections.unmodifiableMapOf(
+        Tuple.of(Void.class,      null),
+        Tuple.of(Boolean.class,   Boolean.FALSE),
+        Tuple.of(Byte.class,      ZERO_BYTE),
+        Tuple.of(Character.class, ZERO_CHARACTER),
+        Tuple.of(Short.class,     ZERO_SHORT),
+        Tuple.of(Integer.class,   ZERO_INTEGER),
+        Tuple.of(Long.class,      ZERO_LONG),
+        Tuple.of(Float.class,     ZERO_FLOAT),
+        Tuple.of(Double.class,    ZERO_DOUBLE),
+        Tuple.of(String.class,    EMPTY_STRING)
+    );
 
     /**
      * Map primitives and their wrapper types to their zero values, and String to ""
      */
-    public static final Map<Class<?>, Object> PRIMITIVE_AND_WRAPPER_TO_ZERO_VALUE = Collections.map(
-        new HashMap<Class<?>, Object>()
-    ).
-    addAll(PRIMITIVE_TO_ZERO_VALUE).
-    addAll(WRAPPER_TO_ZERO_VALUE).
-    toUnmodifiableMap();
+    public static final Map<Class<?>, Object> PRIMITIVE_AND_WRAPPER_TO_ZERO_VALUE = Collections.unmodifiableMapOf(
+        new HashMap<Class<?>, Object>(),
+        PRIMITIVE_TO_ZERO_VALUE,
+        WRAPPER_TO_ZERO_VALUE
+    );
     
     /**
      * Determine if the given object is a non-null instance of the given type.

@@ -48,7 +48,7 @@ public class Server implements HttpHandler {
      *     handler: delete customer
      *     nextPart: empty
      */
-    protected Map<String, Map<String, PathPart>> services;
+    protected Map<String, Map<String, PathElement>> services;
     
     // ==== Error messages
     
@@ -59,7 +59,7 @@ public class Server implements HttpHandler {
     
     // ==== Construct
     
-    public Server(final Map<String, Map<String, PathPart>> services) {
+    public Server(final Map<String, Map<String, PathElement>> services) {
         this.services = services;
     }
     

@@ -5,16 +5,20 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 public final class Collections {
     private Collections() {
         throw new RuntimeException();
     }
+    
+    // ==== List
     
     /**
      * Create a {@link ArrayList} of the items given.
@@ -55,6 +59,51 @@ public final class Collections {
     }
     
     /**
+     * Create a {@link ArrayList} of the lists given.
+     * 
+     * @param <E> the type of elements to add to the list
+     * @param firstList the first list to add
+     * @param moreLists additional lists to add, if any
+     * @return a list of all the elements of all the given lists
+     */
+    @SafeVarargs
+    public static <E> List<E> listOf(
+        final List<E> firstList,
+        final List<E>... moreLists
+    ) {
+        int size = firstList.size();
+        for (final List<E> l : moreLists) {
+            size += l.size();
+        }
+        
+        final List<E> list = new ArrayList<>(size);
+        list.addAll(firstList);
+        for (final List<E> nextList: moreLists) {
+            list.addAll(nextList);
+        }
+        
+        return list;
+    }
+    
+    /**
+     * Create an unmodifiable list of the items given.
+     * 
+     * @param <E> the type of elements to add to the list
+     * @param firstElement the first element to add
+     * @param moreElements additional elements to add, if any
+     * @return an unmodifiable list of all the elements
+     */
+    @SafeVarargs
+    public static <E> List<E> unmodifiableListOf(
+        final List<E> firstList,
+        final List<E>... moreLists
+    ) {
+        return java.util.Collections.unmodifiableList(listOf(firstList, moreLists));
+    }
+    
+    // ==== Set
+    
+    /**
      * The error message format for adding duplicate set values
      */
     static final String DUPLICATE_VALUE_MSG = "Duplicate element: %s";
@@ -89,6 +138,31 @@ public final class Collections {
         addOne(set, firstElement);
         for (final E element : moreElements) {
             addOne(set, element);
+        }
+        
+        return set;
+    }
+    
+    /**
+     * Add the elements of firstSet and all moreSets sets to a set. 
+     * @param <E> the type of elements to add
+     * @param set the set to add the elements to
+     * @param firstSet the first set to add the elements of
+     * @param moreSets additional sets to add the elements of
+     * @return the given set, with all the elements of the other sets added
+     */
+    static <E> Set<E> addSets(
+        final Set<E> set,
+        final Set<E> firstSet,
+        final Set<E>[] moreSets
+    ) {
+        for (final E element : firstSet) {
+            addOne(set, element);
+        }
+        for (final Set<E> s : moreSets) {
+            for (final E element : s) {
+                addOne(set, element);
+            }
         }
         
         return set;
@@ -133,6 +207,40 @@ public final class Collections {
     }
     
     /**
+     * Create a {@link HashSet} of the sets given.
+     * 
+     * @param <E> the type of elements to add
+     * @param firstSet the first set to add
+     * @param moreSets additional sets to add
+     * @return a set of all the elements of the given sets
+     * @throws IllegalArgumentException if a duplicate value is provided
+     */
+    @SafeVarargs
+    public static <E> Set<E> setOf(
+        final Set<E> firstSet,
+        final Set<E>... moreSets
+    ) {
+        return addSets(new HashSet<>(), firstSet, moreSets);
+    }
+    
+    /**
+     * Create an unmodifiable set of the sets given.
+     * 
+     * @param <E> the type of elements to add
+     * @param firstSet the first set to add
+     * @param moreSets additional sets to add
+     * @return a set of all the elements of the given sets
+     * @throws IllegalArgumentException if a duplicate value is provided
+     */
+    @SafeVarargs
+    public static <E> Set<E> unmodifiableSetOf(
+        final Set<E> firstSet,
+        final Set<E>... moreSets
+    ) {
+        return java.util.Collections.unmodifiableSet(setOf(firstSet, moreSets));
+    }
+    
+    /**
      * Create a {@link LinkedHashSet} of the items given.
      * 
      * @param <E> the type of elements to add
@@ -171,12 +279,46 @@ public final class Collections {
     }
     
     /**
+     * Create a {@link LinkedHashSet} of the sets given.
+     * 
+     * @param <E> the type of elements to add
+     * @param firstSet the first set to add
+     * @param moreSets additional sets to add
+     * @return a set of all the elements of the given sets
+     * @throws IllegalArgumentException if a duplicate value is provided
+     */
+    @SafeVarargs
+    public static <E> Set<E> orderedSetOf(
+        final Set<E> firstSet,
+        final Set<E>... moreSets
+    ) {
+        return addSets(new LinkedHashSet<>(), firstSet, moreSets);
+    }
+    
+    /**
+     * Create an unmodifiable set of the sets given.
+     * 
+     * @param <E> the type of elements to add
+     * @param firstSet the first set to add
+     * @param moreSets additional sets to add
+     * @return a set of all the elements of the given sets
+     * @throws IllegalArgumentException if a duplicate value is provided
+     */
+    @SafeVarargs
+    public static <E> Set<E> unmodifiableOrderedSetOf(
+        final Set<E> firstSet,
+        final Set<E>... moreSets
+    ) {
+        return java.util.Collections.unmodifiableSet(orderedSetOf(firstSet, moreSets));
+    }
+    
+    /**
      * Create a {@link TreeSet} of the items given.
      * 
      * @param <E> the type of elements to add
      * @param firstElement the first element to add
      * @param moreElements additional elements to add
-     * @return a set of all the elements that iterate in the order given
+     * @return a set of all the elements that iterate in sorted order
      * @throws IllegalArgumentException if a duplicate value is provided
      */
     @SafeVarargs
@@ -197,7 +339,7 @@ public final class Collections {
      * @param <E> the type of elements to add
      * @param firstElement the first element to add
      * @param moreElements additional elements to add
-     * @return an unmodifiable set of all the elements that iterate in the order given
+     * @return an unmodifiable set of all the elements that iterate in sorted order
      * @throws IllegalArgumentException if a duplicate value is provided
      */
     @SafeVarargs
@@ -207,241 +349,340 @@ public final class Collections {
     ) {
         return java.util.Collections.unmodifiableSet(sortedSetOf(firstElement, moreElements));
     }
-
+    
     /**
-     * Build a map of hard-coded key value pairs of any length, in batches of 1 to 10 pairs.
-     * Duplicate keys result in an error, as they are considered a mistake in the coding.
+     * Create a {@link LinkedHashSet} of the sets given.
      * 
-     * @param <K> the key type
-     * @param <V> the value type
-     * @throws {@link IllegalArgumentException} if duplicate keys are added
+     * @param <E> the type of elements to add
+     * @param firstSet the first set to add
+     * @param moreSets additional sets to add
+     * @return a set of all the elements of the given sets
+     * @throws IllegalArgumentException if a duplicate value is provided
      */
-    public static class MapBuilder<K, V> {
-        /**
-         * The error message format for adding duplicate map keys
-         */
-        static final String DUPLICATE_KEY_MSG = "Duplicate key: %s";
-        
-        private final Map<K, V> map;
-        
-        MapBuilder(
-            final Map<K, V> map
-        ) {
-            this.map = map;
-        }
-        
-        private void addOne(final K k, final V v) {
-            if (map.put(k, v) != null) {
-                throw new IllegalArgumentException(String.format(DUPLICATE_KEY_MSG, k));
-            }
-        }
-        
-        public MapBuilder<K, V> add(
-            final K k, final V v
-        ) {
-            addOne(k, v);
-            return this;
-        }
-        
-        public MapBuilder<K, V> add(
-            final K k1, final V v1,
-            final K k2, final V v2
-        ) {
-            addOne(k1, v1);
-            addOne(k2, v2);
-            return this;
-        }
-        
-        public MapBuilder<K, V> add(
-            final K k1, final V v1,
-            final K k2, final V v2,
-            final K k3, final V v3
-        ) {
-            addOne(k1, v1);
-            addOne(k2, v2);
-            addOne(k3, v3);
-            return this;
-        }
-        
-        public MapBuilder<K, V> add(
-            final K k1, final V v1,
-            final K k2, final V v2,
-            final K k3, final V v3,
-            final K k4, final V v4
-        ) {
-            addOne(k1, v1);
-            addOne(k2, v2);
-            addOne(k3, v3);
-            addOne(k4, v4);
-            return this;
-        }
-        
-        public MapBuilder<K, V> add(
-            final K k1, final V v1,
-            final K k2, final V v2,
-            final K k3, final V v3,
-            final K k4, final V v4,
-            final K k5, final V v5
-        ) {
-            addOne(k1, v1);
-            addOne(k2, v2);
-            addOne(k3, v3);
-            addOne(k4, v4);
-            addOne(k5, v5);
-            return this;
-        }
-        
-        public MapBuilder<K, V> add(
-            final K k1, final V v1,
-            final K k2, final V v2,
-            final K k3, final V v3,
-            final K k4, final V v4,
-            final K k5, final V v5,
-            final K k6, final V v6
-        ) {
-            addOne(k1, v1);
-            addOne(k2, v2);
-            addOne(k3, v3);
-            addOne(k4, v4);
-            addOne(k5, v5);
-            addOne(k6, v6);
-            return this;
-        }
-        
-        public MapBuilder<K, V> add(
-            final K k1, final V v1,
-            final K k2, final V v2,
-            final K k3, final V v3,
-            final K k4, final V v4,
-            final K k5, final V v5,
-            final K k6, final V v6,
-            final K k7, final V v7
-        ) {
-            addOne(k1, v1);
-            addOne(k2, v2);
-            addOne(k3, v3);
-            addOne(k4, v4);
-            addOne(k5, v5);
-            addOne(k6, v6);
-            addOne(k7, v7);
-            return this;
-        }
-        
-        public MapBuilder<K, V> add(
-            final K k1, final V v1,
-            final K k2, final V v2,
-            final K k3, final V v3,
-            final K k4, final V v4,
-            final K k5, final V v5,
-            final K k6, final V v6,
-            final K k7, final V v7,
-            final K k8, final V v8
-        ) {
-            addOne(k1, v1);
-            addOne(k2, v2);
-            addOne(k3, v3);
-            addOne(k4, v4);
-            addOne(k5, v5);
-            addOne(k6, v6);
-            addOne(k7, v7);
-            addOne(k8, v8);
-            return this;
-        }
-        
-        public MapBuilder<K, V> add(
-            final K k1, final V v1,
-            final K k2, final V v2,
-            final K k3, final V v3,
-            final K k4, final V v4,
-            final K k5, final V v5,
-            final K k6, final V v6,
-            final K k7, final V v7,
-            final K k8, final V v8,
-            final K k9, final V v9
-        ) {
-            addOne(k1, v1);
-            addOne(k2, v2);
-            addOne(k3, v3);
-            addOne(k4, v4);
-            addOne(k5, v5);
-            addOne(k6, v6);
-            addOne(k7, v7);
-            addOne(k8, v8);
-            addOne(k9, v9);
-            return this;
-        }
-        
-        public MapBuilder<K, V> add(
-            final K k1, final V v1,
-            final K k2, final V v2,
-            final K k3, final V v3,
-            final K k4, final V v4,
-            final K k5, final V v5,
-            final K k6, final V v6,
-            final K k7, final V v7,
-            final K k8, final V v8,
-            final K k9, final V v9,
-            final K k10, final V v10
-        ) {
-            addOne(k1, v1);
-            addOne(k2, v2);
-            addOne(k3, v3);
-            addOne(k4, v4);
-            addOne(k5, v5);
-            addOne(k6, v6);
-            addOne(k7, v7);
-            addOne(k8, v8);
-            addOne(k9, v9);
-            addOne(k10, v10);
-            return this;
-        }
-        
-        /**
-         * Add all the key/value pairs of another map to this map.
-         * 
-         * @param m map of key/value pairs to add
-         * @return this builder
-         */
-        public MapBuilder<K, V> addAll(
-            final Map<K, V> m
-        ) {
-            for (final Map.Entry<K, V> e : m.entrySet()) {
-                addOne(e.getKey(), e.getValue());
-            }
-            
-            return this;
-        }
-        
-        public Map<K, V> done() {
-            return map;
-        }
-        
-        public Map<K, V> toUnmodifiableMap() {
-            return java.util.Collections.unmodifiableMap(map);
-        }
+    @SafeVarargs
+    public static <E> Set<E> sortedSetOf(
+        final Set<E> firstSet,
+        final Set<E>... moreSets
+    ) {
+        return addSets(new TreeSet<>(), firstSet, moreSets);
     }
     
     /**
-     * Build a map of K, V pairs into a {@list HashMap}.
+     * Create an unmodifiable set of the sets given.
      * 
-     * @param <K> the key type
-     * @param <V> the value type
-     * @return a builder for the given map
+     * @param <E> the type of elements to add
+     * @param firstSet the first set to add
+     * @param moreSets additional sets to add
+     * @return a set of all the elements of the given sets
+     * @throws IllegalArgumentException if a duplicate value is provided
      */
-    public static <K, V> MapBuilder<K, V> map() {
-        return new MapBuilder<>(new HashMap<>());
+    @SafeVarargs
+    public static <E> Set<E> unmodifiableSortedSetOf(
+        final Set<E> firstSet,
+        final Set<E>... moreSets
+    ) {
+        return java.util.Collections.unmodifiableSet(sortedSetOf(firstSet, moreSets));
+    }
+    
+    // ==== Map
+    
+    /**
+     * The error message format for adding duplicate keys
+     */
+    static final String DUPLICATE_KEY_MSG = "Duplicate key: %s";
+        
+    /**
+     * Add one key/value pair to the map, throwing an {@link IllegalArgumentException} if it is a key
+     * 
+     * @param <K> the type of key to add
+     * @param <V> the type of value to add
+     * @param map the map to add the key/value pair to
+     * @param k the key to add
+     * @param v the value for the added key
+     */
+    static <K, V> void addOne(final Map<K, V> map, final K k, final V v) {
+        if (map.containsKey(k)) {
+            throw new IllegalArgumentException(String.format(DUPLICATE_KEY_MSG, k));
+        }
+        
+        map.put(k, v);
     }
     
     /**
-     * Build a map of K, V pairs into the given map
+     * Add all the elements to the map, throwing an {@link IllegalArgumentException} if any item is a duplicate
      * 
-     * @param <K> the key type
-     * @param <V> the value type
-     * @param map the map to build
-     * @return a builder for the given map
+     * @param <K> the type of key to add
+     * @param <V> the type of value to add
+     * @param map the map to add the key/value pair to
+     * @param firstPair the first key/value pair to add
+     * @param morePairs additional key/value pairs to add
+     * @return the given map, with all the key/value pairs added
      */
-    public static <K, V> MapBuilder<K, V> map(final Map<K, V> map) {
-        return new MapBuilder<>(map);
+    static <K, V> Map<K, V> addPairs(
+        final Map<K, V> map,
+        final Tuple.Two<K, V> firstPair,
+        final Tuple.Two<K, V>[] morePairs
+    ) {
+        addOne(map, firstPair.get1(), firstPair.get2());
+        for (final Tuple.Two<K, V> pair : morePairs) {
+            addOne(map, pair.get1(), pair.get2());
+        }
+        
+        return map;
+    }
+    
+    /**
+     * 
+     * @param <K> the type of key to add
+     * @param <V> the type of value to add
+     * @param map the map to add the key/value pairs to
+     * @param firstMap the first map to add the key/value pairs of
+     * @param moreMaps additional maops to add the key/value pairs of
+     * @return the given map, with all the key/value pairs of all the maps added
+     */
+    static <K, V> Map<K, V> addMaps(
+        final Map<K, V> map,
+        final Map<K, V> firstMap,
+        final Map<K, V>[] moreMaps
+    ) {
+        for (final Map.Entry<K, V> entry : firstMap.entrySet()) {
+            addOne(map, entry.getKey(), entry.getValue());
+        }
+        for (final Map<K, V> m : moreMaps) {
+            for (final Map.Entry<K, V> entry : m.entrySet()) {
+                addOne(map, entry.getKey(), entry.getValue());
+            }
+        }
+        
+        return map;
+    }
+    
+    /**
+     * Create a {@link HashMap} of the key/value pairs given.
+     * 
+     * @param <K> the type of keys to add
+     * @param <V> the type of values to add
+     * @param firstPair the first key/value pair to add
+     * @param morePairs additional key/value pairs to add
+     * @return a map of all the elements
+     * @throws IllegalArgumentException if a duplicate key is provided
+     */
+    @SafeVarargs
+    public static <K, V> Map<K, V> mapOf(
+        final Tuple.Two<K, V> firstPair,
+        final Tuple.Two<K, V>... morePairs
+    ) {
+        return addPairs(
+            new HashMap<>(),
+            firstPair,
+            morePairs
+        );
+    }
+    
+    /**
+     * Create an unmodifiable map of the key/value pairs given.
+     * 
+     * @param <K> the type of keys to add
+     * @param <V> the type of values to add
+     * @param firstPair the first key/value pair to add
+     * @param morePairs additional key/value pairs to add
+     * @return a map of all the elements
+     * @throws IllegalArgumentException if a duplicate key is provided
+     */
+    @SafeVarargs
+    public static <K, V> Map<K, V> unmodifiableMapOf(
+        final Tuple.Two<K, V> firstPair,
+        final Tuple.Two<K, V>... morePairs
+    ) {
+        return java.util.Collections.unmodifiableMap(mapOf(firstPair, morePairs));
+    }
+    
+    /**
+     * Create a {@link HashMap} of the key/value pairs of all the given maps.
+     * 
+     * @param <K> the type of keys to add
+     * @param <V> the type of values to add
+     * @param firstMap the first map to add the key/value pairs of
+     * @param moreMaps additional maps to add the key/value pairs of
+     * @return a map of all the elements
+     * @throws IllegalArgumentException if a duplicate key is provided
+     */
+    @SafeVarargs
+    public static <K, V> Map<K, V> mapOf(
+        final Map<K, V> firstMap,
+        final Map<K, V>... moreMaps
+    ) {
+        return addMaps(new HashMap<>(), firstMap, moreMaps);
+    }
+    
+    /**
+     * Create an unmodifiable map of the key/value pairs given.
+     * 
+     * @param <K> the type of keys to add
+     * @param <V> the type of values to add
+     * @param firstMap the first mapo to add the key/value pairs of
+     * @param moreMaps additional maps to add the key/value pairs of
+     * @return a map of all the elements
+     * @throws IllegalArgumentException if a duplicate key is provided
+     */
+    @SafeVarargs
+    public static <K, V> Map<K, V> unmodifiableMapOf(
+        final Map<K, V> firstMap,
+        final Map<K, V>... moreMaps
+    ) {
+        return java.util.Collections.unmodifiableMap(mapOf(firstMap, moreMaps));
+    }
+    
+    /**
+     * Create a {@link LinkedHashMap} of the key/value pairs given.
+     * 
+     * @param <K> the type of keys to add
+     * @param <V> the type of values to add
+     * @param firstPair the first key/value pair to add
+     * @param morePairs additional key/value pairs to add
+     * @return a map of all the elements that iterate in the order given
+     * @throws IllegalArgumentException if a duplicate key is provided
+     */
+    @SafeVarargs
+    public static <K, V> Map<K, V> orderedMapOf(
+        final Tuple.Two<K, V> firstPair,
+        final Tuple.Two<K, V>... morePairs
+    ) {
+        return addPairs(
+            new LinkedHashMap<>(),
+            firstPair,
+            morePairs
+        );
+    }
+    
+    /**
+     * Create an unmodifiable {@link LinkedHashMap} of the key/value pairs given.
+     * 
+     * @param <K> the type of keys to add
+     * @param <V> the type of values to add
+     * @param firstPair the first key/value pair to add
+     * @param morePairs additional key/value pairs to add
+     * @return a map of all the elements
+     * @throws IllegalArgumentException if a duplicate key is provided
+     */
+    @SafeVarargs
+    public static <K, V> Map<K, V> unmodifiableOrderedMapOf(
+        final Tuple.Two<K, V> firstPair,
+        final Tuple.Two<K, V>... morePairs
+    ) {
+        return java.util.Collections.unmodifiableMap(orderedMapOf(firstPair, morePairs));
+    }
+    
+    /**
+     * Create a {@link LinkedHashMap} of the key/value pairs of all the given maps.
+     * 
+     * @param <K> the type of keys to add
+     * @param <V> the type of values to add
+     * @param firstMap the first map to add the key/value pairs of
+     * @param moreMaps additional maps to add the key/value pairs of
+     * @return a map of all the elements
+     * @throws IllegalArgumentException if a duplicate key is provided
+     */
+    @SafeVarargs
+    public static <K, V> Map<K, V> orderedMapOf(
+        final Map<K, V> firstMap,
+        final Map<K, V>... moreMaps
+    ) {
+        return addMaps(new LinkedHashMap<>(), firstMap, moreMaps);
+    }
+    
+    /**
+     * Create an unmodifiable ordered map of the key/value pairs given.
+     * 
+     * @param <K> the type of keys to add
+     * @param <V> the type of values to add
+     * @param firstMap the first mapo to add the key/value pairs of
+     * @param moreMaps additional maps to add the key/value pairs of
+     * @return a map of all the elements
+     * @throws IllegalArgumentException if a duplicate key is provided
+     */
+    @SafeVarargs
+    public static <K, V> Map<K, V> unmodifiableOrderedMapOf(
+        final Map<K, V> firstMap,
+        final Map<K, V>... moreMaps
+    ) {
+        return java.util.Collections.unmodifiableMap(orderedMapOf(firstMap, moreMaps));
+    }
+    
+    /**
+     * Create a {@link TreeMap} of the key/value pairs given.
+     * 
+     * @param <K> the type of keys to add
+     * @param <V> the type of values to add
+     * @param firstPair the first key/value pair to add
+     * @param morePairs additional key/value pairs to add
+     * @return a map of all the elements that iterate in sorted order
+     * @throws IllegalArgumentException if a duplicate key is provided
+     */
+    @SafeVarargs
+    public static <K, V> Map<K, V> sortedMapOf(
+        final Tuple.Two<K, V> firstPair,
+        final Tuple.Two<K, V>... morePairs
+    ) {
+        return addPairs(
+            new TreeMap<>(),
+            firstPair,
+            morePairs
+        );
+    }
+    
+    /**
+     * Create an unmodifiable {@link TreeMap} of the key/value pairs given.
+     * 
+     * @param <K> the type of keys to add
+     * @param <V> the type of values to add
+     * @param firstPair the first key/value pair to add
+     * @param morePairs additional key/value pairs to add
+     * @return an unmodifiable map of all the elements that iterate in sorted order
+     * @throws IllegalArgumentException if a duplicate key is provided
+     */
+    @SafeVarargs
+    public static <K, V> Map<K, V> unmodifiableSortedMapOf(
+        final Tuple.Two<K, V> firstPair,
+        final Tuple.Two<K, V>... morePairs
+    ) {
+        return java.util.Collections.unmodifiableMap(sortedMapOf(firstPair, morePairs));
+    }
+    
+    /**
+     * Create a {@link TreeMap} of the key/value pairs of all the given maps.
+     * 
+     * @param <K> the type of keys to add
+     * @param <V> the type of values to add
+     * @param firstMap the first map to add the key/value pairs of
+     * @param moreMaps additional maps to add the key/value pairs of
+     * @return a map of all the elements
+     * @throws IllegalArgumentException if a duplicate key is provided
+     */
+    @SafeVarargs
+    public static <K, V> Map<K, V> sortedMapOf(
+        final Map<K, V> firstMap,
+        final Map<K, V>... moreMaps
+    ) {
+        return addMaps(new TreeMap<>(), firstMap, moreMaps);
+    }
+    
+    /**
+     * Create an unmodifiable sorted map of the key/value pairs given.
+     * 
+     * @param <K> the type of keys to add
+     * @param <V> the type of values to add
+     * @param firstMap the first mapo to add the key/value pairs of
+     * @param moreMaps additional maps to add the key/value pairs of
+     * @return a map of all the elements
+     * @throws IllegalArgumentException if a duplicate key is provided
+     */
+    @SafeVarargs
+    public static <K, V> Map<K, V> unmodifiableSortedMapOf(
+        final Map<K, V> firstMap,
+        final Map<K, V>... moreMaps
+    ) {
+        return java.util.Collections.unmodifiableMap(sortedMapOf(firstMap, moreMaps));
     }
     
     /**

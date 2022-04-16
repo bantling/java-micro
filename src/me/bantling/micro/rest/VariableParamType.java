@@ -1,10 +1,10 @@
 package me.bantling.micro.rest;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
 import me.bantling.micro.util.Collections;
+import me.bantling.micro.util.Tuple;
 
 /**
  * {@code VariableParamType} is a case-insensitive type name of a query parameter
@@ -45,20 +45,18 @@ enum VariableParamType {
      */
     UUID;
     
-    private static final Map<String, VariableParamType> STRING_TO_PARAM_TYPE = Collections.map(
-        new HashMap<String, VariableParamType>()
-    ).
-        add("{bool}",    BOOLEAN).
-        add("{boolean}", BOOLEAN).
-        add("{str}",     STRING).
-        add("{string}",  STRING).
-        add("{int}",     INT).
-        add("{integer}", INT).
-        add("{long}",    LONG).
-        add("{float}",   FLOAT).
-        add("{double}",  DOUBLE).
-        add("{uuid}",    UUID).
-    done();
+    private static final Map<String, VariableParamType> STRING_TO_PARAM_TYPE = Collections.mapOf(
+        Tuple.of("{bool}",    BOOLEAN),
+        Tuple.of("{boolean}", BOOLEAN),
+        Tuple.of("{str}",     STRING),
+        Tuple.of("{string}",  STRING),
+        Tuple.of("{int}",     INT),
+        Tuple.of("{integer}", INT),
+        Tuple.of("{long}",    LONG),
+        Tuple.of("{float}",   FLOAT),
+        Tuple.of("{double}",  DOUBLE),
+        Tuple.of("{uuid}",    UUID)
+    );
     
     /**
      * @return an appropriate enum constant given a case-insensitive string

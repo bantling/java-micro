@@ -1,4 +1,4 @@
-package me.bantling.micro.util;
+package me.bantling.micro.reflect;
 
 import static org.junit.Assert.assertEquals;
 
@@ -10,8 +10,11 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
+import me.bantling.micro.util.Collections;
+import me.bantling.micro.util.Tuple;
+
 @SuppressWarnings({ "static-method", "static-access", "rawtypes" })
-public class TestReflect {
+public class TestResolver {
     static class GAT1<T> {
         T[] array;
     }
@@ -98,7 +101,7 @@ public class TestReflect {
         );
         
         for (final Tuple.TwoOf<Type> testCase : testCases) {
-            assertEquals(testCase.get2(), Reflect.resolveType(testCase.get1()));
+            assertEquals(testCase.get2(), Resolver.resolveType(testCase.get1()));
         }
     }
     
@@ -112,7 +115,7 @@ public class TestReflect {
         );
         
         for (final Tuple.UpToFourOf<Class<?>> testCase : testCases) {
-            final List<Class<?>> expandedRawType = Reflect.expandRawType(testCase.get1());
+            final List<Class<?>> expandedRawType = Resolver.expandRawType(testCase.get1());
             
             assertEquals(testCase.get2(), expandedRawType.get(0));
             assertEquals(testCase.get3(), expandedRawType.get(1));
@@ -145,7 +148,7 @@ public class TestReflect {
         );
 
         for (final Tuple.Two<Type, List<Type>> testCase : testCases) {
-            assertEquals(testCase.get2(), Reflect.resolveTypeAndArgs(testCase.get1()));
+            assertEquals(testCase.get2(), Resolver.resolveTypeAndArgs(testCase.get1()));
         }
     }
 }

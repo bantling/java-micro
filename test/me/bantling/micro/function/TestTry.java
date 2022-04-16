@@ -15,16 +15,6 @@ import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Test;
 
-import me.bantling.micro.function.BooleanBinaryOperator;
-import me.bantling.micro.function.Try;
-import me.bantling.micro.function.TryBooleanSupplier;
-import me.bantling.micro.function.TryConsumer;
-import me.bantling.micro.function.TryDoubleSupplier;
-import me.bantling.micro.function.TryIntSupplier;
-import me.bantling.micro.function.TryLongSupplier;
-import me.bantling.micro.function.TrySideEffect;
-import me.bantling.micro.function.TrySupplier;
-
 @SuppressWarnings("static-method")
 public class TestTry {
     private static final Integer INT_ONE = Integer.valueOf(1);

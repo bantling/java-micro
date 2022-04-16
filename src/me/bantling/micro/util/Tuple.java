@@ -54,7 +54,7 @@ import java.util.Objects;
  *   ...
  * )
  * 
- * 4. Create a List or Set of up to a max number of tuples
+ * 4. Create a List or Set of tuples that have a variable number of values
  * - Declare type as
  *   Tuple.UpTo{Two,Three,Four,Five,Six}<T,U,...>
  *   OR
@@ -102,9 +102,46 @@ import java.util.Objects;
  * list.get(4).count() => 1
  * list.get(5).count() => 2
  * list.get(6).count() => 3
+ * 
+ * 5. Create a tuple that acts as a union, where only one value is set
+ * - Declare type as Tuple.Union{Two,Three,Four,Five,Six}<T,U,...>
+ * - Use Tuple.Union.{two,three,four,five,six}{Nullable?}(position, value), where position is from 1 to N
+ * - Call the getPosition() method the union to get the position that has a value
+ * 
+ * EG:
+ * Tuple.UnionThree<String, Integer, Double> u = Tuple.Union.of(2, 5)
+ * u.getPosition() = 2
+ * u.get1() and u.get3() throw IllegalArgumentException
+ * u.get2() = 5
  */
 public final class Tuple {
-    // ==== Base Class
+    
+    // ==== Utility methods
+    
+    /**
+     * UNION_ERROR_FMT is the error format string to use if the wrong member of a union is accessed.
+     */
+    public static final String UNION_ERROR_FMT = "Only member %d of the union is available";
+    
+    /**
+     * Verify that the caller has accessed the correct member of a union
+     *   
+     * @param position the position of the union that is accessible
+     * @param requested the position the caller is trying to read
+     * @throws IllegalArgumentException if expected != actual
+     */
+    static void checkUnionPosition(
+        final int expected,
+        final int actual
+    ) {
+        if (expected != actual) {
+            throw new IllegalArgumentException(
+                String.format(UNION_ERROR_FMT, Integer.valueOf(expected))
+            );
+        }
+    }
+    
+    // ==== Base Classes
     
     /**
      * Base provides the functionality to back all the use cases
@@ -120,7 +157,7 @@ public final class Tuple {
         /**
          * the number of fields actually used
          */
-        final int count;
+        final int size;
         
         /**
          * The first value
@@ -155,7 +192,7 @@ public final class Tuple {
         /**
          * Construct with the given values
          * 
-         * @param count the number of values actually used 
+         * @param size the number of values actually used 
          * @param t the first value
          * @param u the second value
          * @param v the third value
@@ -164,7 +201,7 @@ public final class Tuple {
          * @param y the sixth value
          */
         Base(
-            final int count,
+            final int size,
             final T t,
             final U u,
             final V v,
@@ -172,7 +209,7 @@ public final class Tuple {
             final X x,
             final Y y
         ) { 
-            this.count = count;
+            this.size = size;
             this.t = t;
             this.u = u;
             this.v = v;
@@ -182,9 +219,102 @@ public final class Tuple {
         }
         
         /**
-         * Hash all the provided values in a fashion compatible with {@link Arrays#hashCode(Object[])}.
-         * If the instance is an UpTo{Two,Three,Four,Five,Six}{Same?} object,
-         * the number of provided values may be less than the generic signature. 
+         * Hash all the provided values in a fashion compatible with {@link Arrays#hashCode(Object[])}. 
+         */
+        @Override
+        public int hashCode() {
+            int hashCode = 1;
+            
+            if (size >= 1) {
+                hashCode = 31 * hashCode + Objects.hashCode(t);
+            }
+            
+            if (size >= 2) {
+                hashCode = 31 * hashCode + Objects.hashCode(u);
+            }
+            
+            if (size >= 3) {
+                hashCode = 31 * hashCode + Objects.hashCode(v);
+            }
+            
+            if (size >= 4) {
+                hashCode = 31 * hashCode + Objects.hashCode(w);
+            }
+            
+            if (size >= 5) {
+                hashCode = 31 * hashCode + Objects.hashCode(x);
+            }
+            
+            if (size >= 6) {
+                hashCode = 31 * hashCode + Objects.hashCode(y);
+            }
+            
+            return hashCode;
+        }
+        
+        /**
+         * Two Tuples are equal if they have the same count, and the first count values are equal.
+         * They do not have be the same subclass type. 
+         */
+        @Override
+        public boolean equals(final Object o) {
+            boolean equals = o == this;
+            if ((! equals) && (o instanceof Base)) {
+                @SuppressWarnings("unchecked")
+                final Base<T, U, V, W, X, Y> obj = (Base<T, U, V, W, X, Y>)(o);
+                equals =
+                    (size == obj.size) &&
+                    ((size < 1) || Objects.equals(t, obj.t)) &&
+                    ((size < 2) || Objects.equals(u, obj.u)) &&
+                    ((size < 3) || Objects.equals(v, obj.v)) &&
+                    ((size < 4) || Objects.equals(w, obj.w)) &&
+                    ((size < 5) || Objects.equals(x, obj.x)) &&
+                    ((size < 6) || Objects.equals(y, obj.y));
+            }
+            
+            return equals;
+        }
+        
+        /**
+         * The string is of the form (first, second, ...), where only the first count values are included
+         */
+        @Override
+        public String toString() {
+            return
+                "(" +
+                ((size < 1) ? "" :       String.valueOf(t)) +
+                ((size < 2) ? "" : "," + String.valueOf(u)) +
+                ((size < 3) ? "" : "," + String.valueOf(v)) +
+                ((size < 4) ? "" : "," + String.valueOf(w)) +
+                ((size < 5) ? "" : "," + String.valueOf(x)) +
+                ((size < 6) ? "" : "," + String.valueOf(y)) + 
+                ")";
+        }
+    }
+    
+    static class UpToBase<T, U, V, W, X, Y> extends Base<T, U, V, W, X, Y> {
+        final int count;
+        
+        UpToBase(
+            final int size,
+            final int count,
+            final T t,
+            final U u,
+            final V v,
+            final W w,
+            final X x,
+            final Y y
+        ) {
+            super(size, t, u, v, w, x, y);
+            this.count = count;
+        }
+        
+        public int getCount() {
+            return count;
+        }
+        
+        /**
+         * Hash all the provided values in a fashion compatible with {@link Arrays#hashCode(Object[])}. 
          */
         @Override
         public int hashCode() {
@@ -218,30 +348,7 @@ public final class Tuple {
         }
         
         /**
-         * Two Tuples are equal if they have the same count, and the first count values are equal.
-         * They do not have be the same subclass type. 
-         */
-        @Override
-        public boolean equals(final Object o) {
-            boolean equals = o == this;
-            if ((! equals) && (o instanceof Base)) {
-                @SuppressWarnings("unchecked")
-                final Base<T, U, V, W, X, Y> obj = (Base<T, U, V, W, X, Y>)(o);
-                equals =
-                    (count == obj.count) &&
-                    ((count < 1) || Objects.equals(t, obj.t)) &&
-                    ((count < 2) || Objects.equals(u, obj.u)) &&
-                    ((count < 3) || Objects.equals(v, obj.v)) &&
-                    ((count < 4) || Objects.equals(w, obj.w)) &&
-                    ((count < 5) || Objects.equals(x, obj.x)) &&
-                    ((count < 6) || Objects.equals(y, obj.y));
-            }
-            
-            return equals;
-        }
-        
-        /**
-         * The string is of the form (first, second, ...), where only the first count values are included
+         * The string is of the form (first, second, ...), but only the first count values are included
          */
         @Override
         public String toString() {
@@ -254,6 +361,107 @@ public final class Tuple {
                 ((count < 5) ? "" : "," + String.valueOf(x)) +
                 ((count < 6) ? "" : "," + String.valueOf(y)) + 
                 ")";
+        }
+    }
+    
+    static class UnionBase<T, U, V, W, X, Y> extends Base<T, U, V, W, X, Y> {
+        /**
+         * Construct with the given values
+         * 
+         * @param count the number of values actually used 
+         * @param t the first value
+         * @param u the second value
+         * @param v the third value
+         * @param w the fourth value
+         * @param x the fifth value
+         * @param y the sixth value
+         */
+        UnionBase(
+            final int count,
+            final T t,
+            final U u,
+            final V v,
+            final W w,
+            final X x,
+            final Y y
+        ) {
+           super(count, t, u, v, w, x, y); 
+        }
+        
+        @Override
+        public int hashCode() {
+            int hashCode = 0;
+            
+            switch(size) {
+            case 1:
+                if (t != null) {
+                    hashCode = t.hashCode();
+                }
+                break;
+
+            case 2:
+                if (u != null) {
+                    hashCode = u.hashCode();
+                }
+                break;
+
+            case 3:
+                if (v != null) {
+                    hashCode = v.hashCode();
+                }
+                break;
+
+            case 4:
+                if (w != null) {
+                    hashCode = w.hashCode();
+                }
+                break;
+
+            case 5:
+                if (x != null) {
+                    hashCode = x.hashCode();
+                }
+                break;
+
+            default:
+                if (y != null) {
+                    hashCode = y.hashCode();
+                }
+            }
+            
+            return hashCode;
+        }
+        
+        @Override
+        public String toString() {
+            final StringBuilder sb = new StringBuilder("(");
+            
+            switch(size) {
+            case 1:
+                sb.append(t);
+                break;
+    
+            case 2:
+                sb.append(u);
+                break;
+    
+            case 3:
+                sb.append(v);
+                break;
+    
+            case 4:
+                sb.append(w);
+                break;
+    
+            case 5:
+                sb.append(x);
+                break;
+    
+            default:
+                sb.append(y);
+            }
+        
+            return sb.append(")").toString();
         }
     }
     
@@ -312,22 +520,13 @@ public final class Tuple {
      * @param <T> first type
      * @param <U> second type
      */
-    public static class UpToTwo<T, U> extends Base<T, U, Void, Void, Void, Void> {
+    public static class UpToTwo<T, U> extends UpToBase<T, U, Void, Void, Void, Void> {
         UpToTwo(
             final int count,
             final T t,
             final U u
         ) {
-            super(count, t, u, null, null, null, null);
-        }
-        
-        /**
-         * get the count
-         * 
-         * @return the count
-         */
-        public int getCount() {
-            return count;
+            super(2, count, t, u, null, null, null, null);
         }
 
         /**
@@ -361,6 +560,63 @@ public final class Tuple {
             final T u
         ) {
             super(count, t, u);
+        }
+    }
+    
+    /**
+     * A union of two values of different types
+     */
+    public static class UnionTwo<T, U> extends UnionBase<T, U, Void, Void, Void, Void> {
+        UnionTwo(
+            final int position,
+            final T t,
+            final U u
+        ) {
+            super(position, t, u, null, null, null, null);
+        }
+        
+        /**
+         * get the position
+         * 
+         * @return the position of the set value
+         */
+        public int getPosition() {
+            return size;
+        }
+
+        /**
+         * get first value
+         * 
+         * @return first value
+         * @throws IllegalArgumentException if position != 1
+         */
+        public T get1() {
+            checkUnionPosition(size, 1);
+            return t;
+        }
+
+        /**
+         * get second value
+         * 
+         * @return second value
+         * @throws IllegalArgumentException if position != 2
+         */
+        public U get2() {
+            checkUnionPosition(size, 2);
+            return u;
+        }
+    }
+
+    /**
+     * A union of two values of the same type
+     */
+    public static class UnionTwoOf<T> extends UnionTwo<T, T> {
+        UnionTwoOf(
+            final int position,
+            final T t,
+            final T u
+        ) {
+            super(position, t, u);
         }
     }
     
@@ -448,7 +704,7 @@ public final class Tuple {
          * @return the count
          */
         public int getCount() {
-            return count;
+            return size;
         }
 
         /**
@@ -492,6 +748,76 @@ public final class Tuple {
             final T v
         ) {
             super(count, t, u, v);
+        }
+    }
+    
+    /**
+     * A union of three values of different types
+     */
+    public static class UnionThree<T, U, V> extends UnionBase<T, U, V, Void, Void, Void> {
+        UnionThree(
+            final int position,
+            final T t,
+            final U u,
+            final V v
+        ) {
+            super(position, t, u, v, null, null, null);
+        }
+        
+        /**
+         * get the position
+         * 
+         * @return the position of the set value
+         */
+        public int getPosition() {
+            return size;
+        }
+
+        /**
+         * get first value
+         * 
+         * @return first value
+         * @throws IllegalArgumentException if position != 1
+         */
+        public T get1() {
+            checkUnionPosition(size, 1);
+            return t;
+        }
+
+        /**
+         * get second value
+         * 
+         * @return second value
+         * @throws IllegalArgumentException if position != 2
+         */
+        public U get2() {
+            checkUnionPosition(size, 2);
+            return u;
+        }
+
+        /**
+         * get third value
+         * 
+         * @return third value
+         * @throws IllegalArgumentException if position != 3
+         */
+        public V get3() {
+            checkUnionPosition(size, 3);
+            return v;
+        }
+    }
+
+    /**
+     * A union of three values of the same type
+     */
+    public static class UnionThreeOf<T> extends UnionThree<T, T, T> {
+        UnionThreeOf(
+            final int position,
+            final T t,
+            final T u,
+            final T v
+        ) {
+            super(position, t, u, v);
         }
     }
     
@@ -593,7 +919,7 @@ public final class Tuple {
          * @return the count
          */
         public int getCount() {
-            return count;
+            return size;
         }
 
         /**
@@ -647,6 +973,89 @@ public final class Tuple {
             final T w
         ) {
             super(count, t, u, v, w);
+        }
+    }
+    
+    /**
+     * A union of four values of different types
+     */
+    public static class UnionFour<T, U, V, W> extends UnionBase<T, U, V, W, Void, Void> {
+        UnionFour(
+            final int position,
+            final T t,
+            final U u,
+            final V v,
+            final W w
+        ) {
+            super(position, t, u, v, w, null, null);
+        }
+        
+        /**
+         * get the position
+         * 
+         * @return the position of the set value
+         */
+        public int getPosition() {
+            return size;
+        }
+
+        /**
+         * get first value
+         * 
+         * @return first value
+         * @throws IllegalArgumentException if position != 1
+         */
+        public T get1() {
+            checkUnionPosition(size, 1);
+            return t;
+        }
+
+        /**
+         * get second value
+         * 
+         * @return second value
+         * @throws IllegalArgumentException if position != 2
+         */
+        public U get2() {
+            checkUnionPosition(size, 2);
+            return u;
+        }
+
+        /**
+         * get third value
+         * 
+         * @return third value
+         * @throws IllegalArgumentException if position != 3
+         */
+        public V get3() {
+            checkUnionPosition(size, 3);
+            return v;
+        }
+
+        /**
+         * get fourth value
+         * 
+         * @return fourth value
+         * @throws IllegalArgumentException if position != 4
+         */
+        public W get4() {
+            checkUnionPosition(size, 4);
+            return w;
+        }
+    }
+
+    /**
+     * A union of four values of the same type
+     */
+    public static class UnionFourOf<T> extends UnionFour<T, T, T, T> {
+        UnionFourOf(
+            final int position,
+            final T t,
+            final T u,
+            final T v,
+            final T w
+        ) {
+            super(position, t, u, v, w);
         }
     }
     
@@ -762,7 +1171,7 @@ public final class Tuple {
          * @return the count
          */
         public int getCount() {
-            return count;
+            return size;
         }
 
         /**
@@ -826,6 +1235,102 @@ public final class Tuple {
             final T x
         ) {
             super(count, t, u, v, w, x);
+        }
+    }
+    
+    /**
+     * A union of five values of different types
+     */
+    public static class UnionFive<T, U, V, W, X> extends UnionBase<T, U, V, W, X, Void> {
+        UnionFive(
+            final int position,
+            final T t,
+            final U u,
+            final V v,
+            final W w,
+            final X x
+        ) {
+            super(position, t, u, v, w, x, null);
+        }
+        
+        /**
+         * get the position
+         * 
+         * @return the position of the set value
+         */
+        public int getPosition() {
+            return size;
+        }
+
+        /**
+         * get first value
+         * 
+         * @return first value
+         * @throws IllegalArgumentException if position != 1
+         */
+        public T get1() {
+            checkUnionPosition(size, 1);
+            return t;
+        }
+
+        /**
+         * get second value
+         * 
+         * @return second value
+         * @throws IllegalArgumentException if position != 2
+         */
+        public U get2() {
+            checkUnionPosition(size, 2);
+            return u;
+        }
+
+        /**
+         * get third value
+         * 
+         * @return third value
+         * @throws IllegalArgumentException if position != 3
+         */
+        public V get3() {
+            checkUnionPosition(size, 3);
+            return v;
+        }
+
+        /**
+         * get fourth value
+         * 
+         * @return fourth value
+         * @throws IllegalArgumentException if position != 4
+         */
+        public W get4() {
+            checkUnionPosition(size, 4);
+            return w;
+        }
+
+        /**
+         * get fifth value
+         * 
+         * @return fifth value
+         * @throws IllegalArgumentException if position != 5
+         */
+        public X get5() {
+            checkUnionPosition(size, 5);
+            return x;
+        }
+    }
+
+    /**
+     * A union of five values of the same type
+     */
+    public static class UnionFiveOf<T> extends UnionFive<T, T, T, T, T> {
+        UnionFiveOf(
+            final int position,
+            final T t,
+            final T u,
+            final T v,
+            final T w,
+            final T x
+        ) {
+            super(position, t, u, v, w, x);
         }
     }
     
@@ -955,7 +1460,7 @@ public final class Tuple {
          * @return the count
          */
         public int getCount() {
-            return count;
+            return size;
         }
 
         /**
@@ -1033,9 +1538,120 @@ public final class Tuple {
     }
     
     /**
+     * A union of six values of different types
+     */
+    public static class UnionSix<T, U, V, W, X, Y> extends UnionBase<T, U, V, W, X, Y> {
+        UnionSix(
+            final int position,
+            final T t,
+            final U u,
+            final V v,
+            final W w,
+            final X x,
+            final Y y
+        ) {
+            super(position, t, u, v, w, x, y);
+        }
+        
+        /**
+         * get the position
+         * 
+         * @return the position of the set value
+         */
+        public int getPosition() {
+            return size;
+        }
+
+        /**
+         * get first value
+         * 
+         * @return first value
+         * @throws IllegalArgumentException if position != 1
+         */
+        public T get1() {
+            checkUnionPosition(size, 1);
+            return t;
+        }
+
+        /**
+         * get second value
+         * 
+         * @return second value
+         * @throws IllegalArgumentException if position != 2
+         */
+        public U get2() {
+            checkUnionPosition(size, 2);
+            return u;
+        }
+
+        /**
+         * get third value
+         * 
+         * @return third value
+         * @throws IllegalArgumentException if position != 3
+         */
+        public V get3() {
+            checkUnionPosition(size, 3);
+            return v;
+        }
+
+        /**
+         * get fourth value
+         * 
+         * @return fourth value
+         * @throws IllegalArgumentException if position != 4
+         */
+        public W get4() {
+            checkUnionPosition(size, 4);
+            return w;
+        }
+
+        /**
+         * get fifth value
+         * 
+         * @return fifth value
+         * @throws IllegalArgumentException if position != 5
+         */
+        public X get5() {
+            checkUnionPosition(size, 5);
+            return x;
+        }
+
+        /**
+         * get sixth value
+         * 
+         * @return sixthvalue
+         * @throws IllegalArgumentException if position != 6
+         */
+        public Y get6() {
+            checkUnionPosition(size, 6);
+            return y;
+        }
+    }
+
+    /**
+     * A union of six values of the same type
+     */
+    public static class UnionSixOf<T> extends UnionSix<T, T, T, T, T, T> {
+        UnionSixOf(
+            final int position,
+            final T t,
+            final T u,
+            final T v,
+            final T w,
+            final T x,
+            final T y
+        ) {
+            super(position, t, u, v, w, x, y);
+        }
+    }
+    
+    // ==== Constructor classes
+    
+    /**
      * A class that provides named constructors for fixed size tuples with single type
      */
-    public static final class Same {
+    public static class Same {
         // ==== Two named constructors
         
         /**
@@ -1291,7 +1907,7 @@ public final class Tuple {
     /**
      * A class that provides named constructors for variable size tuples with different types
      */
-    public static final class UpTo {
+    public static class UpTo {
         
         // ==== Two named constructors
 
@@ -2467,7 +3083,7 @@ public final class Tuple {
     /**
      * A class that provides named constructors for variable size tuples with a single type
      */
-    public static final class UpToSame {
+    public static class UpToSame {
         
         // ==== Two named constructors
 
@@ -3480,6 +4096,878 @@ public final class Tuple {
                 v,
                 w,
                 x,
+                y
+            );
+        }
+    }
+
+    /**
+     * A class that provides named constructors for unions with different types
+     */
+    public static class Union {
+        
+        // ==== Two named constructors
+        
+        public static <T, U> UnionTwo<T, U> twoFirst(final T t) {
+            return new UnionTwo<>(
+                1,
+                Objects.requireNonNull(t, "t"),
+                null
+            );
+        }
+        
+        public static <T, U> UnionTwo<T, U> twoFirstNullable(final T t) {
+            return new UnionTwo<>(
+                1,
+                t,
+                null
+            );
+        }
+        
+        public static <T, U> UnionTwo<T, U> twoSecond(final U u) {
+            return new UnionTwo<>(
+                2,
+                null,
+                u
+            );
+        }
+        
+        public static <T, U> UnionTwo<T, U> twoSecondNullable(final U u) {
+            return new UnionTwo<>(
+                2,
+                null,
+                u
+            );
+        }
+        
+        // ==== Three named constructors
+        
+        public static <T, U, V> UnionThree<T, U, V> threeFirst(final T t) {
+            return new UnionThree<>(
+                1,
+                Objects.requireNonNull(t, "t"),
+                null,
+                null
+            );
+        }
+        
+        public static <T, U, V> UnionThree<T, U, V> threeFirstNullable(final T t) {
+            return new UnionThree<>(
+                1,
+                t,
+                null,
+                null
+            );
+        }
+        
+        public static <T, U, V> UnionThree<T, U, V> threeSecond(final U u) {
+            return new UnionThree<>(
+                2,
+                null,
+                Objects.requireNonNull(u, "u"),
+                null
+            );
+        }
+        
+        public static <T, U, V> UnionThree<T, U, V> threeSecondNullable(final U u) {
+            return new UnionThree<>(
+                2,
+                null,
+                u,
+                null
+            );
+        }
+        
+        public static <T, U, V> UnionThree<T, U, V> threeThird(final V v) {
+            return new UnionThree<>(
+                3,
+                null,
+                null,
+                Objects.requireNonNull(v, "v")
+            );
+        }
+        
+        public static <T, U, V> UnionThree<T, U, V> threeThirdNullable(final V v) {
+            return new UnionThree<>(
+                3,
+                null,
+                null,
+                v
+            );
+        }
+        
+        // ==== Four named constructors
+        
+        public static <T, U, V, W> UnionFour<T, U, V, W> fourFirst(final T t) {
+            return new UnionFour<>(
+                1,
+                Objects.requireNonNull(t, "t"),
+                null,
+                null,
+                null
+            );
+        }
+        
+        public static <T, U, V, W> UnionFour<T, U, V, W> fourFirstNullable(final T t) {
+            return new UnionFour<>(
+                1,
+                t,
+                null,
+                null,
+                null
+            );
+        }
+        
+        public static <T, U, V, W> UnionFour<T, U, V, W> fourSecond(final U u) {
+            return new UnionFour<>(
+                2,
+                null,
+                Objects.requireNonNull(u, "u"),
+                null,
+                null
+            );
+        }
+        
+        public static <T, U, V, W> UnionFour<T, U, V, W> fourSecondNullable(final U u) {
+            return new UnionFour<>(
+                2,
+                null,
+                u,
+                null,
+                null
+            );
+        }
+        
+        public static <T, U, V, W> UnionFour<T, U, V, W> fourThird(final V v) {
+            return new UnionFour<>(
+                3,
+                null,
+                null,
+                Objects.requireNonNull(v, "v"),
+                null
+            );
+        }
+        
+        public static <T, U, V, W> UnionFour<T, U, V, W> fourThirdNullable(final V v) {
+            return new UnionFour<>(
+                3,
+                null,
+                null,
+                v,
+                null
+            );
+        }
+        
+        public static <T, U, V, W> UnionFour<T, U, V, W> fourFourth(final W w) {
+            return new UnionFour<>(
+                4,
+                null,
+                null,
+                null,
+                Objects.requireNonNull(w, "w")
+            );
+        }
+        
+        public static <T, U, V, W> UnionFour<T, U, V, W> fourFourthNullable(final W w) {
+            return new UnionFour<>(
+                4,
+                null,
+                null,
+                null,
+                w
+            );
+        }
+        
+        // ==== Five named constructors
+        
+        public static <T, U, V, W, X> UnionFive<T, U, V, W, X> fiveFirst(final T t) {
+            return new UnionFive<>(
+                1,
+                Objects.requireNonNull(t, "t"),
+                null,
+                null,
+                null,
+                null
+            );
+        }
+        
+        public static <T, U, V, W, X> UnionFive<T, U, V, W, X> fiveFirstNullable(final T t) {
+            return new UnionFive<>(
+                1,
+                t,
+                null,
+                null,
+                null,
+                null
+            );
+        }
+        
+        public static <T, U, V, W, X> UnionFive<T, U, V, W, X> fiveSecond(final U u) {
+            return new UnionFive<>(
+                2,
+                null,
+                Objects.requireNonNull(u, "u"),
+                null,
+                null,
+                null
+            );
+        }
+        
+        public static <T, U, V, W, X> UnionFive<T, U, V, W, X> fiveSecondNullable(final U u) {
+            return new UnionFive<>(
+                2,
+                null,
+                u,
+                null,
+                null,
+                null
+            );
+        }
+        
+        public static <T, U, V, W, X> UnionFive<T, U, V, W, X> fiveThird(final V v) {
+            return new UnionFive<>(
+                3,
+                null,
+                null,
+                Objects.requireNonNull(v, "v"),
+                null,
+                null
+            );
+        }
+        
+        public static <T, U, V, W, X> UnionFive<T, U, V, W, X> fiveThirdNullable(final V v) {
+            return new UnionFive<>(
+                3,
+                null,
+                null,
+                v,
+                null,
+                null
+            );
+        }
+        
+        public static <T, U, V, W, X> UnionFive<T, U, V, W, X> fiveFourth(final W w) {
+            return new UnionFive<>(
+                4,
+                null,
+                null,
+                null,
+                Objects.requireNonNull(w, "w"),
+                null
+            );
+        }
+        
+        public static <T, U, V, W, X> UnionFive<T, U, V, W, X> fiveFourthNullable(final W w) {
+            return new UnionFive<>(
+                4,
+                null,
+                null,
+                null,
+                w,
+                null
+            );
+        }
+        
+        public static <T, U, V, W, X> UnionFive<T, U, V, W, X> fiveFifth(final X x) {
+            return new UnionFive<>(
+                5,
+                null,
+                null,
+                null,
+                null,
+                Objects.requireNonNull(x, "x")
+            );
+        }
+        
+        public static <T, U, V, W, X> UnionFive<T, U, V, W, X> fiveFifthNullable(final X x) {
+            return new UnionFive<>(
+                5,
+                null,
+                null,
+                null,
+                null,
+                x
+            );
+        }
+        
+        // ==== Six named constructors
+        
+        public static <T, U, V, W, X, Y> UnionSix<T, U, V, W, X, Y> sixFirst(final T t) {
+            return new UnionSix<>(
+                1,
+                Objects.requireNonNull(t, "t"),
+                null,
+                null,
+                null,
+                null,
+                null
+            );
+        }
+        
+        public static <T, U, V, W, X, Y> UnionSix<T, U, V, W, X, Y> sixFirstNullable(final T t) {
+            return new UnionSix<>(
+                1,
+                t,
+                null,
+                null,
+                null,
+                null,
+                null
+            );
+        }
+        
+        public static <T, U, V, W, X, Y> UnionSix<T, U, V, W, X, Y> sixSecond(final U u) {
+            return new UnionSix<>(
+                2,
+                null,
+                Objects.requireNonNull(u, "u"),
+                null,
+                null,
+                null,
+                null
+            );
+        }
+        
+        public static <T, U, V, W, X, Y> UnionSix<T, U, V, W, X, Y> sixSecondNullable(final U u) {
+            return new UnionSix<>(
+                2,
+                null,
+                u,
+                null,
+                null,
+                null,
+                null
+            );
+        }
+        
+        public static <T, U, V, W, X, Y> UnionSix<T, U, V, W, X, Y> sixThird(final V v) {
+            return new UnionSix<>(
+                3,
+                null,
+                null,
+                Objects.requireNonNull(v, "v"),
+                null,
+                null,
+                null
+            );
+        }
+        
+        public static <T, U, V, W, X, Y> UnionSix<T, U, V, W, X, Y> sixThirdNullable(final V v) {
+            return new UnionSix<>(
+                3,
+                null,
+                null,
+                v,
+                null,
+                null,
+                null
+            );
+        }
+        
+        public static <T, U, V, W, X, Y> UnionSix<T, U, V, W, X, Y> sixFourth(final W w) {
+            return new UnionSix<>(
+                4,
+                null,
+                null,
+                null,
+                Objects.requireNonNull(w, "w"),
+                null,
+                null
+            );
+        }
+        
+        public static <T, U, V, W, X, Y> UnionSix<T, U, V, W, X, Y> sixFourthNullable(final W w) {
+            return new UnionSix<>(
+                4,
+                null,
+                null,
+                null,
+                w,
+                null,
+                null
+            );
+        }
+        
+        public static <T, U, V, W, X, Y> UnionSix<T, U, V, W, X, Y> sixFifth(final X x) {
+            return new UnionSix<>(
+                5,
+                null,
+                null,
+                null,
+                null,
+                Objects.requireNonNull(x, "x"),
+                null
+            );
+        }
+        
+        public static <T, U, V, W, X, Y> UnionSix<T, U, V, W, X, Y> sixFifthNullable(final X x) {
+            return new UnionSix<>(
+                5,
+                null,
+                null,
+                null,
+                null,
+                x,
+                null
+            );
+        }
+        
+        public static <T, U, V, W, X, Y> UnionSix<T, U, V, W, X, Y> sixSixth(final Y y) {
+            return new UnionSix<>(
+                6,
+                null,
+                null,
+                null,
+                null,
+                null,
+                Objects.requireNonNull(y, "y")
+            );
+        }
+        
+        public static <T, U, V, W, X, Y> UnionSix<T, U, V, W, X, Y> sixSixthNullable(final Y y) {
+            return new UnionSix<>(
+                6,
+                null,
+                null,
+                null,
+                null,
+                null,
+                y
+            );
+        }
+    }
+
+    /**
+     * A class that provides named constructors for unions with different types
+     */
+    public static class UnionSame {
+        
+        // ==== Two named constructors
+        
+        public static <T> UnionTwoOf<T> twoFirst(final T t) {
+            return new UnionTwoOf<>(
+                1,
+                Objects.requireNonNull(t, "t"),
+                null
+            );
+        }
+        
+        public static <T> UnionTwoOf<T> twoFirstNullable(final T t) {
+            return new UnionTwoOf<>(
+                1,
+                t,
+                null
+            );
+        }
+        
+        public static <T> UnionTwoOf<T> twoSecond(final T u) {
+            return new UnionTwoOf<>(
+                2,
+                null,
+                u
+            );
+        }
+        
+        public static <T> UnionTwoOf<T> twoSecondNullable(final T u) {
+            return new UnionTwoOf<>(
+                2,
+                null,
+                u
+            );
+        }
+        
+        // ==== Three named constructors
+        
+        public static <T> UnionThreeOf<T> threeFirst(final T t) {
+            return new UnionThreeOf<>(
+                1,
+                Objects.requireNonNull(t, "t"),
+                null,
+                null
+            );
+        }
+        
+        public static <T> UnionThreeOf<T> threeFirstNullable(final T t) {
+            return new UnionThreeOf<>(
+                1,
+                t,
+                null,
+                null
+            );
+        }
+        
+        public static <T> UnionThreeOf<T> threeSecond(final T u) {
+            return new UnionThreeOf<>(
+                2,
+                null,
+                Objects.requireNonNull(u, "u"),
+                null
+            );
+        }
+        
+        public static <T> UnionThreeOf<T> threeSecondNullable(final T u) {
+            return new UnionThreeOf<>(
+                2,
+                null,
+                u,
+                null
+            );
+        }
+        
+        public static <T> UnionThreeOf<T> threeThird(final T v) {
+            return new UnionThreeOf<>(
+                3,
+                null,
+                null,
+                Objects.requireNonNull(v, "v")
+            );
+        }
+        
+        public static <T> UnionThreeOf<T> threeThirdNullable(final T v) {
+            return new UnionThreeOf<>(
+                3,
+                null,
+                null,
+                v
+            );
+        }
+        
+        // ==== Four named constructors
+        
+        public static <T> UnionFourOf<T> fourFirst(final T t) {
+            return new UnionFourOf<>(
+                1,
+                Objects.requireNonNull(t, "t"),
+                null,
+                null,
+                null
+            );
+        }
+        
+        public static <T> UnionFourOf<T> fourFirstNullable(final T t) {
+            return new UnionFourOf<>(
+                1,
+                t,
+                null,
+                null,
+                null
+            );
+        }
+        
+        public static <T> UnionFourOf<T> fourSecond(final T u) {
+            return new UnionFourOf<>(
+                2,
+                null,
+                Objects.requireNonNull(u, "u"),
+                null,
+                null
+            );
+        }
+        
+        public static <T> UnionFourOf<T> fourSecondNullable(final T u) {
+            return new UnionFourOf<>(
+                2,
+                null,
+                u,
+                null,
+                null
+            );
+        }
+        
+        public static <T> UnionFourOf<T> fourThird(final T v) {
+            return new UnionFourOf<>(
+                3,
+                null,
+                null,
+                Objects.requireNonNull(v, "v"),
+                null
+            );
+        }
+        
+        public static <T> UnionFourOf<T> fourThirdNullable(final T v) {
+            return new UnionFourOf<>(
+                3,
+                null,
+                null,
+                v,
+                null
+            );
+        }
+        
+        public static <T> UnionFourOf<T> fourFourth(final T w) {
+            return new UnionFourOf<>(
+                4,
+                null,
+                null,
+                null,
+                Objects.requireNonNull(w, "w")
+            );
+        }
+        
+        public static <T> UnionFourOf<T> fourFourthNullable(final T w) {
+            return new UnionFourOf<>(
+                4,
+                null,
+                null,
+                null,
+                w
+            );
+        }
+        
+        // ==== Five named constructors
+        
+        public static <T> UnionFiveOf<T> fiveFirst(final T t) {
+            return new UnionFiveOf<>(
+                1,
+                Objects.requireNonNull(t, "t"),
+                null,
+                null,
+                null,
+                null
+            );
+        }
+        
+        public static <T> UnionFiveOf<T> fiveFirstNullable(final T t) {
+            return new UnionFiveOf<>(
+                1,
+                t,
+                null,
+                null,
+                null,
+                null
+            );
+        }
+        
+        public static <T> UnionFiveOf<T> fiveSecond(final T u) {
+            return new UnionFiveOf<>(
+                2,
+                null,
+                Objects.requireNonNull(u, "u"),
+                null,
+                null,
+                null
+            );
+        }
+        
+        public static <T> UnionFiveOf<T> fiveSecondNullable(final T u) {
+            return new UnionFiveOf<>(
+                2,
+                null,
+                u,
+                null,
+                null,
+                null
+            );
+        }
+        
+        public static <T> UnionFiveOf<T> fiveThird(final T v) {
+            return new UnionFiveOf<>(
+                3,
+                null,
+                null,
+                Objects.requireNonNull(v, "v"),
+                null,
+                null
+            );
+        }
+        
+        public static <T> UnionFiveOf<T> fiveThirdNullable(final T v) {
+            return new UnionFiveOf<>(
+                3,
+                null,
+                null,
+                v,
+                null,
+                null
+            );
+        }
+        
+        public static <T> UnionFiveOf<T> fiveFourth(final T w) {
+            return new UnionFiveOf<>(
+                4,
+                null,
+                null,
+                null,
+                Objects.requireNonNull(w, "w"),
+                null
+            );
+        }
+        
+        public static <T> UnionFiveOf<T> fiveFourthNullable(final T w) {
+            return new UnionFiveOf<>(
+                4,
+                null,
+                null,
+                null,
+                w,
+                null
+            );
+        }
+        
+        public static <T> UnionFiveOf<T> fiveFifth(final T x) {
+            return new UnionFiveOf<>(
+                5,
+                null,
+                null,
+                null,
+                null,
+                Objects.requireNonNull(x, "x")
+            );
+        }
+        
+        public static <T> UnionFiveOf<T> fiveFifthNullable(final T x) {
+            return new UnionFiveOf<>(
+                5,
+                null,
+                null,
+                null,
+                null,
+                x
+            );
+        }
+        
+        // ==== Six named constructors
+        
+        public static <T> UnionSixOf<T> sixFirst(final T t) {
+            return new UnionSixOf<>(
+                1,
+                Objects.requireNonNull(t, "t"),
+                null,
+                null,
+                null,
+                null,
+                null
+            );
+        }
+        
+        public static <T> UnionSixOf<T> sixFirstNullable(final T t) {
+            return new UnionSixOf<>(
+                1,
+                t,
+                null,
+                null,
+                null,
+                null,
+                null
+            );
+        }
+        
+        public static <T> UnionSixOf<T> sixSecond(final T u) {
+            return new UnionSixOf<>(
+                2,
+                null,
+                Objects.requireNonNull(u, "u"),
+                null,
+                null,
+                null,
+                null
+            );
+        }
+        
+        public static <T> UnionSixOf<T> sixSecondNullable(final T u) {
+            return new UnionSixOf<>(
+                2,
+                null,
+                u,
+                null,
+                null,
+                null,
+                null
+            );
+        }
+        
+        public static <T> UnionSixOf<T> sixThird(final T v) {
+            return new UnionSixOf<>(
+                3,
+                null,
+                null,
+                Objects.requireNonNull(v, "v"),
+                null,
+                null,
+                null
+            );
+        }
+        
+        public static <T> UnionSixOf<T> sixThirdNullable(final T v) {
+            return new UnionSixOf<>(
+                3,
+                null,
+                null,
+                v,
+                null,
+                null,
+                null
+            );
+        }
+        
+        public static <T> UnionSixOf<T> sixFourth(final T w) {
+            return new UnionSixOf<>(
+                4,
+                null,
+                null,
+                null,
+                Objects.requireNonNull(w, "w"),
+                null,
+                null
+            );
+        }
+        
+        public static <T> UnionSixOf<T> sixFourthNullable(final T w) {
+            return new UnionSixOf<>(
+                4,
+                null,
+                null,
+                null,
+                w,
+                null,
+                null
+            );
+        }
+        
+        public static <T> UnionSixOf<T> sixFifth(final T x) {
+            return new UnionSixOf<>(
+                5,
+                null,
+                null,
+                null,
+                null,
+                Objects.requireNonNull(x, "x"),
+                null
+            );
+        }
+        
+        public static <T> UnionSixOf<T> sixFifthNullable(final T x) {
+            return new UnionSixOf<>(
+                5,
+                null,
+                null,
+                null,
+                null,
+                x,
+                null
+            );
+        }
+        
+        public static <T> UnionSixOf<T> sixSixth(final T y) {
+            return new UnionSixOf<>(
+                6,
+                null,
+                null,
+                null,
+                null,
+                null,
+                Objects.requireNonNull(y, "y")
+            );
+        }
+        
+        public static <T> UnionSixOf<T> sixSixthNullable(final T y) {
+            return new UnionSixOf<>(
+                6,
+                null,
+                null,
+                null,
+                null,
+                null,
                 y
             );
         }

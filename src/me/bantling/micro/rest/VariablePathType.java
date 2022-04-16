@@ -1,13 +1,13 @@
 package me.bantling.micro.rest;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
 import me.bantling.micro.util.Collections;
+import me.bantling.micro.util.Tuple;
 
 /**
- * {@code VariablePathType} is a case-insensitive type name of a variable path part
+ * {@code VariablePathType} is a case-insensitive type name of a path parameter
  */
 enum VariablePathType {
     /**
@@ -30,16 +30,14 @@ enum VariablePathType {
      */
     UUID;
     
-    private static final Map<String, VariablePathType> STRING_TO_PATH_TYPE = Collections.map(
-        new HashMap<String, VariablePathType>()
-    ).
-        add("{str}",     STRING).
-        add("{string}",  STRING).
-        add("{int}",     INT).
-        add("{integer}", INT).
-        add("{long}",    LONG).
-        add("{uuid}",    UUID).
-    done();
+    private static final Map<String, VariablePathType> STRING_TO_PATH_TYPE = Collections.mapOf(
+        Tuple.of("{str}",     STRING),
+        Tuple.of("{string}",  STRING),
+        Tuple.of("{int}",     INT),
+        Tuple.of("{integer}", INT),
+        Tuple.of("{long}",    LONG),
+        Tuple.of("{uuid}",    UUID)
+    );
     
     /**
      * @return an appropriate enum constant given a case-insensitive string

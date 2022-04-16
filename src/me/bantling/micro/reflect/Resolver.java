@@ -1,4 +1,4 @@
-package me.bantling.micro.util;
+package me.bantling.micro.reflect;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.GenericArrayType;
@@ -10,7 +10,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Function;
 
-public class Reflect {
+import me.bantling.micro.util.Collections;
+
+/**
+ * Resolve types
+ */
+public class Resolver {
     static final String UNRESOLVABLE_TYPE_FMT = "Type implementation %s is not handled";
     
     /**
